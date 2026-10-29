@@ -1,0 +1,24 @@
+# Milestone 0: reproduce Model B on a CUAD test subset (notebooks/00_reproduce.ipynb).
+model: Ihteshamstar/qwen3-4b-cuad-extractor   # fp16 merged weights at repo root
+prompt: cuad_native                           # model-card prompt, byte-identical
+n_contracts: 10                               # first 10 of the 102 test contracts by md5(title)
+max_tokens: 12288                             # upstream num_predict
+ladder: [1.05, 1.15, 1.25]                    # model-card retry ladder, temperature stays 0
+batch_size: 16                                # vLLM requests per batch (one Hub sync point)
+max_model_len_cap: 65536
+vllm_kwargs:
+  gpu_memory_utilization: 0.90
+  enforce_eager: false
+
+# Chunkings to run. 60k/8k reproduces the model card; 32k/4k is the setting planned for
+# credit agreements (Milestone 3), run here to measure its F1 and latency on CUAD.
+runs:
+  - name: cuad60k
+    chunk_chars: 60000
+    overlap: 8000
+  - name: cuad32k
+    chunk_chars: 32000
+    overlap: 4000
+
+hub_prefix: m0_reproduce          # path in the private HF dataset repo
+sync_every_minutes: 3

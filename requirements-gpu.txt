@@ -1,0 +1,3 @@
+# GPU runtime (Kaggle / Colab). Unpinned on purpose for the first run: the notebook
+# prints the installed versions, and the first version that works on T4 gets pinned here.
+vllm

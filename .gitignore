@@ -5,3 +5,6 @@ data/train.jsonl
 data/test.jsonl
 data/predictions/
 models/
+work/
+.pytest_cache/
+*.tmp
