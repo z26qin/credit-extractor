@@ -108,7 +108,7 @@ Everything below comes from reading code and docs. Nothing upstream was run.
 | optimizer | adamw_8bit, lr 2e-4 linear, warmup_ratio 0.06, 2 epochs |
 | batch | per-device 1 × grad accumulation 8 = effective 8 |
 | loss | `train_on_responses_only` (assistant JSON only) |
-| precision | not set in the script; Unsloth picks bf16 on GPUs that support it, so presumably bf16 on the 5090 (inferred, not stated). Merged weights were published as fp16 |
+| precision | not set in the script; Unsloth picks bf16 on GPUs that support it, so presumably bf16 on the 5090 (inferred, not stated). The merged weights on the Hub are **bf16** (`config.json` `torch_dtype: bfloat16`, and vLLM logs a bf16 → fp16 cast for every tensor), even though the export step is called `merged_16bit` |
 | checkpoints | every 50 steps, keep 1 |
 | hardware / time | 1× RTX 5090 (32 GB), 44.6 min, final loss 0.0835 |
 | seeds | 42 (published), 43, 44; data curve n = 50/150/300/408 |
@@ -124,6 +124,18 @@ over-length one. The launch scripts hardcode Windows/WSL paths.
 - 3 seeds: 0.8995 ± 0.0017. Strict F1, 3-seed mean: 0.678.
 - From the serving bench, as stated on the card: vLLM BF16 0.900, FP8 0.895.
 - Qwen3-14B zero-shot with definitions: 0.816.
+
+## Checked on the first Kaggle run (2026-10-29)
+
+- Weights are bf16. T4 has no bf16, so we load them as fp16. That keeps the exponent
+  range narrower than the model was trained in, and an fp16 overflow would show up as
+  garbage or invalid JSON, which the decode stats would catch. The model card's numbers
+  came from a Q4_K_M GGUF, so neither precision is the card's exactly.
+- transformers warns "incorrect regex pattern … fix_mistral_regex" when loading B's
+  tokenizer. That is a false positive: B's `tokenizer.json` has the same split regex,
+  vocab and merges as `Qwen/Qwen3-4B-Instruct-2507`. Only the ByteLevel
+  `trim_offsets` / decoder flags differ, and those don't change ids. I checked locally
+  that encoding a mixed legal/JSON/unicode string gives identical ids and decoded text.
 
 ## What this means for credit agreements
 

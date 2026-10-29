@@ -36,6 +36,8 @@ LADDER_CHAIN = (("hf", 0), ("vllm", 2))
 # vLLM pins its own torch, which can clash with the platform's preinstalled torch /
 # torchaudio, so the notebook installs it into a separate venv. transformers stages keep
 # the platform's own interpreter.
+# log lines kept in logs/ but not echoed to the notebook (vLLM prints one per tensor)
+NOISY = ("Attempted to load weight",)
 VLLM_VENV = Path(os.environ.get("CREDIT_VLLM_VENV", "/tmp/vllm-env"))
 
 
@@ -217,10 +219,16 @@ def run_with_fallback(run_dir: Path, stage: str, chain=DEFAULT_CHAIN) -> str:
         with open(log, "w", encoding="utf-8") as lf:
             proc = subprocess.Popen(cmd, cwd=REPO_ROOT, stdout=subprocess.PIPE,
                                     stderr=subprocess.STDOUT, text=True, bufsize=1)
+            muted = 0
             for line in proc.stdout:
                 lf.write(line)
-                print(line, end="", flush=True)
+                if any(n in line for n in NOISY):
+                    muted += 1
+                else:
+                    print(line, end="", flush=True)
             code = proc.wait()
+        if muted:
+            print(f"==> ({muted} repetitive log lines kept in the log file only)", flush=True)
         # every attempt counts toward GPU time, including ones that crashed
         log_stage(run_dir, {"stage": stage, "backend": kind, "tp": tp, "exit_code": code,
                             "python": py,
