@@ -119,11 +119,14 @@ tests/             CPU unit tests:  python -m pytest -q
   - a secured mid-cap deal with a "Material Intellectual Property" (J.Crew) blocker
     (Angi 2025),
   - a leveraged revolver plus term loan (Repay 2026),
-  - a small private-credit facility with a credit-fund agent (AlTi 2026).
+  - a cov-lite, term-loan-only agreement from a tech issuer with no financial
+    covenant at all, because the revolver is a separate ABL (VIAVI 2025).
 
   Some clause types should be absent from some documents. For example, the IG revolver
   should have no builder basket or MFN. That makes "found share" mean something in M3.
-  Three alternates are listed in `configs/collect.yaml`. The picks came from EDGAR
+  VIAVI replaced the first pick, AlTi 2026 (private credit), on review: the set had no
+  agreement without a maintenance covenant. The alternates are listed in
+  `configs/collect.yaml`. The picks came from EDGAR
   full-text search, and their lengths and key terms were checked in a browser.
 - **Facts come from EDGAR, not the config.** Issuer, form and filing date come from the
   submissions API. Agreement date is the first "dated as of …" in the first 5,000 chars.
@@ -140,5 +143,5 @@ tests/             CPU unit tests:  python -m pytest -q
 - **Manifest to GitHub:** this machine has no HF token, so the notebook prints
   `manifest.csv` at the end, and that output is committed as
   `reports/m1_manifest.csv`.
-- **Size:** about 3.0M chars in total (estimated in the browser), which makes about 110
-  chunks at 32k/4k per condition and about 330 decodes for the three M2 conditions.
+- **Size:** about 2.85M chars in total (estimated in the browser), which makes about 104
+  chunks at 32k/4k per condition and about 312 decodes for the three M2 conditions.

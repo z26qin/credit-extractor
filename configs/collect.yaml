@@ -35,14 +35,16 @@ picks:
     document: rpay-ex10_1.htm
     note: Repay Holdings (borrower Hawk Parent Holdings), Credit Agreement dated as of June 1, 2026; Truist agent; 8-K
 
-  - id: alti-2026
-    archetype: small private-credit facility ($85m, credit-fund agent; different drafting style)
-    cik: 1838615
-    accession: 0001628280-26-066398
-    document: alti-creditagreementexec.htm
-    note: AlTi Global, Credit Agreement dated as of October 19, 2026; Diameter Finance Administration agent; 8-K
+  - id: viavi-2025
+    archetype: cov-lite term loan only (no financial covenant; revolver is a separate ABL; MFN, Available Amount, J.Crew/Serta/Chewy blockers)
+    cik: 912093
+    accession: 0000912093-25-000153
+    document: termloancreditagreement.htm
+    note: VIAVI Solutions, Term Loan Credit Agreement dated as of October 16, 2025; Wells Fargo agent; filed with 10-Q
 
 # Alternates if a pick is rejected:
+#   alti-2026          CIK 1838615  0001628280-26-066398  alti-creditagreementexec.htm (private credit, Diameter agent; replaced by viavi-2025)
+#   upland-2025        CIK 1505155  0001505155-25-000080  exhibit101sp-uplandxcredit.htm (software, Sound Point agent)
 #   chewy-2026         CIK 1766502  0001193125-26-281042  d43042dex101.htm  (large-cap, JPM, ~860k chars)
 #   servicetitan-2023  CIK 1638826  0001638826-26-000028  ttan-ex10_9.htm   (growth tech, 2023 agreement filed as a 10-K exhibit 2026-03-25)
 #   choicehotels-2026  CIK 1046311  0001193125-26-374377  d110369dex101.htm (IG unsecured term loan)
