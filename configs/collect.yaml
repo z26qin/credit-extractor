@@ -1,0 +1,48 @@
+# Milestone 1: five credit agreements from EDGAR (full original agreements, not amendments).
+# Picked for spread across deal types, so the 10 credit clause types are present in some
+# documents and absent in others. Filing date / form / issuer are read from EDGAR at
+# collection time; the notes below come from a full-text search on 2026-10-29 (unverified
+# until the notebook runs).
+hub_prefix: m1_collect
+min_interval_s: 0.2          # <= 5 requests/s (SEC limit is 10/s)
+
+picks:
+  - id: quanta-2024
+    archetype: investment-grade bank revolver (maintenance covenants, few or no baskets)
+    cik: 1050915
+    accession: 0001193125-24-182240
+    document: d841267dex101.htm
+    note: Quanta Services, Credit Agreement dated as of July 16, 2024; BofA agent; 8-K
+
+  - id: exlservice-2026
+    archetype: secured bank revolver + term loan with defined Serta / Chewy LME provisions
+    cik: 1297989
+    accession: 0001104659-26-098380
+    document: tm2623504d1_ex10-1.htm
+    note: ExlService, $600m RCF + $400m TL, Credit Agreement dated as of August 18, 2026; PNC agent; 8-K
+
+  - id: angi-2025
+    archetype: secured mid-cap revolver + term loan (incremental, Available Amount, J.Crew blocker)
+    cik: 1705110
+    accession: 0001705110-25-000138
+    document: angiex101creditagreement.htm
+    note: Angi Group, Credit Agreement dated as of November 6, 2025; JPMorgan agent; 8-K
+
+  - id: repay-2026
+    archetype: leveraged secured revolver + term loan (Applicable Margin, MFN, Available Amount)
+    cik: 1720592
+    accession: 0001193125-26-251442
+    document: rpay-ex10_1.htm
+    note: Repay Holdings (borrower Hawk Parent Holdings), Credit Agreement dated as of June 1, 2026; Truist agent; 8-K
+
+  - id: alti-2026
+    archetype: small private-credit facility ($85m, credit-fund agent; different drafting style)
+    cik: 1838615
+    accession: 0001628280-26-066398
+    document: alti-creditagreementexec.htm
+    note: AlTi Global, Credit Agreement dated as of October 19, 2026; Diameter Finance Administration agent; 8-K
+
+# Alternates if a pick is rejected:
+#   chewy-2026         CIK 1766502  0001193125-26-281042  d43042dex101.htm  (large-cap, JPM, ~860k chars)
+#   servicetitan-2023  CIK 1638826  0001638826-26-000028  ttan-ex10_9.htm   (growth tech, 2023 agreement filed as a 10-K exhibit 2026-03-25)
+#   choicehotels-2026  CIK 1046311  0001193125-26-374377  d110369dex101.htm (IG unsecured term loan)

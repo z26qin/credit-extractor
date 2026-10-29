@@ -15,8 +15,8 @@ so `src/` is an independent implementation and does not import it. See
 
 | milestone | state |
 |---|---|
-| M0 fork + reproduce Model B on CUAD | code ready, `notebooks/00_reproduce.ipynb` **not run yet** |
-| M1 collect 5 credit agreements | not started |
+| M0 fork + reproduce Model B on CUAD | code ready; first Kaggle run in progress, **no results yet** |
+| M1 collect 5 credit agreements | code ready on branch `m1-collect`, `notebooks/01_collect.ipynb` **not run yet**; picks await review |
 | M2 credit schema + prompts | not started |
 | M3 label-free baselines | not started |
 
@@ -34,7 +34,8 @@ src/runner.py      resumable primary pass + retry ladder, backend fallback chain
 src/evaluate.py    scores a run dir, writes eval.json / latency.csv, markdown report
 src/cuad.py        CUAD download + official test split
 src/reproduce.py   M0 orchestration (used by the notebook)
-configs/           run configs (reproduce.yaml)
+src/edgar.py       M1: rate-limited EDGAR client, HTML -> text, manifest
+configs/           run configs (reproduce.yaml, collect.yaml)
 notebooks/         thin notebooks: clone repo, pip install, call src/
 tests/             CPU unit tests:  python -m pytest -q
 ```
@@ -105,3 +106,39 @@ tests/             CPU unit tests:  python -m pytest -q
   each attempt used.
 - **vLLM unpinned for the first run.** The notebook prints the installed versions, and
   the first version that works on T4 gets pinned in `requirements-gpu.txt`.
+
+### Milestone 1 (credit agreements)
+
+- **Five full, original credit agreements, no amendments.** Amendments that only list
+  changes would make "found / not found" depend on what the amendment touches. Amendments
+  with a conformed copy attached (for example ZoomInfo or Tronox) double the text and mix
+  two documents. Commitment letters and transaction support agreements mention the same
+  terms but aren't agreements. The picks cover:
+  - an investment-grade bank revolver (Quanta 2024),
+  - a bank deal with defined Serta and Chewy provisions (ExlService 2026),
+  - a secured mid-cap deal with a "Material Intellectual Property" (J.Crew) blocker
+    (Angi 2025),
+  - a leveraged revolver plus term loan (Repay 2026),
+  - a small private-credit facility with a credit-fund agent (AlTi 2026).
+
+  Some clause types should be absent from some documents. For example, the IG revolver
+  should have no builder basket or MFN. That makes "found share" mean something in M3.
+  Three alternates are listed in `configs/collect.yaml`. The picks came from EDGAR
+  full-text search, and their lengths and key terms were checked in a browser.
+- **Facts come from EDGAR, not the config.** Issuer, form and filing date come from the
+  submissions API. Agreement date is the first "dated as of …" in the first 5,000 chars.
+  sha256 is over the raw exhibit bytes. `char_count` is the length of the cleaned text,
+  which is what gets chunked.
+- **Cleaning:** stdlib `HTMLParser`. Block tags become line breaks and table cells are
+  separated by spaces. Script, style and `display:none` content is dropped, along with the
+  EDGAR SGML header (`<TYPE>`, `<SEQUENCE>`, …). Entities, nbsp and runs of spaces are
+  normalized. Unclosed tags (common in EDGAR HTML) can't hide the rest of the document.
+  Page headers and footers and the table of contents are **kept**, because removing them
+  heuristically could delete real text. Verbatim checks run against this same text.
+- **Politeness:** at most 5 requests/s (SEC allows 10/s). Back off on 429 and 5xx. Every
+  request carries `SEC_USER_AGENT`. One collection is about 15 requests.
+- **Manifest to GitHub:** this machine has no HF token, so the notebook prints
+  `manifest.csv` at the end, and that output is committed as
+  `reports/m1_manifest.csv`.
+- **Size:** about 3.0M chars in total (estimated in the browser), which makes about 110
+  chunks at 32k/4k per condition and about 330 decodes for the three M2 conditions.
