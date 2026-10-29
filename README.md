@@ -95,5 +95,13 @@ tests/             CPU unit tests:  python -m pytest -q
   check that Model B's F1 holds at the chunk size planned for M3.
 - **Partial runs are never reported as results.** If any chunk is missing, every gold
   metric in the report shows `incomplete (k/n chunks)`.
+- **vLLM lives in its own venv (`/tmp/vllm-env`).** On Kaggle's first run, `pip install
+  vllm` swapped the preinstalled torch for a CUDA 13.0 build and left torchaudio at CUDA
+  12.8. transformers imports torchaudio, so every backend failed, the transformers
+  fallback included. The notebook now installs vLLM with `uv pip install
+  --torch-backend=auto` into a separate venv, where uv picks the torch build for the GPU
+  driver. vLLM subprocesses use that interpreter (`runner.backend_python`), and
+  transformers keeps the platform's own Python. `stages.jsonl` records which interpreter
+  each attempt used.
 - **vLLM unpinned for the first run.** The notebook prints the installed versions, and
   the first version that works on T4 gets pinned in `requirements-gpu.txt`.

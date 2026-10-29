@@ -117,3 +117,13 @@ def test_report_marks_unrun_chunks_incomplete(run_dir):
                           {"platform": "local", "gpus": [], "n_contracts": 2,
                            "session_minutes": 0})
     assert "| detection F1 | 0.9 | incomplete (1/2 chunks) |" in md
+
+
+def test_backend_python_uses_vllm_venv_only_for_vllm(tmp_path):
+    import sys
+    from src.runner import backend_python
+    assert backend_python("vllm", tmp_path / "missing") == sys.executable
+    (tmp_path / "bin").mkdir()
+    (tmp_path / "bin" / "python").write_text("")
+    assert backend_python("vllm", tmp_path) == str(tmp_path / "bin" / "python")
+    assert backend_python("hf", tmp_path) == sys.executable

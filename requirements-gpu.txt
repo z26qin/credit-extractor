@@ -1,3 +1,5 @@
-# GPU runtime (Kaggle / Colab). Unpinned on purpose for the first run: the notebook
-# prints the installed versions, and the first version that works on T4 gets pinned here.
+# vLLM runtime (Kaggle / Colab). Installed into its own venv (/tmp/vllm-env) by the
+# notebook with `uv pip install --torch-backend=auto`, never into the platform's Python:
+# vLLM's torch pin broke the preinstalled torchaudio and with it transformers.
+# Unpinned for the first run; the first version that works on T4 gets pinned here.
 vllm

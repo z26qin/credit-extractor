@@ -33,6 +33,16 @@ DEFAULT_CHAIN = (("vllm", 2), ("vllm", 1), ("hf", 0))
 # ladder: HF first (Ollama-style 64-token window penalty); vLLM's full-context penalty
 # is only a fallback and is flagged in every attempt record via `backend`
 LADDER_CHAIN = (("hf", 0), ("vllm", 2))
+# vLLM pins its own torch, which can clash with the platform's preinstalled torch /
+# torchaudio, so the notebook installs it into a separate venv. transformers stages keep
+# the platform's own interpreter.
+VLLM_VENV = Path(os.environ.get("CREDIT_VLLM_VENV", "/tmp/vllm-env"))
+
+
+def backend_python(kind: str, venv: Path = VLLM_VENV) -> str:
+    """Interpreter for a backend subprocess: the vLLM venv if it exists, else this one."""
+    py = venv / "bin" / "python"
+    return str(py) if kind == "vllm" and py.exists() else sys.executable
 
 
 # ----------------------------------------------------------------- run directory io
@@ -199,7 +209,8 @@ def run_with_fallback(run_dir: Path, stage: str, chain=DEFAULT_CHAIN) -> str:
     for kind, tp in chain:
         label = f"{kind}:{tp}"
         log = run_dir / "logs" / f"{stage}_{kind}_tp{tp}_{int(time.time())}.log"
-        cmd = [sys.executable, "-m", "src.runner", "--run-dir", str(run_dir),
+        py = backend_python(kind)
+        cmd = [py, "-m", "src.runner", "--run-dir", str(run_dir),
                "--stage", stage, "--backend", kind, "--tp", str(tp)]
         print(f"==> {stage}: trying {label}", flush=True)
         t0 = time.time()
@@ -212,6 +223,7 @@ def run_with_fallback(run_dir: Path, stage: str, chain=DEFAULT_CHAIN) -> str:
             code = proc.wait()
         # every attempt counts toward GPU time, including ones that crashed
         log_stage(run_dir, {"stage": stage, "backend": kind, "tp": tp, "exit_code": code,
+                            "python": py,
                             "n_gpus": tp if kind == "vllm" else n_visible,
                             "wall_s": round(time.time() - t0, 1),
                             "finished_at": time.strftime("%Y-%m-%dT%H:%M:%S")})
