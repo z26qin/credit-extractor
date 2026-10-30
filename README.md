@@ -80,6 +80,10 @@ tests/             CPU unit tests:  python -m pytest -q
   parse, go to the ladder. This differs from upstream, which retried every failed chunk.
   The raw JSON valid count is unchanged by repair, and repaired counts and the verbatim rate
   of repaired chunks are reported separately. The same rule applies to every condition.
+  Notebook 00c parsed all 10 saved failures this way (see the M0 report).
+- **Curly quotes.** The M1 text has 6,503 curly double quotes and no straight ones. A model
+  that swaps one for the other fails the plain verbatim check although the wording matches,
+  so M3 reports the verbatim rate both ways, and the review sheet uses the tolerant one.
 - **Retry ladder: 1.05 → 1.15 → 1.25 at temperature 0.** Each chunk tries the next rung
   only if the previous one failed, and every attempt is kept. Ollama's `repeat_penalty`,
   which upstream used, only penalizes the **last 64 tokens**. vLLM's and transformers'

@@ -217,6 +217,9 @@ def test_verbatim():
     q = ["The Borrower shall maintain", "the borrower shall", "made up"]
     assert verbatim_flags(q, src) == [True, False, False]
     assert verbatim_flags(q, src, casefold=True) == [True, True, False]
+    curly = "the \u201cLender\u201d and the Borrower\u2019s"
+    assert verbatim_flags(['the "Lender"', "Borrower's"], curly) == [False, False]
+    assert verbatim_flags(['the "Lender"', "Borrower's"], curly, fold_quotes=True) == [True, True]
     assert verbatim_rate([], src) is None
 
 

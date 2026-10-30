@@ -111,11 +111,12 @@ def evaluate_run(run_dir: Path, clauses: list[str], doc_texts: dict[str, str],
                 repaired_quotes += len(qs)
                 repaired_verbatim += sum(flags)
     merged = {d: merge_chunks(outs, clauses) for d, outs in per_doc.items()}
-    doc_q, doc_v = 0, 0
+    doc_q, doc_v, doc_v_folded = 0, 0, 0
     for d, m in merged.items():
         qs = [q for v in m.values() for q in v]
         doc_q += len(qs)
         doc_v += sum(verbatim_flags(qs, doc_texts[d], casefold=True))
+        doc_v_folded += sum(verbatim_flags(qs, doc_texts[d], casefold=True, fold_quotes=True))
     result = {
         "run_dir": str(run_dir), "model": cfg["model"], "prompt": cfg["prompt"],
         "chunk_chars": cfg["chunk_chars"], "overlap": cfg["overlap"],
@@ -127,6 +128,7 @@ def evaluate_run(run_dir: Path, clauses: list[str], doc_texts: dict[str, str],
         "verbatim_rate_repaired_chunks": round(repaired_verbatim / repaired_quotes, 4)
         if repaired_quotes else None,
         "verbatim_rate_casefolded": round(doc_v / doc_q, 4) if doc_q else None,
+        "verbatim_rate_quotes_folded": round(doc_v_folded / doc_q, 4) if doc_q else None,
         "total_predicted_quotes_merged": doc_q,
         "gpu_time": gpu_time(run_dir),
         "found_share_per_clause": {

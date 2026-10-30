@@ -18,6 +18,7 @@ from collections import Counter
 from .parsing import norm_ws
 
 Doc = dict[str, list[str]]          # clause -> quotes
+_CURLY_QUOTES = str.maketrans({"\u201c": '"', "\u201d": '"', "\u2018": "'", "\u2019": "'"})
 
 
 def tok_f1(a: str, b: str) -> float:
@@ -102,17 +103,16 @@ def detection_report(gold: dict[str, Doc], pred: dict[str, Doc], clauses: list[s
     }
 
 
-def verbatim_flags(quotes: list[str], source: str, casefold: bool = False) -> list[bool]:
-    src = norm_ws(source)
-    if casefold:
-        src = src.casefold()
-    out = []
-    for q in quotes:
-        k = norm_ws(q)
-        if casefold:
-            k = k.casefold()
-        out.append(bool(k) and k in src)
-    return out
+def verbatim_flags(quotes: list[str], source: str, casefold: bool = False,
+                   fold_quotes: bool = False) -> list[bool]:
+    """fold_quotes treats curly and straight quote marks as the same character."""
+    def key(s: str) -> str:
+        s = norm_ws(s)
+        if fold_quotes:
+            s = s.translate(_CURLY_QUOTES)
+        return s.casefold() if casefold else s
+    src = key(source)
+    return [bool(k) and k in src for k in map(key, quotes)]
 
 
 def verbatim_rate(quotes: list[str], source: str, casefold: bool = False) -> float | None:

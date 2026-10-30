@@ -130,3 +130,46 @@ took 31.3 min at 60k and 13.2 min at 32k for this one chunk.
 **M3 estimate (not measured):** if credit agreements fail at M0's CUAD rate (2 of 41 chunks)
 and nothing recovers, that is about 15 of 312 chunks × 13.2 min, or about 3.3 hours of
 retries on top of about 2 hours of primary decoding.
+
+# Quote repair check (notebook 00c, ran 2026-10-30, Kaggle, no GPU)
+
+The repair applied to every saved failed decode. Decoding did not run again, so `output
+tokens` and `latency s` are the original attempts' values.
+
+| run | ladder | penalty | backend | status | output tokens | latency s | quotes | verbatim |
+|---|---|---|---|---|---|---|---|---|
+| cuad60k | M0 | 1.00 | vllm | repaired | 1632 | 43.0 | 26 | 1.0000 |
+| cuad60k | M0 | 1.05 | vllm | repaired | 1632 | 115.8 | 26 | 1.0000 |
+| cuad60k | check | 1.05 | hf | repaired | 1535 | 555.1 | 24 | 1.0000 |
+| cuad60k | check | 1.15 | hf | repaired | 1675 | 606.7 | 26 | 1.0000 |
+| cuad60k | check | 1.25 | hf | repaired | 1962 | 715.0 | 40 | 0.8500 |
+| cuad32k | M0 | 1.00 | vllm | repaired | 914 | 18.2 | 18 | 1.0000 |
+| cuad32k | M0 | 1.05 | vllm | repaired | 964 | 47.7 | 19 | 1.0000 |
+| cuad32k | check | 1.05 | hf | repaired | 902 | 197.5 | 17 | 1.0000 |
+| cuad32k | check | 1.15 | hf | repaired | 1154 | 253.9 | 21 | 0.9048 |
+| cuad32k | check | 1.25 | hf | repaired | 1517 | 338.3 | 31 | 0.8387 |
+
+Double quotes in the cleaned M1 credit agreements:
+
+| document | chars | straight | curly |
+|---|---|---|---|
+| angi-2025 | 661,145 | 0 | 1,488 |
+| exlservice-2026 | 499,265 | 0 | 1,115 |
+| quanta-2024 | 348,218 | 0 | 806 |
+| repay-2026 | 660,536 | 0 | 1,418 |
+| viavi-2025 | 695,765 | 0 | 1,676 |
+
+**What this shows:**
+- The repair parsed all 10 saved failures, including the 6 the ladder could not fix. On the
+  first attempts every quote was verbatim: 26 of 26 at 60k and 18 of 18 at 32k. That means
+  the text is in the chunk, not that the extraction is right, and it is one chunk.
+- vLLM's 1.15 attempts had 30 of 34 and 19 of 20 verbatim, so repair kept slightly fewer
+  verbatim quotes at 60k (26 vs 30). Whether those extra quotes are correct was not checked.
+- Across both chunkings, more penalty meant more quotes and fewer verbatim ones, and 1.25
+  was at 0.85 and 0.84. This is one chunk, but it fits the concern that a penalty disturbs
+  copying.
+- The credit agreements contain no straight double quotes, so M0's exact failure cannot come
+  from copying them. It could still appear if a model turns curly quotes into straight ones.
+  That swap would also lower the plain verbatim rate, so M3 also reports it with curly and
+  straight quote marks treated as equal, and the review sheet's `verbatim` column uses that
+  version.

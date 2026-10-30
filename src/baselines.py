@@ -157,7 +157,7 @@ def review_rows(plan: dict, results: dict) -> list[dict]:
                                      verbatim="", chunks="", from_repaired=""))
                     continue
                 flags = verbatim_flags([q for q, _, _ in quotes], plan["docs"][doc_id],
-                                       casefold=True)
+                                       casefold=True, fold_quotes=True)
                 for i, ((q, idx, rep), v) in enumerate(zip(quotes, flags), 1):
                     rows.append(dict(base, found=True, quote_no=i, quote=q, chars=len(q),
                                      verbatim=v, chunks=";".join(map(str, idx)),
@@ -225,6 +225,8 @@ def baseline_report(plan: dict, results: dict, meta: dict) -> str:
         lambda r: _rate(r["keys"]["with_unknown_keys"], r["keys"]["usable_outputs"]))
     row("verbatim, exact vs own chunk", lambda r: r["verbatim_rate_chunk_exact"])
     row("verbatim, casefolded vs document", lambda r: r["verbatim_rate_casefolded"])
+    row("same, curly and straight quote marks equal",
+        lambda r: r["verbatim_rate_quotes_folded"])
     row("verbatim, quotes from repaired chunks", lambda r: r["verbatim_rate_repaired_chunks"])
     row("quotes after merge", lambda r: r["total_predicted_quotes_merged"])
     row("primary latency per chunk, mean / max s",
