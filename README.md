@@ -16,7 +16,7 @@ so `src/` is an independent implementation and does not import it. See
 | milestone | state |
 |---|---|
 | M0 fork + reproduce Model B on CUAD | **ran 2026-10-29**: F1 0.883 (60k) / 0.892 (32k), card's 0.900 inside both CIs; see [reports/m0_reproduce.md](reports/m0_reproduce.md). Open: transformers ladder ran out of memory on T4; fix needs `notebooks/00b_ladder_check.ipynb` |
-| M1 collect 5 credit agreements | **ran 2026-10-30**, but the preview showed a cleaner bug (now fixed). `notebooks/01_collect.ipynb` must be **re-run**; [reports/m1_manifest.csv](reports/m1_manifest.csv) has the pre-fix char counts until then |
+| M1 collect 5 credit agreements | **done 2026-10-30**: 5 documents on the Hub, cleaned text reviewed after a cleaner fix, manifest in [reports/m1_manifest.csv](reports/m1_manifest.csv) |
 | M2 credit schema + prompts | not started |
 | M3 label-free baselines | not started |
 
@@ -146,7 +146,7 @@ tests/             CPU unit tests:  python -m pytest -q
 - **Manifest to GitHub:** this machine has no HF token, so the notebook prints
   `manifest.csv` at the end, and that output is committed unchanged as
   `reports/m1_manifest.csv`.
-- **Size (measured):** 2,871,678 cleaned chars, which makes 104 chunks at 32k/4k per
+- **Size (measured):** 2,864,929 cleaned chars, which makes 104 chunks at 32k/4k per
   condition and 312 primary decodes for the three M2 conditions, before any ladder retries.
 - **Re-running M1 makes no SEC requests.** If the raw file's sha256 matches, the text is
   rebuilt from it, so a cleaner fix doesn't re-download anything. The first run's
