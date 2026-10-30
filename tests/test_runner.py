@@ -127,3 +127,24 @@ def test_backend_python_uses_vllm_venv_only_for_vllm(tmp_path):
     (tmp_path / "bin" / "python").write_text("")
     assert backend_python("vllm", tmp_path) == str(tmp_path / "bin" / "python")
     assert backend_python("hf", tmp_path) == sys.executable
+
+
+def test_ladder_check_replays_failed_chunks_without_touching_m0(run_dir, tmp_path, monkeypatch):
+    from types import SimpleNamespace
+    from src import reproduce
+    rd, cfg, chunks = run_dir
+    run_stage(rd, "primary", "vllm", 2)
+    run_stage(rd, "ladder", "vllm", 2)
+    before = load_record(rd, "d1__chunk0")
+    monkeypatch.setattr(reproduce, "run_with_fallback",
+                        lambda d, stage, chain: run_stage(d, stage, "hf", 0))
+    env = SimpleNamespace(data_repo=None)
+    rows = reproduce.ladder_check(env, {"root": tmp_path / "m0", "run_dirs": {"r": rd}},
+                                  {"hub_prefix": "m0"})
+    assert load_record(rd, "d1__chunk0") == before
+    new = load_record(tmp_path / "m0" / "ladder_check" / "r", "d1__chunk0")
+    assert [a["repeat_penalty"] for a in new["attempts"]] == [1.0, 1.05, 1.15]
+    assert new["attempts"][0] == before["attempts"][0] and new["final_status"] == "ok"
+    assert [r["repeat_penalty"] for r in rows if r["ladder"].startswith("check")] == [1.05, 1.15]
+    assert len([r for r in rows if r["ladder"].startswith("M0")]) == 3
+    assert rows[-1]["status"] == "ok" and rows[-1]["verbatim"] == 1.0

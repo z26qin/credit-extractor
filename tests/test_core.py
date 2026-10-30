@@ -137,3 +137,10 @@ def test_verbatim():
     assert verbatim_flags(q, src) == [True, False, False]
     assert verbatim_flags(q, src, casefold=True) == [True, True, False]
     assert verbatim_rate([], src) is None
+
+
+def test_json_error_points_at_an_unescaped_quote():
+    from src.parsing import json_error
+    assert json_error('{"a": ["ok"]}') is None
+    e = json_error('{"Parties": ["the "Company" and Acme"]}')
+    assert e["pos"] == 19 and "Company" in e["context"]

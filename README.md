@@ -15,7 +15,7 @@ so `src/` is an independent implementation and does not import it. See
 
 | milestone | state |
 |---|---|
-| M0 fork + reproduce Model B on CUAD | **ran 2026-10-29**: F1 0.883 (60k) / 0.892 (32k), card's 0.900 inside both CIs; see [reports/m0_reproduce.md](reports/m0_reproduce.md). Open: transformers ladder crashed on Kaggle |
+| M0 fork + reproduce Model B on CUAD | **ran 2026-10-29**: F1 0.883 (60k) / 0.892 (32k), card's 0.900 inside both CIs; see [reports/m0_reproduce.md](reports/m0_reproduce.md). Open: transformers ladder ran out of memory on T4; fix needs `notebooks/00b_ladder_check.ipynb` |
 | M1 collect 5 credit agreements | **ran 2026-10-30**, but the preview showed a cleaner bug (now fixed). `notebooks/01_collect.ipynb` must be **re-run**; [reports/m1_manifest.csv](reports/m1_manifest.csv) has the pre-fix char counts until then |
 | M2 credit schema + prompts | not started |
 | M3 label-free baselines | not started |
@@ -29,7 +29,7 @@ src/chunking.py    char windows with overlap
 src/parsing.py     JSON parsing, loop detection, key canonicalization
 src/merge.py       per-document union of chunk outputs (deduplicated)
 src/metrics.py     detection F1 + bootstrap CI, overlap, strict F1, verbatim rate
-src/generation.py  vLLM + transformers backends, Ollama-style windowed repeat penalty
+src/generation.py  vLLM + transformers backends, Ollama-style windowed penalty, slice prefill
 src/runner.py      resumable primary pass + retry ladder, backend fallback chain, GPU time
 src/evaluate.py    scores a run dir, writes eval.json / latency.csv, markdown report
 src/cuad.py        CUAD download + official test split
@@ -77,7 +77,9 @@ tests/             CPU unit tests:  python -m pytest -q
   built-in `repetition_penalty` penalize *every* prompt and output token. For verbatim
   copying that penalizes almost everything the model should copy, so it hardly singles out
   the loop. The ladder therefore runs on transformers with a custom 64-token windowed
-  penalty (`WindowedRepeatPenalty`), the same for every model and condition. vLLM with its
+  penalty (`WindowedRepeatPenalty`), the same for every model and condition. Prompts over
+  512 tokens enter the cache in slices (`prefill_cache`), because a single pass over 8-14k
+  tokens needs 5.6-19 GiB for attention on T4. Slicing gives identical output. vLLM with its
   native penalty is only a fallback, and `backend` is recorded on every attempt. In
   transformers, a retry that loops again is stopped early once the loop is detected. It
   still counts as a failure, so metrics are unchanged and T4 time is saved.

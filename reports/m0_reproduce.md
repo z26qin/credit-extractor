@@ -60,17 +60,22 @@ below the card's 0.900, but both CIs contain it. This is 10 contracts, so the CI
 - 32k/4k chunking did no worse than 60k/8k (0.8916 vs 0.8826, heavily overlapping CIs) and
   took about two thirds of the stage time. That supports using 32k/4k in M3.
 
-**Open problems:**
-1. **The ladder did not run as designed.** `hf:0` exited 1 in both runs, so the retries fell
-   back to vLLM, whose repetition penalty covers the full context instead of Ollama's
-   64-token window. The one recovery at 1.15 is therefore not the planned semantics. Cause
-   unknown: `HFBackend` runs end to end locally (tiny random Qwen3, transformers 5.22,
-   torch 2.15, with and without the penalty), so the traceback from Kaggle is needed.
-   Until that is fixed there is also no working transformers fallback.
-2. **The failed chunks were "invalid", not "loop".** The card describes greedy repetition
-   loops; here each run had one decode that ended without hitting the cap but was not
-   valid JSON. We don't use Ollama's JSON grammar, which may be the difference. Not yet
-   inspected. Which chunk failed is not in this report (upstream's was INGEVITY c0).
+**Open problems (updated after the Kaggle logs, 2026-10-30):**
+1. **The ladder did not run as designed.** `hf:0` ran out of GPU memory in both runs, inside
+   attention, asking for 5.63 GiB (32k) and 19.27 GiB (60k). That is about 3.4x, roughly
+   quadratic in prompt length, so one pass over the whole prompt builds a full T x T matrix.
+   Retries therefore fell back to vLLM, whose penalty covers the full context instead of
+   Ollama's 64-token window. The 1.15 recoveries above are not the planned semantics.
+   **Fix:** `prefill_cache` feeds long prompts in 512-token slices. Output is token-identical
+   to a single pass locally (transformers 4.57 and 5.22). **Not yet proven on T4 x2:**
+   `notebooks/00b_ladder_check.ipynb` does that on the failed chunks.
+2. **The one failure is not a repetition loop, and it isn't the chunk upstream reported.**
+   Both runs failed on El Pollo Loco chunk 0 (`stop` at 914 / 1,632 tokens). The output ends
+   cleanly with `...[]}`, so the break is inside the JSON. Rung 1.05 failed too and 1.15
+   passed. El Pollo is not in upstream's list of 9 failures, and INGEVITY c0, which is in
+   our sample and needed 1.15 upstream, passed first time here. We decode without Ollama's
+   JSON grammar, which would have forced valid JSON, so this is a likely cause. Hypothesis:
+   an unescaped quote copied from the contract. Not confirmed: 00b prints the parse error.
 
 **Reading the time figures:** the cuad60k stage time includes the crashed attempts from
 the first session (the failed primary attempts in its list). Latency is amortized over a

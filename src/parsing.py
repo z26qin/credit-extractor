@@ -55,6 +55,20 @@ def parse_json_object(raw: str):
     return None
 
 
+def json_error(raw: str, context: int = 160) -> dict | None:
+    """Where strict parsing fails (for diagnosis), or None if `raw` parses."""
+    s = raw.strip()
+    m = _FENCE.match(s)
+    if m:
+        s = m.group(1)
+    try:
+        json.loads(s)
+        return None
+    except json.JSONDecodeError as e:
+        return {"error": e.msg, "pos": e.pos,
+                "context": s[max(0, e.pos - context):e.pos + context]}
+
+
 def classify(raw: str, finish_reason: str | None) -> tuple[str, dict | None]:
     d = parse_json_object(raw)
     if d is not None:

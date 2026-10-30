@@ -30,3 +30,28 @@ def test_repetition_stop():
     assert not stop(torch.zeros(1, 10 + 31, dtype=torch.long), None).item()
     assert stop(torch.zeros(1, 10 + 64, dtype=torch.long), None).item()
     assert stop.fired
+
+
+def test_prefill_gives_the_same_output_as_a_single_pass():
+    try:
+        from transformers import Qwen3Config, Qwen3ForCausalLM
+    except (ImportError, RuntimeError):
+        pytest.skip("transformers cannot import Qwen3 in this environment")
+    from src.generation import prefill_cache
+    torch.manual_seed(0)
+    model = Qwen3ForCausalLM(Qwen3Config(
+        vocab_size=97, hidden_size=32, num_hidden_layers=2, num_attention_heads=2,
+        num_key_value_heads=2, intermediate_size=64, head_dim=16,
+        layer_types=["full_attention"] * 2, max_position_embeddings=512,
+        attn_implementation="sdpa")).eval()
+    ids = torch.randint(0, 97, (1, 137))
+    mask = torch.ones_like(ids)
+    kw = dict(attention_mask=mask, max_new_tokens=25, min_new_tokens=25, do_sample=False,
+              temperature=None, top_p=None, top_k=None, pad_token_id=0)
+    with torch.inference_mode():
+        plain = model.generate(input_ids=ids, **kw)
+        for size in (10, 40, 136):
+            cache = prefill_cache(model, ids, size)
+            assert cache.get_seq_length() == 136
+            sliced = model.generate(input_ids=ids, past_key_values=cache, **kw)
+            assert torch.equal(plain, sliced), size

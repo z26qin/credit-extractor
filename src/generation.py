@@ -19,6 +19,9 @@ from dataclasses import dataclass, asdict
 from .parsing import detect_repetition
 
 OLLAMA_REPEAT_LAST_N = 64
+# transformers on T4: one attention pass over a whole 8-14k token prompt needs a T x T matrix
+# per layer (5.6 / 19 GiB, OOM on Kaggle), so long prompts enter the cache in slices
+PREFILL_TOKENS = 512
 
 
 @dataclass
@@ -89,6 +92,21 @@ class RepetitionStop:
                           device=input_ids.device)
 
 
+def prefill_cache(model, ids, slice_tokens: int = PREFILL_TOKENS):
+    """Run all but the last prompt token through the model in slices; return the cache.
+
+    generate() then continues from it. Each slice costs slice x T attention memory instead
+    of T x T. The output is the same as a single pass, because the attention result for a
+    token does not depend on how the prompt was split.
+    """
+    from transformers import DynamicCache
+    cache = DynamicCache()
+    for start in range(0, ids.shape[1] - 1, slice_tokens):
+        end = min(start + slice_tokens, ids.shape[1] - 1)
+        model(input_ids=ids[:, start:end], past_key_values=cache, use_cache=True)
+    return cache
+
+
 class VLLMBackend:
     name = "vllm"
 
@@ -150,8 +168,11 @@ class HFBackend:
                 [WindowedRepeatPenalty(repeat_penalty)] if repeat_penalty != 1.0 else [])
             t0 = time.time()
             with self.torch.inference_mode():
+                cache = (prefill_cache(self.model, ids)
+                         if n_prompt > PREFILL_TOKENS else None)
                 out = self.model.generate(
                     input_ids=ids, attention_mask=enc["attention_mask"].to(ids.device),
+                    past_key_values=cache,
                     max_new_tokens=max_tokens, do_sample=False, temperature=None,
                     top_p=None, top_k=None, logits_processor=procs,
                     stopping_criteria=StoppingCriteriaList([stop]),
