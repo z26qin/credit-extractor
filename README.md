@@ -112,14 +112,15 @@ tests/             CPU unit tests:  python -m pytest -q
   conditions sit together per document and clause. A clause with no quote gets one row with
   `found=False`, so misses can be reviewed too. Condition a is left out because its output
   uses CUAD's clause types.
-- **Compute after M3 (decided 2026-10-30).** Nebius is only a training fallback, used after
-  a cost estimate and approval. Teacher pre-labeling uses the DeepSeek API directly, an
-  agreed exception to the three platforms, rather than Token Factory or a local model. The
-  calls need no GPU, so they can run on Kaggle with no accelerator. The key goes in a new
-  `DEEPSEEK_API_KEY` secret, and every paid run gets a cost estimate and approval first.
-  DeepSeek's terms (effective 2026-04-29, section 4.2) allow using outputs to train other
-  models. They don't say how long inputs are kept or where they are processed, so only
-  public EDGAR text is sent. The model is not chosen and nothing has run.
+- **Compute after M3 (decided 2026-10-30).** Teacher pre-labeling uses a DeepSeek model on
+  Nebius Token Factory with the existing `NEBIUS_API_KEY`. The calls need no GPU, so they
+  can run on Kaggle with no accelerator. Nebius GPU VMs stay a training fallback. Every
+  Nebius call needs a cost estimate and approval first. Token Factory's terms (effective
+  2026-10-22) leave outputs with the customer and bar using them to build a service that
+  competes with Nebius's, and they have no explicit rule against training a model on
+  outputs. Each model's own license also applies, so pre-labeling uses a model listed as MIT
+  and not `DeepSeek-V4-Pro`, which is listed under a DeepSeek License. Only public EDGAR text
+  is sent. The model is not chosen and nothing has run.
 - **Latency:** vLLM rows report batch wall time divided by batch size, which is amortized
   rather than true single-request latency. transformers rows report true per-request
   time. `latency.csv` has one row per decode attempt.
