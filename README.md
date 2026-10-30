@@ -71,8 +71,9 @@ tests/             CPU unit tests:  python -m pytest -q
   hits the cap, or whose tail is one substring repeated 5 or more times, counts as a
   *loop*. A decode that finishes normally but isn't a JSON object counts as *invalid*.
 - **Quote repair before the ladder (changed after M0).** Upstream's grammar forces valid
-  JSON. Without it, a copied quote broke the JSON in M0, and the ladder did not fix that in 6 of 6 attempts at up to 12 minutes each. So a decode that finishes
-  normally but fails to parse gets one deterministic repair: a `"` ends a string only if a
+  JSON. Without it, a copied quote broke the JSON in M0, and the ladder did not fix that in
+  6 of 6 attempts at up to 12 minutes each. So a decode that finishes normally but fails to
+  parse gets one deterministic repair: a `"` ends a string only if a
   key colon, list end or next string follows, and any other `"` is escaped. A decode saved
   this way has status *repaired* and skips the ladder. Loops, and decodes that still don't
   parse, go to the ladder. This differs from upstream, which retried every failed chunk.
