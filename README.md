@@ -118,9 +118,9 @@ tests/             CPU unit tests:  python -m pytest -q
   Nebius call needs a cost estimate and approval first. Token Factory's terms (effective
   2026-10-22) leave outputs with the customer and bar using them to build a service that
   competes with Nebius's, and they have no explicit rule against training a model on
-  outputs. Each model's own license also applies, so pre-labeling uses a model listed as MIT
-  and not `DeepSeek-V4-Pro`, which is listed under a DeepSeek License. Only public EDGAR text
-  is sent. The model is not chosen and nothing has run.
+  outputs. Each model's own license also applies. The chosen model is
+  `deepseek-ai/DeepSeek-V4.1-Flash-1017`, listed as MIT at $0.30 input and $1.20 output per
+  million tokens. Only public EDGAR text is sent. Nothing has run.
 - **Latency:** vLLM rows report batch wall time divided by batch size, which is amortized
   rather than true single-request latency. transformers rows report true per-request
   time. `latency.csv` has one row per decode attempt.
