@@ -112,6 +112,10 @@ tests/             CPU unit tests:  python -m pytest -q
   conditions sit together per document and clause. A clause with no quote gets one row with
   `found=False`, so misses can be reviewed too. Condition a is left out because its output
   uses CUAD's clause types.
+- **Compute after M3 (decided 2026-10-30).** Nebius is only a training fallback, used after
+  a cost estimate and approval. Teacher pre-labeling runs a DeepSeek model locally, not on
+  Token Factory. The model is not chosen and its speed is not measured. The local machine is
+  an Apple M4 with 16 GB of unified memory, which limits which models fit.
 - **Latency:** vLLM rows report batch wall time divided by batch size, which is amortized
   rather than true single-request latency. transformers rows report true per-request
   time. `latency.csv` has one row per decode attempt.
