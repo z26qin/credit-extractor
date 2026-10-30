@@ -5,9 +5,11 @@ import pytest
 from src.chunking import chunk_bounds, chunk_text, safe_id
 from src.merge import merge_chunks
 from src.metrics import detection_report, tok_f1, verbatim_flags, verbatim_rate
-from src.parsing import canonicalize, classify, detect_repetition, parse_json_object
-from src.prompts import (CUAD_SYSTEM, CUAD_USER_PREFIX, canon_map, load_cuad_clauses,
-                         messages, norm_key)
+from src.parsing import (canonicalize, classify, detect_repetition, parse_json_object,
+                         parse_output, repair_quotes)
+from src.prompts import (CUAD_SYSTEM, CUAD_USER_PREFIX, PROMPTS, canon_map, credit_clauses,
+                         load_credit_schema, load_cuad_clauses, messages, norm_key,
+                         render_report)
 
 
 # ---------------------------------------------------------------- prompts
@@ -22,6 +24,45 @@ def test_cuad_prompt_is_byte_identical_to_model_card():
         "types, values: lists of verbatim quotes).\n\nCONTRACT EXCERPT:\n")
     m = messages(CUAD_SYSTEM, CUAD_USER_PREFIX, "TEXT")
     assert m[1]["content"].endswith("CONTRACT EXCERPT:\nTEXT")
+
+
+def test_credit_prompt_keeps_model_b_shape():
+    system, prefix = PROMPTS["credit_schema"]
+    assert system == CUAD_SYSTEM
+    assert prefix.startswith("Extract all 10 credit clause types from this contract excerpt "
+                             "as JSON (keys: clause types, values: lists of verbatim quotes)."
+                             "\n\nCLAUSE TYPES:\n- Financial Maintenance Covenant: ")
+    assert prefix.endswith("\n\nCONTRACT EXCERPT:\n")
+    assert '"' not in prefix
+
+
+def test_credit_schema_is_the_agreed_clause_list():
+    assert credit_clauses() == [
+        "Financial Maintenance Covenant", "Incremental Facility", "MFN Protection",
+        "Restricted Payments General Basket", "Available Amount / Builder Basket",
+        "Debt Incurrence General Basket", "Liens General Basket", "Applicable Margin",
+        "Maturity Date", "Liability Management Protections"]
+    canon = canon_map(credit_clauses())
+    assert canon[norm_key("available amount/builder basket")] == \
+        "Available Amount / Builder Basket"
+
+
+def test_conditions_and_rendered_report():
+    conds = load_credit_schema()["conditions"]
+    assert [(c["id"], c["prompt"]) for c in conds] == [
+        ("a", "cuad_native"), ("b", "credit_schema"), ("c", "credit_schema")]
+    assert conds[0]["model"] == conds[1]["model"] != conds[2]["model"]
+
+    class Tok:
+        def __call__(self, text, add_special_tokens=False):
+            return {"input_ids": text.split()}
+
+        def apply_chat_template(self, msgs, tokenize=False, add_generation_prompt=True):
+            return "\n".join(m["content"] for m in msgs)
+
+    md = render_report(lambda model: Tok())
+    assert "Extract all 41 CUAD clause types" in md and "CLAUSE TYPES:" in md
+    assert "Conditions b and c render to the same text: yes." in md
 
 
 def test_cuad_clauses_and_canon():
@@ -80,6 +121,46 @@ def test_detect_repetition():
     legit = json.dumps({f"Clause {i}": [] for i in range(41)})
     assert not detect_repetition(legit)
     assert not detect_repetition(sent * 2)
+
+
+# the two parse failures from M0's El Pollo Loco chunk (reports/m0_reproduce.md)
+SOURCE = ('applicable add ", and specifically Section 2.20 hereof,") and as long as Developer '
+          'shall not be in default')
+
+
+def test_repair_escapes_quote_copied_from_the_contract():
+    raw = ('{"License Grant": ["applicable add \\", and specifically Section 2.20 hereof,") '
+           'and as long as Developer shall not be in default"], "Cap": []}')
+    assert parse_json_object(raw) is None
+    status, d = classify(raw, "stop")
+    assert status == "repaired" and d["License Grant"] == [SOURCE] and d["Cap"] == []
+
+
+def test_repair_keeps_valid_json_after_a_split_string_valid():
+    raw = ('{"License Grant": ["applicable add ", "and specifically Section 2.20 hereof,") '
+           'and as long as Developer shall not be in default"], "Cap": []}')
+    assert parse_json_object(raw) is None
+    status, d = classify(raw, "stop")
+    assert status == "repaired"
+    assert d["License Grant"] == ["applicable add ",
+                                  'and specifically Section 2.20 hereof,") and as long as '
+                                  'Developer shall not be in default']
+
+
+def test_repair_handles_defined_terms_and_leaves_good_json_alone():
+    good = '{"a": ["x \\"y\\" z", "b"], "c": []}'
+    assert repair_quotes(good) == good
+    raw = '{"a": ["the "Lender" means, and the "Agent", as such"], "c": ["ok"]}'
+    assert parse_output(raw) == {"a": ['the "Lender" means, and the "Agent", as such'],
+                                 "c": ["ok"]}
+    assert parse_output('```json\n{"a": ["the "Lender" here"]}\n```') == {
+        "a": ['the "Lender" here']}
+
+
+def test_repair_does_not_rescue_other_failures():
+    assert classify('{"a": ["the "Lender" means', "length")[0] == "loop"
+    assert classify('{"a": ["no closing bracket"', "stop")[0] == "invalid"
+    assert classify("I cannot help with that.", "stop")[0] == "invalid"
 
 
 def test_classify():

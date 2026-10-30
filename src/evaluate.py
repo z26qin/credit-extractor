@@ -7,7 +7,7 @@ from pathlib import Path
 
 from .merge import merge_chunks
 from .metrics import detection_report, verbatim_flags
-from .parsing import canonicalize, parse_json_object
+from .parsing import OK_STATUSES, canonicalize, parse_output
 from .prompts import canon_map
 from .runner import load_chunks, load_config, load_record
 
@@ -23,10 +23,10 @@ CARD_REFERENCE = {
 
 def final_output(rec: dict | None, canon: dict) -> tuple[dict | None, int]:
     """Canonicalized output of the chunk's successful attempt (None if every attempt failed)."""
-    if not rec or rec.get("final_status") != "ok":
+    if not rec or rec.get("final_status") not in OK_STATUSES:
         return None, 0
-    ok = [a for a in rec["attempts"] if a["status"] == "ok"][0]
-    return canonicalize(parse_json_object(ok["text"]), canon)
+    ok = [a for a in rec["attempts"] if a["status"] in OK_STATUSES][0]
+    return canonicalize(parse_output(ok["text"]), canon)
 
 
 def decode_summary(records: list[dict | None], ladder: list[float]) -> dict:
@@ -36,6 +36,7 @@ def decode_summary(records: list[dict | None], ladder: list[float]) -> dict:
     s = {
         "chunks_total": len(records), "chunks_with_record": n,
         "primary_json_valid": sum(a["status"] == "ok" for a in prim),
+        "primary_repaired": sum(a["status"] == "repaired" for a in prim),
         "primary_loop": sum(a["status"] == "loop" for a in prim),
         "primary_invalid_other": sum(a["status"] == "invalid" for a in prim),
         "recovered_by_rung": {str(rp): 0 for rp in ladder},
@@ -45,17 +46,18 @@ def decode_summary(records: list[dict | None], ladder: list[float]) -> dict:
     s["primary_json_valid_rate"] = round(s["primary_json_valid"] / n, 4) if n else None
     s["primary_loop_rate"] = round(s["primary_loop"] / n, 4) if n else None
     for r in present:
-        if r["attempts"][0]["status"] == "ok":
+        if r["attempts"][0]["status"] in OK_STATUSES:
             continue
-        if r["final_status"] == "ok":
+        if r["final_status"] in OK_STATUSES:
             s["recovered_by_rung"][str(r["final_repeat_penalty"])] += 1
         else:
             s["still_failing"].append(r["chunk_id"])
-    failed = n - s["primary_json_valid"]
+    failed = n - s["primary_json_valid"] - s["primary_repaired"]
+    s["chunks_sent_to_ladder"] = failed
     s["ladder_recovery_rate"] = (round((failed - len(s["still_failing"])) / failed, 4)
                                  if failed else None)
-    s["final_json_valid_rate"] = round(sum(r["final_status"] == "ok" for r in present) / n,
-                                       4) if n else None
+    s["final_json_valid_rate"] = round(sum(r["final_status"] in OK_STATUSES for r in present)
+                                       / n, 4) if n else None
     return s
 
 
@@ -94,6 +96,7 @@ def evaluate_run(run_dir: Path, clauses: list[str], doc_texts: dict[str, str],
     per_doc: dict[str, list[dict]] = {}
     dropped = 0
     chunk_quotes, chunk_verbatim = 0, 0
+    repaired_quotes, repaired_verbatim = 0, 0
     for c, r in zip(chunks, records):
         out, d = final_output(r, canon)
         dropped += d
@@ -101,8 +104,12 @@ def evaluate_run(run_dir: Path, clauses: list[str], doc_texts: dict[str, str],
         if out is not None:
             per_doc[c.doc_id].append(out)
             qs = [q for v in out.values() for q in v]
+            flags = verbatim_flags(qs, c.text)
             chunk_quotes += len(qs)
-            chunk_verbatim += sum(verbatim_flags(qs, c.text))
+            chunk_verbatim += sum(flags)
+            if r["final_status"] == "repaired":
+                repaired_quotes += len(qs)
+                repaired_verbatim += sum(flags)
     merged = {d: merge_chunks(outs, clauses) for d, outs in per_doc.items()}
     doc_q, doc_v = 0, 0
     for d, m in merged.items():
@@ -117,6 +124,8 @@ def evaluate_run(run_dir: Path, clauses: list[str], doc_texts: dict[str, str],
         "dropped_prediction_keys": dropped,
         "verbatim_rate_chunk_exact": round(chunk_verbatim / chunk_quotes, 4)
         if chunk_quotes else None,
+        "verbatim_rate_repaired_chunks": round(repaired_verbatim / repaired_quotes, 4)
+        if repaired_quotes else None,
         "verbatim_rate_casefolded": round(doc_v / doc_q, 4) if doc_q else None,
         "total_predicted_quotes_merged": doc_q,
         "gpu_time": gpu_time(run_dir),
@@ -172,7 +181,7 @@ def reproduce_report(results: dict[str, dict], meta: dict) -> str:
     for label, k, ref in rows:
         L.append(f"| {label} | {ref} | " + " | ".join(str(g(r, k)) for r in results.values()) + " |")
     L.append("| chunks needing ladder | " + CARD_REFERENCE["chunks_needing_ladder"] + " | " +
-             " | ".join(f"{r['decode']['chunks_with_record'] - r['decode']['primary_json_valid']}"
+             " | ".join(f"{r['decode']['chunks_sent_to_ladder']}"
                         f"/{r['decode']['chunks_with_record']}" for r in results.values()) + " |")
     L += ["", "## Decode stability and latency", ""]
     for name, r in results.items():
@@ -181,7 +190,8 @@ def reproduce_report(results: dict[str, dict], meta: dict) -> str:
               f"- chunk size {r['chunk_chars']} / overlap {r['overlap']}, "
               f"max output tokens {r['max_tokens']}",
               f"- primary JSON valid: {d['primary_json_valid']}/{d['chunks_with_record']}, "
-              f"loops: {d['primary_loop']}, other invalid: {d['primary_invalid_other']}",
+              f"repaired: {d['primary_repaired']}, loops: {d['primary_loop']}, "
+              f"other invalid: {d['primary_invalid_other']}",
               f"- recovered by ladder rung: {d['recovered_by_rung']}; still failing: "
               f"{d['still_failing'] or 'none'}; ladder backends: {d['ladder_backends'] or 'n/a'}",
               f"- verbatim (exact after whitespace norm, vs own chunk): "

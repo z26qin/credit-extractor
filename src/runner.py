@@ -25,7 +25,7 @@ from dataclasses import asdict
 from pathlib import Path
 
 from .chunking import Chunk, safe_id
-from .parsing import classify
+from .parsing import OK_STATUSES, classify
 from .prompts import PROMPTS, REPO_ROOT, messages
 
 DEFAULT_LADDER = (1.05, 1.15, 1.25)     # Model B card: 1.05, escalating to 1.15 / 1.25
@@ -105,7 +105,7 @@ def save_record(run_dir: Path, rec: dict) -> None:
 
 def add_attempt(rec: dict, attempt: dict) -> dict:
     rec["attempts"].append(attempt)
-    if attempt["status"] == "ok" or rec.get("final_status") != "ok":
+    if attempt["status"] in OK_STATUSES or rec.get("final_status") not in OK_STATUSES:
         rec["final_status"] = attempt["status"]
         rec["final_repeat_penalty"] = attempt["repeat_penalty"]
     return rec
@@ -125,7 +125,7 @@ def stage_todo(run_dir: Path, chunks: list[Chunk], stage: str,
             if rec is None:
                 todo.append((c, 1.0))
         elif stage == "ladder":
-            if rec is None or rec["final_status"] == "ok":
+            if rec is None or rec["final_status"] in OK_STATUSES:
                 continue
             tried = {a["repeat_penalty"] for a in rec["attempts"]}
             nxt = [rp for rp in ladder if rp not in tried]

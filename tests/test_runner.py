@@ -5,9 +5,10 @@ import pytest
 
 import src.generation as generation
 from src.chunking import chunk_text
-from src.evaluate import evaluate_run, reproduce_report
+from src.evaluate import decode_summary, evaluate_run, reproduce_report
 from src.generation import GenResult
-from src.runner import load_record, prepare_run, run_stage, stage_todo
+from src.runner import (add_attempt, load_record, prepare_run, run_stage, save_record,
+                        stage_todo)
 
 CLAUSES = ["Governing Law", "Parties"]
 LOOP = '{"Parties": ["' + "Acme Corp and Beta LLC agree as follows here. " * 30
@@ -127,6 +128,38 @@ def test_backend_python_uses_vllm_venv_only_for_vllm(tmp_path):
     (tmp_path / "bin" / "python").write_text("")
     assert backend_python("vllm", tmp_path) == str(tmp_path / "bin" / "python")
     assert backend_python("hf", tmp_path) == sys.executable
+
+
+def test_repaired_chunk_skips_the_ladder_but_stays_separate_from_raw_validity(tmp_path):
+    chunks = chunk_text("d", "text", 1000, 100)
+    cfg = {"model": "m", "prompt": "cuad_native", "max_tokens": 64, "chunk_chars": 1000,
+           "overlap": 100}
+    rd = prepare_run(tmp_path / "run", cfg, chunks)
+    rec = {"chunk_id": chunks[0].chunk_id, "doc_id": "d", "chunk_index": 0, "attempts": [],
+           "final_status": None}
+    add_attempt(rec, {"status": "repaired", "repeat_penalty": 1.0, "backend": "vllm"})
+    save_record(rd, rec)
+    assert stage_todo(rd, chunks, "ladder") == []
+    s = decode_summary([load_record(rd, chunks[0].chunk_id)], [1.05])
+    assert s["primary_json_valid"] == 0 and s["primary_repaired"] == 1
+    assert s["chunks_sent_to_ladder"] == 0 and s["final_json_valid_rate"] == 1.0
+
+
+def test_repair_check_replays_saved_failures(tmp_path):
+    from src import reproduce
+    chunks = chunk_text("d", 'x add ", and y,") and z', 1000, 100)
+    cfg = {"model": "m", "prompt": "cuad_native", "max_tokens": 64, "chunk_chars": 1000,
+           "overlap": 100}
+    rd = prepare_run(tmp_path / "m0" / "r", cfg, chunks)
+    bad = '{"a": ["x add \\", and y,") and z"]}'
+    rec = {"chunk_id": chunks[0].chunk_id, "doc_id": "d", "chunk_index": 0, "final_status": None,
+           "attempts": [{"text": bad, "finish_reason": "stop", "status": "invalid",
+                         "repeat_penalty": 1.0, "backend": "vllm", "n_output_tokens": 9,
+                         "latency_s": 1.0}]}
+    save_record(rd, rec)
+    rows = reproduce.repair_check({"root": tmp_path / "m0", "run_dirs": {"r": rd}})
+    assert [(r["ladder"], r["status"], r["quotes"], r["verbatim"]) for r in rows] == [
+        ("M0", "repaired", 1, 1.0)]
 
 
 def test_ladder_check_replays_failed_chunks_without_touching_m0(run_dir, tmp_path, monkeypatch):

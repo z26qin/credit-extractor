@@ -285,6 +285,13 @@ def summary(rows: list[dict], chunk_chars: int = 32000, overlap: int = 4000) -> 
             for r in rows]
 
 
+def quote_counts(text_dir: Path) -> list[dict]:
+    """Only straight double quotes break JSON when copied unescaped; curly ones do not."""
+    return [{"id": p.stem, "chars": len(t := p.read_text(encoding="utf-8")),
+             "straight": t.count('"'), "curly": t.count("\u201c") + t.count("\u201d")}
+            for p in sorted(Path(text_dir).glob("*.txt"))]
+
+
 def run(env, cfg: dict) -> list[dict]:
     """Notebook entry point: Hub pull (resume), collect, Hub push."""
     from .platform import get_secret, pull, push_folder

@@ -2,9 +2,10 @@
 
 Generation is unconstrained (no JSON grammar), so JSON validity is a real, measurable
 metric. Statuses:
-  ok      - parsed to a JSON object
-  loop    - hit the output-token cap or ended in a detected repetition loop
-  invalid - finished normally but is not a JSON object
+  ok       - parsed to a JSON object
+  repaired - parsed only after escaping double quotes inside strings
+  loop     - hit the output-token cap or ended in a detected repetition loop
+  invalid  - finished normally but is not a JSON object, even after repair
 """
 from __future__ import annotations
 
@@ -14,6 +15,10 @@ import re
 from .prompts import norm_key
 
 _FENCE = re.compile(r"^\s*```(?:json)?\s*(.*?)\s*```\s*$", re.S)
+# what can follow a string's real closing quote in {clause: [quotes]}: key, list end, next quote
+_CLOSES_STRING = re.compile(r'\s*(?::\s*\[|\]|,\s*")')
+
+OK_STATUSES = ("ok", "repaired")      # a usable decode; anything else goes to the ladder
 
 
 def detect_repetition(text: str, min_period: int = 10, max_period: int = 1000,
@@ -55,6 +60,40 @@ def parse_json_object(raw: str):
     return None
 
 
+def repair_quotes(s: str) -> str:
+    """Escape double quotes inside strings, the model's copying error on quoted contract text.
+
+    A quote ends a string only if a key colon, list end or next string follows. Ambiguous
+    text such as `"Lender", "Agent"` inside a quote can still split it in two, which is why
+    quotes from repaired decodes get their own verbatim rate.
+    """
+    out, in_string, i = [], False, 0
+    while i < len(s):
+        ch = s[i]
+        if in_string and ch == "\\":
+            out.append(s[i:i + 2])
+            i += 2
+            continue
+        if ch == '"':
+            if not in_string:
+                in_string = True
+            elif _CLOSES_STRING.match(s, i + 1):
+                in_string = False
+            else:
+                out.append("\\")
+        out.append(ch)
+        i += 1
+    return "".join(out)
+
+
+def parse_output(raw: str):
+    """Strict parse, then the same parse after `repair_quotes`. Returns a dict or None."""
+    d = parse_json_object(raw)
+    if d is None:
+        d = parse_json_object(repair_quotes(raw))
+    return d
+
+
 def json_error(raw: str, context: int = 160) -> dict | None:
     """Where strict parsing fails (for diagnosis), or None if `raw` parses."""
     s = raw.strip()
@@ -75,6 +114,9 @@ def classify(raw: str, finish_reason: str | None) -> tuple[str, dict | None]:
         return "ok", d
     if finish_reason in ("length", "repetition") or detect_repetition(raw):
         return "loop", None
+    d = parse_output(raw)
+    if d is not None:
+        return "repaired", d
     return "invalid", None
 
 

@@ -15,16 +15,16 @@ so `src/` is an independent implementation and does not import it. See
 
 | milestone | state |
 |---|---|
-| M0 fork + reproduce Model B on CUAD | **ran 2026-10-29**: F1 0.883 (60k) / 0.892 (32k), card's 0.900 inside both CIs; see [reports/m0_reproduce.md](reports/m0_reproduce.md). Ladder check ran 2026-10-30: the memory fix works on T4 x2, and the one failure is an unescaped quote that the 64-token ladder did not recover. How M3 handles this is open |
+| M0 fork + reproduce Model B on CUAD | **ran 2026-10-29**: F1 0.883 (60k) / 0.892 (32k), card's 0.900 inside both CIs; see [reports/m0_reproduce.md](reports/m0_reproduce.md). Ladder check ran 2026-10-30: the memory fix works on T4 x2, and the one failure is an unescaped quote that the 64-token ladder did not recover, so M3 repairs quotes first |
 | M1 collect 5 credit agreements | **done 2026-10-30**: 5 documents on the Hub, cleaned text reviewed after a cleaner fix, manifest in [reports/m1_manifest.csv](reports/m1_manifest.csv) |
-| M2 credit schema + prompts | not started |
+| M2 credit schema + prompts | **written 2026-10-30, not run**: 10 clause types in [configs/credit_schema.yaml](configs/credit_schema.yaml), exact prompts in [reports/m2_prompts.md](reports/m2_prompts.md) |
 | M3 label-free baselines | not started |
 
 ## Layout
 
 ```
 src/platform.py    Kaggle/Colab/local detection, paths, secrets, private-Hub sync helpers
-src/prompts.py     prompt strings (Model B's, byte-identical) + clause canon
+src/prompts.py     prompt strings (Model B's, byte-identical), credit prompt, clause canon
 src/chunking.py    char windows with overlap
 src/parsing.py     JSON parsing, loop detection, key canonicalization
 src/merge.py       per-document union of chunk outputs (deduplicated)
@@ -35,7 +35,7 @@ src/evaluate.py    scores a run dir, writes eval.json / latency.csv, markdown re
 src/cuad.py        CUAD download + official test split
 src/reproduce.py   M0 orchestration (used by the notebook)
 src/edgar.py       M1: rate-limited EDGAR client, HTML -> text, manifest
-configs/           run configs (reproduce.yaml, collect.yaml)
+configs/           run configs (reproduce.yaml, collect.yaml, credit_schema.yaml)
 notebooks/         thin notebooks: clone repo, pip install, call src/
 tests/             CPU unit tests:  python -m pytest -q
 ```
@@ -70,7 +70,14 @@ tests/             CPU unit tests:  python -m pytest -q
 - **Output cap 12,288 tokens**, the same as upstream `num_predict`. A primary decode that
   hits the cap, or whose tail is one substring repeated 5 or more times, counts as a
   *loop*. A decode that finishes normally but isn't a JSON object counts as *invalid*.
-  Both go to the ladder, as upstream retried every failed chunk.
+- **Quote repair before the ladder (changed after M0).** Upstream's grammar forces valid
+  JSON. Without it, a copied quote broke the JSON in M0, and the ladder did not fix that in 6 of 6 attempts at up to 12 minutes each. So a decode that finishes
+  normally but fails to parse gets one deterministic repair: a `"` ends a string only if a
+  key colon, list end or next string follows, and any other `"` is escaped. A decode saved
+  this way has status *repaired* and skips the ladder. Loops, and decodes that still don't
+  parse, go to the ladder. This differs from upstream, which retried every failed chunk.
+  The raw JSON valid count is unchanged by repair, and repaired counts and the verbatim rate
+  of repaired chunks are reported separately. The same rule applies to every condition.
 - **Retry ladder: 1.05 → 1.15 → 1.25 at temperature 0.** Each chunk tries the next rung
   only if the previous one failed, and every attempt is kept. Ollama's `repeat_penalty`,
   which upstream used, only penalizes the **last 64 tokens**. vLLM's and transformers'
@@ -83,6 +90,14 @@ tests/             CPU unit tests:  python -m pytest -q
   native penalty is only a fallback, and `backend` is recorded on every attempt. In
   transformers, a retry that loops again is stopped early once the loop is detected. It
   still counts as a failure, so metrics are unchanged and T4 time is saved.
+- **Credit prompt (M2).** The system turn is Model B's, byte for byte. The user turn keeps
+  Model B's first sentence with the count and name changed, and adds a one-sentence
+  definition per clause, because the 10 credit clauses are not in B's weights. Condition b is
+  therefore outside the prompt shape B was trained on, by design. Models A and B get the
+  same text. Both chat templates end at `<|im_start|>assistant\n` with no think block, and
+  neither reacts to `enable_thinking`, so no thinking flag is set.
+- **Condition a outputs CUAD's 41 clauses, not the 10 credit ones.** It is the control for
+  decode stability and verbatim rate. Per-clause found share compares b and c only.
 - **Latency:** vLLM rows report batch wall time divided by batch size, which is amortized
   rather than true single-request latency. transformers rows report true per-request
   time. `latency.csv` has one row per decode attempt.

@@ -1,4 +1,3 @@
 # reports
 
-Generated reports land here after each milestone run (copied from the HF dataset repo).
-Nothing here yet: no GPU run has happened.
+Reports for each milestone, copied from the HF dataset repo or generated in this repo.

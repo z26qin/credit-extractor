@@ -9,7 +9,7 @@ import yaml
 from . import cuad
 from .evaluate import evaluate_run, reproduce_report
 from .metrics import verbatim_flags
-from .parsing import json_error, parse_json_object
+from .parsing import classify, json_error, parse_output
 from .platform import Env, pull, push_folder, start_sync
 from .prompts import REPO_ROOT, load_cuad_clauses
 from .runner import (DEFAULT_CHAIN, LADDER_CHAIN, load_chunks, load_config, load_record,
@@ -78,7 +78,7 @@ def report(env: Env, plan: dict, cfg: dict) -> dict:
 
 
 def _attempt_row(run: str, label: str, a: dict, text: str) -> dict:
-    d = parse_json_object(a["text"])
+    d = parse_output(a["text"])
     quotes = [q for v in (d or {}).values() if isinstance(v, list) for q in v
               if isinstance(q, str)]
     flags = verbatim_flags(quotes, text)
@@ -126,4 +126,22 @@ def ladder_check(env: Env, plan: dict, cfg: dict, chain=(("hf", 0),)) -> list[di
         push_folder(env.data_repo, root, f"{cfg['hub_prefix']}/ladder_check", "m0 ladder check")
     for k, e in errors.items():
         print(k, json.dumps(e, indent=1, ensure_ascii=False))
+    return rows
+
+
+def repair_check(plan: dict) -> list[dict]:
+    """Apply the quote repair to every saved failed decode. Read only, no GPU."""
+    rows = []
+    for name, rd in plan["run_dirs"].items():
+        check = plan["root"] / "ladder_check" / name
+        for label, d, skip in (("M0", rd, 0), ("check", check, 1)):
+            if not (d / "run_config.json").exists():
+                continue
+            for c in load_chunks(d):
+                rec = load_record(d, c.chunk_id)
+                for a in (rec["attempts"][skip:] if rec else []):
+                    if a["status"] == "ok":
+                        continue
+                    status, _ = classify(a["text"], a["finish_reason"])
+                    rows.append(_attempt_row(name, label, dict(a, status=status), c.text))
     return rows

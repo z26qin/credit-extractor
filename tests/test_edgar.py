@@ -201,6 +201,12 @@ def test_collect_writes_manifest_and_resumes(tmp_path):
     assert len(c.urls) > n
 
 
+def test_quote_counts(tmp_path):
+    from src.edgar import quote_counts
+    (tmp_path / "a.txt").write_text('\u201cLender\u201d and "Agent"', encoding="utf-8")
+    assert quote_counts(tmp_path) == [{"id": "a", "chars": 20, "straight": 2, "curly": 2}]
+
+
 def test_collect_config_is_valid():
     cfg = load_cfg()
     ids = [p["id"] for p in cfg["picks"]]
