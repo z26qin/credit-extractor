@@ -67,6 +67,11 @@ def credit_user_prefix(schema: dict | None = None) -> str:
             f"CLAUSE TYPES:\n{lines}\n\nCONTRACT EXCERPT:\n")
 
 
+def clauses_for(prompt: str) -> list[str]:
+    """The clause keys a prompt asks for."""
+    return load_cuad_clauses() if prompt == "cuad_native" else credit_clauses()
+
+
 PROMPTS = {
     # name -> (system, user_prefix)
     "cuad_native": (CUAD_SYSTEM, CUAD_USER_PREFIX),

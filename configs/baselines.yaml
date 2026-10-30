@@ -1,0 +1,16 @@
+# Milestone 3: three label-free baselines on the five M1 credit agreements
+# (notebooks/03_baselines.ipynb). Conditions and prompts: configs/credit_schema.yaml.
+chunk_chars: 32000        # M0: 32k/4k did no worse than 60k/8k and took two thirds of the time
+overlap: 4000
+max_tokens: 12288         # upstream num_predict
+ladder: [1.05, 1.15, 1.25]
+batch_size: 16            # vLLM requests per batch (one Hub sync point)
+max_model_len_cap: 65536
+vllm_kwargs:
+  gpu_memory_utilization: 0.90
+  enforce_eager: false
+
+m1_prefix: m1_collect               # cleaned text from Milestone 1 (Hub)
+manifest: reports/m1_manifest.csv   # the reviewed manifest; Hub text must match its sizes
+hub_prefix: m3_baselines
+sync_every_minutes: 3

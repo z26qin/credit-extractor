@@ -17,14 +17,15 @@ so `src/` is an independent implementation and does not import it. See
 |---|---|
 | M0 fork + reproduce Model B on CUAD | **ran 2026-10-29**: F1 0.883 (60k) / 0.892 (32k), card's 0.900 inside both CIs; see [reports/m0_reproduce.md](reports/m0_reproduce.md). Ladder check ran 2026-10-30: the memory fix works on T4 x2, and the one failure is an unescaped quote that the 64-token ladder did not recover, so M3 repairs quotes first |
 | M1 collect 5 credit agreements | **done 2026-10-30**: 5 documents on the Hub, cleaned text reviewed after a cleaner fix, manifest in [reports/m1_manifest.csv](reports/m1_manifest.csv) |
-| M2 credit schema + prompts | **written 2026-10-30, not run**: 10 clause types in [configs/credit_schema.yaml](configs/credit_schema.yaml), exact prompts in [reports/m2_prompts.md](reports/m2_prompts.md) |
-| M3 label-free baselines | not started |
+| M2 credit schema + prompts | **approved 2026-10-30**: 10 clause types in [configs/credit_schema.yaml](configs/credit_schema.yaml), exact prompts in [reports/m2_prompts.md](reports/m2_prompts.md) |
+| M3 label-free baselines | **code ready, not run**: `notebooks/03_baselines.ipynb`; only tested on CPU with a fake backend |
 
 ## Layout
 
 ```
 src/platform.py    Kaggle/Colab/local detection, paths, secrets, private-Hub sync helpers
 src/prompts.py     prompt strings (Model B's, byte-identical), credit prompt, clause canon
+src/baselines.py   M3 orchestration, report, review sheet
 src/chunking.py    char windows with overlap
 src/parsing.py     JSON parsing, loop detection, key canonicalization
 src/merge.py       per-document union of chunk outputs (deduplicated)
@@ -35,7 +36,7 @@ src/evaluate.py    scores a run dir, writes eval.json / latency.csv, markdown re
 src/cuad.py        CUAD download + official test split
 src/reproduce.py   M0 orchestration (used by the notebook)
 src/edgar.py       M1: rate-limited EDGAR client, HTML -> text, manifest
-configs/           run configs (reproduce.yaml, collect.yaml, credit_schema.yaml)
+configs/           run configs (reproduce.yaml, collect.yaml, credit_schema.yaml, baselines.yaml)
 notebooks/         thin notebooks: clone repo, pip install, call src/
 tests/             CPU unit tests:  python -m pytest -q
 ```
@@ -99,6 +100,14 @@ tests/             CPU unit tests:  python -m pytest -q
   neither reacts to `enable_thinking`, so no thinking flag is set.
 - **Condition a outputs CUAD's 41 clauses, not the 10 credit ones.** It is the control for
   decode stability and verbatim rate. Per-clause found share compares b and c only.
+- **M3 run order.** All three primary passes finish before any ladder, and a report is
+  written in between, so a slow ladder never holds back the core numbers. Stopping a cell
+  also stops the backend subprocess, and finished chunks are kept. `prepare` refuses to run
+  if the Hub text doesn't match the sizes in the reviewed `reports/m1_manifest.csv`.
+- **Review sheet.** One row per merged quote for conditions b and c, sorted so both
+  conditions sit together per document and clause. A clause with no quote gets one row with
+  `found=False`, so misses can be reviewed too. Condition a is left out because its output
+  uses CUAD's clause types.
 - **Latency:** vLLM rows report batch wall time divided by batch size, which is amortized
   rather than true single-request latency. transformers rows report true per-request
   time. `latency.csv` has one row per decode attempt.

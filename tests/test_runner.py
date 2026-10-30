@@ -145,6 +145,31 @@ def test_repaired_chunk_skips_the_ladder_but_stays_separate_from_raw_validity(tm
     assert s["chunks_sent_to_ladder"] == 0 and s["final_json_valid_rate"] == 1.0
 
 
+def test_stopping_a_cell_stops_the_backend_and_logs_the_time(tmp_path, monkeypatch):
+    from src import platform, runner
+
+    class Proc:
+        terminated = False
+
+        @property
+        def stdout(self):
+            raise KeyboardInterrupt
+
+        def terminate(self):
+            Proc.terminated = True
+
+        def wait(self):
+            return -15
+
+    monkeypatch.setattr(runner.subprocess, "Popen", lambda *a, **k: Proc())
+    monkeypatch.setattr(platform, "gpu_info", lambda: [])
+    with pytest.raises(KeyboardInterrupt):
+        runner.run_with_fallback(tmp_path, "ladder", (("hf", 0), ("vllm", 2)))
+    assert Proc.terminated
+    entries = [json.loads(l) for l in (tmp_path / "stages.jsonl").read_text().splitlines()]
+    assert [e["exit_code"] for e in entries] == ["interrupted"]    # no fallback to vLLM
+
+
 def test_repair_check_replays_saved_failures(tmp_path):
     from src import reproduce
     chunks = chunk_text("d", 'x add ", and y,") and z', 1000, 100)

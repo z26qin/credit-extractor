@@ -220,13 +220,18 @@ def run_with_fallback(run_dir: Path, stage: str, chain=DEFAULT_CHAIN) -> str:
             proc = subprocess.Popen(cmd, cwd=REPO_ROOT, stdout=subprocess.PIPE,
                                     stderr=subprocess.STDOUT, text=True, bufsize=1)
             muted = 0
-            for line in proc.stdout:
-                lf.write(line)
-                if any(n in line for n in NOISY):
-                    muted += 1
-                else:
-                    print(line, end="", flush=True)
-            code = proc.wait()
+            try:
+                for line in proc.stdout:
+                    lf.write(line)
+                    if any(n in line for n in NOISY):
+                        muted += 1
+                    else:
+                        print(line, end="", flush=True)
+                code = proc.wait()
+            except KeyboardInterrupt:     # a stopped cell must free the GPUs too
+                proc.terminate()
+                proc.wait()
+                code = "interrupted"
         if muted:
             print(f"==> ({muted} repetitive log lines kept in the log file only)", flush=True)
         # every attempt counts toward GPU time, including ones that crashed
@@ -235,6 +240,8 @@ def run_with_fallback(run_dir: Path, stage: str, chain=DEFAULT_CHAIN) -> str:
                             "n_gpus": tp if kind == "vllm" else n_visible,
                             "wall_s": round(time.time() - t0, 1),
                             "finished_at": time.strftime("%Y-%m-%dT%H:%M:%S")})
+        if code == "interrupted":
+            raise KeyboardInterrupt(f"{stage} stopped; finished chunks are saved")
         if code == 0:
             print(f"==> {stage}: completed with {label}", flush=True)
             return label
