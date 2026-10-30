@@ -67,15 +67,15 @@ below the card's 0.900, but both CIs contain it. This is 10 contracts, so the CI
    Retries therefore fell back to vLLM, whose penalty covers the full context instead of
    Ollama's 64-token window. The 1.15 recoveries above are not the planned semantics.
    **Fix:** `prefill_cache` feeds long prompts in 512-token slices. Output is token-identical
-   to a single pass locally (transformers 4.57 and 5.22). **Not yet proven on T4 x2:**
-   `notebooks/00b_ladder_check.ipynb` does that on the failed chunks.
+   to a single pass locally (transformers 4.57 and 5.22). **Now proven on T4 x2:** all 6
+   decodes in the ladder check below finished without running out of memory.
 2. **The one failure is not a repetition loop, and it isn't the chunk upstream reported.**
    Both runs failed on El Pollo Loco chunk 0 (`stop` at 914 / 1,632 tokens). The output ends
    cleanly with `...[]}`, so the break is inside the JSON. Rung 1.05 failed too and 1.15
    passed. El Pollo is not in upstream's list of 9 failures, and INGEVITY c0, which is in
    our sample and needed 1.15 upstream, passed first time here. We decode without Ollama's
-   JSON grammar, which would have forced valid JSON, so this is a likely cause. Hypothesis:
-   an unescaped quote copied from the contract. Not confirmed: 00b prints the parse error.
+   JSON grammar, which would have forced valid JSON. **Confirmed for the first attempt in
+   both runs:** the break is an unescaped double quote. See the ladder check below.
 
 **Reading the time figures:** the cuad60k stage time includes the crashed attempts from
 the first session (the failed primary attempts in its list). Latency is amortized over a
@@ -84,3 +84,49 @@ batch, so it is throughput, not single-request latency.
 **Rough M3 time (estimate, not measured):** 104 chunks × 22.45 s is about 39 min of primary
 decoding per condition, plus model load, so about 2 hours for three conditions before
 retries. Credit agreements may produce different output lengths than CUAD.
+
+# Ladder check (notebook 00b, ran 2026-10-30, Kaggle T4 x2)
+
+The one failed chunk (El Pollo Loco chunk 0) replayed through the transformers ladder with
+the 64-token windowed penalty. M0's vLLM rows are copied from M0's records, not rerun.
+
+| run | ladder | penalty | backend | status | finish | output tokens | latency s | quotes | verbatim |
+|---|---|---|---|---|---|---|---|---|---|
+| cuad60k | M0 (vLLM full-context) | 1.00 | vllm | invalid | stop | 1632 | 43.0 | 0 | - |
+| cuad60k | M0 (vLLM full-context) | 1.05 | vllm | invalid | stop | 1632 | 115.8 | 0 | - |
+| cuad60k | M0 (vLLM full-context) | 1.15 | vllm | ok | stop | 1918 | 94.8 | 34 | 0.8824 |
+| cuad60k | check (HF 64-token window) | 1.05 | hf | invalid | stop | 1535 | 555.1 | 0 | - |
+| cuad60k | check (HF 64-token window) | 1.15 | hf | invalid | stop | 1675 | 606.7 | 0 | - |
+| cuad60k | check (HF 64-token window) | 1.25 | hf | invalid | stop | 1962 | 715.0 | 0 | - |
+| cuad32k | M0 (vLLM full-context) | 1.00 | vllm | invalid | stop | 914 | 18.2 | 0 | - |
+| cuad32k | M0 (vLLM full-context) | 1.05 | vllm | invalid | stop | 964 | 47.7 | 0 | - |
+| cuad32k | M0 (vLLM full-context) | 1.15 | vllm | ok | stop | 978 | 35.4 | 20 | 0.9500 |
+| cuad32k | check (HF 64-token window) | 1.05 | hf | invalid | stop | 902 | 197.5 | 0 | - |
+| cuad32k | check (HF 64-token window) | 1.15 | hf | invalid | stop | 1154 | 253.9 | 0 | - |
+| cuad32k | check (HF 64-token window) | 1.25 | hf | invalid | stop | 1517 | 338.3 | 0 | - |
+
+Parse errors of the first attempt in each run (`Expecting ',' delimiter`):
+
+- cuad60k, position 5720: `add \", and specifically Section 2.20 hereof,") and as long as`.
+  The first inner quote is escaped and the second is not.
+- cuad32k, position 2229: `add ", "and specifically Section 2.20 hereof,") and as long as`.
+  Neither is escaped, and an extra `"` appears after the comma, so the output looks like
+  it closed the string and opened a new one.
+
+**What this shows:**
+- The memory fix works on T4 x2, including the 60k prompt that needed 19.27 GiB before.
+- The failure is a JSON escaping error, not a repetition loop: every attempt stopped
+  normally. Only the first attempt's error was printed, so the cause of the later failures
+  is not confirmed.
+- The designed ladder recovered 0 of 6 attempts here. vLLM's full-context penalty recovered
+  this chunk at 1.15 in both runs. That is one chunk, and a penalty does not address
+  escaping directly, so it does not show vLLM's penalty is better.
+- The two recovered outputs copied less exactly: verbatim 0.8824 and 0.9500, against 0.969
+  and 0.9825 for those runs overall. One chunk each.
+
+**Cost:** transformers ran at about 2.75 tok/s at 60k and 4.5 tok/s at 32k. All three rungs
+took 31.3 min at 60k and 13.2 min at 32k for this one chunk.
+
+**M3 estimate (not measured):** if credit agreements fail at M0's CUAD rate (2 of 41 chunks)
+and nothing recovers, that is about 15 of 312 chunks × 13.2 min, or about 3.3 hours of
+retries on top of about 2 hours of primary decoding.

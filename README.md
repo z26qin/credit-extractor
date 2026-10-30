@@ -15,7 +15,7 @@ so `src/` is an independent implementation and does not import it. See
 
 | milestone | state |
 |---|---|
-| M0 fork + reproduce Model B on CUAD | **ran 2026-10-29**: F1 0.883 (60k) / 0.892 (32k), card's 0.900 inside both CIs; see [reports/m0_reproduce.md](reports/m0_reproduce.md). Open: transformers ladder ran out of memory on T4; fix needs `notebooks/00b_ladder_check.ipynb` |
+| M0 fork + reproduce Model B on CUAD | **ran 2026-10-29**: F1 0.883 (60k) / 0.892 (32k), card's 0.900 inside both CIs; see [reports/m0_reproduce.md](reports/m0_reproduce.md). Ladder check ran 2026-10-30: the memory fix works on T4 x2, and the one failure is an unescaped quote that the 64-token ladder did not recover. How M3 handles this is open |
 | M1 collect 5 credit agreements | **done 2026-10-30**: 5 documents on the Hub, cleaned text reviewed after a cleaner fix, manifest in [reports/m1_manifest.csv](reports/m1_manifest.csv) |
 | M2 credit schema + prompts | not started |
 | M3 label-free baselines | not started |
