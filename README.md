@@ -16,7 +16,7 @@ so `src/` is an independent implementation and does not import it. See
 | milestone | state |
 |---|---|
 | M0 fork + reproduce Model B on CUAD | code ready; first Kaggle run in progress, **no results yet** |
-| M1 collect 5 credit agreements | code ready on branch `m1-collect`, `notebooks/01_collect.ipynb` **not run yet**; picks await review |
+| M1 collect 5 credit agreements | **ran 2026-10-30**: 5 documents on the Hub, manifest in [reports/m1_manifest.csv](reports/m1_manifest.csv); cleaned-text check still open |
 | M2 credit schema + prompts | not started |
 | M3 label-free baselines | not started |
 
@@ -141,7 +141,10 @@ tests/             CPU unit tests:  python -m pytest -q
 - **Politeness:** at most 5 requests/s (SEC allows 10/s). Back off on 429 and 5xx. Every
   request carries `SEC_USER_AGENT`. One collection is about 15 requests.
 - **Manifest to GitHub:** this machine has no HF token, so the notebook prints
-  `manifest.csv` at the end, and that output is committed as
+  `manifest.csv` at the end, and that output is committed unchanged as
   `reports/m1_manifest.csv`.
-- **Size:** about 2.85M chars in total (estimated in the browser), which makes about 104
-  chunks at 32k/4k per condition and about 312 decodes for the three M2 conditions.
+- **Size (measured):** 2,871,678 cleaned chars, which makes 104 chunks at 32k/4k per
+  condition and 312 primary decodes for the three M2 conditions, before any ladder retries.
+- **Known manifest flaw:** `title` for `exlservice-2026` reads `AGREEMENT`, because
+  `title_of` only looks at single lines and that title wraps. Nothing downstream uses
+  `title`, so the manifest is left exactly as the notebook produced it.
