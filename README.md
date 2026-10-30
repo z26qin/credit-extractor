@@ -15,8 +15,8 @@ so `src/` is an independent implementation and does not import it. See
 
 | milestone | state |
 |---|---|
-| M0 fork + reproduce Model B on CUAD | code ready; first Kaggle run in progress, **no results yet** |
-| M1 collect 5 credit agreements | **ran 2026-10-30**: 5 documents on the Hub, manifest in [reports/m1_manifest.csv](reports/m1_manifest.csv); cleaned-text check still open |
+| M0 fork + reproduce Model B on CUAD | **ran 2026-10-29**: F1 0.883 (60k) / 0.892 (32k), card's 0.900 inside both CIs; see [reports/m0_reproduce.md](reports/m0_reproduce.md). Open: transformers ladder crashed on Kaggle |
+| M1 collect 5 credit agreements | **ran 2026-10-30**, but the preview showed a cleaner bug (now fixed). `notebooks/01_collect.ipynb` must be **re-run**; [reports/m1_manifest.csv](reports/m1_manifest.csv) has the pre-fix char counts until then |
 | M2 credit schema + prompts | not started |
 | M3 label-free baselines | not started |
 
@@ -104,8 +104,7 @@ tests/             CPU unit tests:  python -m pytest -q
   driver. vLLM subprocesses use that interpreter (`runner.backend_python`), and
   transformers keeps the platform's own Python. `stages.jsonl` records which interpreter
   each attempt used.
-- **vLLM unpinned for the first run.** The notebook prints the installed versions, and
-  the first version that works on T4 gets pinned in `requirements-gpu.txt`.
+- **vLLM pinned to 0.32.0**, the version that ran M0 on T4 x2.
 
 ### Milestone 1 (credit agreements)
 
@@ -132,8 +131,10 @@ tests/             CPU unit tests:  python -m pytest -q
   submissions API. Agreement date is the first "dated as of …" in the first 5,000 chars.
   sha256 is over the raw exhibit bytes. `char_count` is the length of the cleaned text,
   which is what gets chunked.
-- **Cleaning:** stdlib `HTMLParser`. Block tags become line breaks and table cells are
-  separated by spaces. Script, style and `display:none` content is dropped, along with the
+- **Cleaning:** stdlib `HTMLParser`. Block tags become line breaks, source newlines inside
+  text become spaces (they are only wrapping), and each table row stays on one line even
+  when cells contain `<p>`, so a pricing grid keeps its rows. Cells over 500 chars keep
+  their breaks, because those are layout tables holding paragraphs. Script, style and `display:none` content is dropped, along with the
   EDGAR SGML header (`<TYPE>`, `<SEQUENCE>`, …). Entities, nbsp and runs of spaces are
   normalized. Unclosed tags (common in EDGAR HTML) can't hide the rest of the document.
   Page headers and footers and the table of contents are **kept**, because removing them
@@ -145,6 +146,6 @@ tests/             CPU unit tests:  python -m pytest -q
   `reports/m1_manifest.csv`.
 - **Size (measured):** 2,871,678 cleaned chars, which makes 104 chunks at 32k/4k per
   condition and 312 primary decodes for the three M2 conditions, before any ladder retries.
-- **Known manifest flaw:** `title` for `exlservice-2026` reads `AGREEMENT`, because
-  `title_of` only looks at single lines and that title wraps. Nothing downstream uses
-  `title`, so the manifest is left exactly as the notebook produced it.
+- **Re-running M1 makes no SEC requests.** If the raw file's sha256 matches, the text is
+  rebuilt from it, so a cleaner fix doesn't re-download anything. The first run's
+  `title: AGREEMENT` for ExlService came from the same wrapping bug.

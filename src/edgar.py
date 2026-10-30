@@ -8,7 +8,7 @@ most 5/s) and back off on 429 / 5xx.
 The picks are explicit (configs/collect.yaml: CIK, accession, exhibit file name). Filing date,
 form and company name come from EDGAR's submissions API, not from the config, so the manifest
 records what EDGAR says. Runs are resumable: a document already on disk whose sha256 matches
-the manifest is not fetched again.
+the manifest is not fetched again, only re-cleaned.
 """
 from __future__ import annotations
 
@@ -118,24 +118,40 @@ SGML = re.compile(r"<(TYPE|SEQUENCE|FILENAME|DESCRIPTION)>[^<\n]*", re.I)
 
 
 VOID = {"br", "hr", "img", "meta", "link", "input", "col", "wbr"}
+BREAK = "\x00"          # a block break inside a table cell, resolved when the cell closes
+MAX_CELL_CHARS = 500    # longer cells are layout tables holding paragraphs: keep their breaks
 
 
 class _Text(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.out: list[str] = []
-        self.stack: list[tuple[str, bool]] = []    # (tag, hidden) of open elements
+        self.stack: list[tuple[str, bool, int | None]] = []  # (tag, hidden, cell start in out)
+        self.n_hidden = self.n_cell = self.n_pre = 0
 
-    @property
-    def hidden(self) -> bool:
-        return any(h for _, h in self.stack)
+    def _push(self, tag: str, hidden: bool, cell_start: int | None) -> None:
+        self.stack.append((tag, hidden, cell_start))
+        self.n_hidden += hidden
+        self.n_cell += cell_start is not None
+        self.n_pre += tag == "pre"
+
+    def _pop(self) -> None:
+        tag, hidden, cell_start = self.stack.pop()
+        self.n_hidden -= hidden
+        self.n_pre -= tag == "pre"
+        if cell_start is not None:
+            self.n_cell -= 1
+            text = "".join(self.out[cell_start:])
+            sep = " " if len(text) <= MAX_CELL_CHARS else "\n"
+            self.out[cell_start:] = [text.replace(BREAK, sep)]
 
     def handle_starttag(self, tag, attrs):
         style = (dict(attrs).get("style") or "").replace(" ", "").lower()
         if tag not in VOID:
-            self.stack.append((tag, tag in SKIP or "display:none" in style))
-        if tag in BLOCK:
-            self.out.append("\n")
+            self._push(tag, tag in SKIP or "display:none" in style,
+                       len(self.out) if tag in CELL else None)
+        if tag in BLOCK and tag != "tr":     # one row, one line: </tr> ends it
+            self.out.append(BREAK if self.n_cell else "\n")
         elif tag in CELL:
             self.out.append(" ")
 
@@ -144,16 +160,18 @@ class _Text(HTMLParser):
             return
         # EDGAR HTML often leaves <p>/<font> unclosed: pop back to the matching open tag,
         # and ignore stray end tags, so one bad tag can't hide (or reveal) the rest
-        for i in range(len(self.stack) - 1, -1, -1):
-            if self.stack[i][0] == tag:
-                del self.stack[i:]
-                break
+        if any(t == tag for t, _, _ in reversed(self.stack)):
+            while self.stack[-1][0] != tag:
+                self._pop()
+            self._pop()
         if tag in BLOCK:
-            self.out.append("\n")
+            self.out.append(BREAK if self.n_cell else "\n")
 
     def handle_data(self, data):
-        if not self.hidden:
-            self.out.append(data)
+        if self.n_hidden:
+            return
+        # source newlines inside text are just wrapping (as a browser renders them)
+        self.out.append(data if self.n_pre else re.sub(r"\s+", " ", data))
 
 
 def html_to_text(raw: str) -> str:
@@ -162,7 +180,9 @@ def html_to_text(raw: str) -> str:
     p = _Text()
     p.feed(raw)
     p.close()
-    t = html.unescape("".join(p.out))
+    while p.stack:
+        p._pop()
+    t = html.unescape("".join(p.out)).replace(BREAK, "\n")
     t = t.replace("\xa0", " ").replace("​", "").replace("\r", "")
     lines = [re.sub(r"[ \t\f\v]+", " ", ln).strip() for ln in t.split("\n")]
     t = "\n".join(lines)
@@ -224,10 +244,15 @@ def collect(cfg: dict, out_dir: Path, client: EdgarClient) -> list[dict]:
         pid = pick["id"]
         raw_p, txt_p = out_dir / "raw" / f"{pid}.htm", out_dir / "text" / f"{pid}.txt"
         prev = old.get(pid)
-        if (prev and raw_p.exists() and txt_p.exists() and
+        if (prev and raw_p.exists() and
                 hashlib.sha256(raw_p.read_bytes()).hexdigest() == prev["sha256"]):
-            print(f"{pid}: already collected, skipping")
-            rows.append(prev)
+            # raw is unchanged: no SEC request, but re-clean in case the cleaner changed
+            text = html_to_text(raw_p.read_bytes().decode("utf-8", errors="replace"))
+            txt_p.write_text(text, encoding="utf-8")
+            row = dict(prev, agreement_date=agreement_date(text) or "", title=title_of(text),
+                       char_count=len(text))
+            print(f"{pid}: raw already collected, re-cleaned ({len(text):,} chars)")
+            rows.append(row)
             continue
         url = archive_url(pick["cik"], pick["accession"], pick["document"])
         meta = filing_meta(client, pick["cik"], pick["accession"])

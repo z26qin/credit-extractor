@@ -117,7 +117,7 @@ Everything below comes from reading code and docs. Nothing upstream was run.
 A length guard tokenizes every example, because a character-based estimate missed the
 over-length one. The launch scripts hardcode Windows/WSL paths.
 
-## Reported results (model card; not reproduced yet)
+## Reported results (model card; our subset run is in reports/m0_reproduce.md)
 
 - Detection F1 0.900 [0.887–0.913], P 0.901, R 0.899, overlap 0.938, verbatim 97.2%
   (seed 42, 102 contracts, Q4_K_M via Ollama).

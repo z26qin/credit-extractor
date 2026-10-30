@@ -47,6 +47,48 @@ def test_unclosed_tags_do_not_hide_the_rest():
     assert t == "visible one\nvisible two\nthree\n"
 
 
+# structure of real exhibits: Quanta's cover and TOC, Repay's pricing grid
+COVER = """<P ALIGN="center">Dated as of
+July&nbsp;16, 2024 </P> <P ALIGN="center">as the
+Borrower, </P>"""
+TOC = """<table><tr>
+<td> <p><b>Section&nbsp;1.01</b></p></td>
+<td>&nbsp;</td>
+<td><b>Defined Terms</b></td>
+<td>&nbsp;&nbsp;</td>
+<td><b>1</b></td></tr></table>"""
+GRID = """<table><tbody><tr>
+<td><p>Level</p></td>
+<td><p>First Lien Net Leverage Ratio</p></td>
+<td><p>SOFR  Loans and CORRA Loans</p></td></tr>
+<tr><td><p>I</p></td><td><p>&gt; 1.90:1.00</p></td><td><p>4.25%</p></td></tr>
+<tr><td><p>II</p></td><td><p>&gt; 1.40:1.00 but \u2264 1.90:1.00</p></td><td><p>4.00%</p></td></tr>
+</tbody></table>"""
+
+
+def test_source_newlines_are_wrapping_not_line_breaks():
+    assert html_to_text(COVER) == "Dated as of July 16, 2024\n\nas the Borrower,\n"
+    assert html_to_text("<pre>a\nb</pre>") == "a\nb\n"
+
+
+def test_table_rows_stay_on_one_line():
+    assert html_to_text(TOC) == "Section 1.01 Defined Terms 1\n"
+    assert html_to_text(GRID).split("\n")[:3] == [
+        "Level First Lien Net Leverage Ratio SOFR Loans and CORRA Loans",
+        "I > 1.90:1.00 4.25%",
+        "II > 1.40:1.00 but \u2264 1.90:1.00 4.00%"]
+
+
+def test_long_layout_cell_keeps_its_paragraphs():
+    para = "word " * 80
+    t = html_to_text(f"<table><tr><td><p>{para}</p><p>{para}</p></td></tr></table>")
+    assert t.count("\n") >= 2 and "\x00" not in t
+
+
+def test_title_survives_a_wrapped_source_line():
+    assert title_of(html_to_text("<p>CREDIT\nAGREEMENT</p>")) == "CREDIT AGREEMENT"
+
+
 def test_agreement_date_and_title():
     t = html_to_text(DOC)
     assert agreement_date(t) == "2024-07-16"
@@ -149,8 +191,11 @@ def test_collect_writes_manifest_and_resumes(tmp_path):
     assert r["url"].endswith("/1050915/000119312524182240/d1dex101.htm")
     assert read_manifest(tmp_path / "manifest.csv")["acme-2024"]["title"] == "CREDIT AGREEMENT"
     n = len(c.urls)
-    collect(cfg, tmp_path, c)                    # second run: nothing fetched
+    (tmp_path / "text" / "acme-2024.txt").write_text("stale")
+    rows = collect(cfg, tmp_path, c)             # second run: nothing fetched, text re-cleaned
     assert len(c.urls) == n
+    assert (tmp_path / "text" / "acme-2024.txt").read_text().startswith("CREDIT AGREEMENT")
+    assert int(rows[0]["char_count"]) == r["char_count"]
     (tmp_path / "raw" / "acme-2024.htm").write_bytes(b"corrupted")
     collect(cfg, tmp_path, c)                    # hash mismatch: fetched again
     assert len(c.urls) > n
