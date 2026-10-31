@@ -42,8 +42,8 @@ Limits:
 - The test agreements use the reviewed labels as answers, not this flow's output.
 
 Trial: run the flow on the 5 M1 agreements and compare it with the `correct` column of
-`reports/review_sheet.csv`, to see whether rejected quotes were really wrong and how many
-accepted quotes are right.
+`reports/review_sheet.csv`, labeled under `docs/labeling_guide.md`, to see whether rejected
+quotes were really wrong and how many accepted quotes are right.
 
 Optional: sample each chunk twice, treat quotes found both times as high confidence, and send
 disagreements to review first. This roughly doubles the cost.

@@ -18,7 +18,7 @@ so `src/` is an independent implementation and does not import it. See
 | M0 fork + reproduce Model B on CUAD | **ran 2026-10-29**: F1 0.883 (60k) / 0.892 (32k), card's 0.900 inside both CIs; see [reports/m0_reproduce.md](reports/m0_reproduce.md). Ladder check ran 2026-10-30: the memory fix works on T4 x2, and the one failure is an unescaped quote that the 64-token ladder did not recover, so M3 repairs quotes first |
 | M1 collect 5 credit agreements | **done 2026-10-30**: 5 documents on the Hub, cleaned text reviewed after a cleaner fix, manifest in [reports/m1_manifest.csv](reports/m1_manifest.csv) |
 | M2 credit schema + prompts | **approved 2026-10-30**: 10 clause types in [configs/credit_schema.yaml](configs/credit_schema.yaml), exact prompts in [reports/m2_prompts.md](reports/m2_prompts.md) |
-| M3 label-free baselines | **code ready, not run**: `notebooks/03_baselines.ipynb`; only tested on CPU with a fake backend |
+| M3 label-free baselines | **primary passes ran 2026-10-30, ladder not run**: interim numbers and observations in [reports/baseline_m3.md](reports/baseline_m3.md). Model B ignored the credit schema (0 quotes), and Model A gave 267 quotes for review using [docs/labeling_guide.md](docs/labeling_guide.md) |
 
 ## Layout
 
@@ -37,6 +37,7 @@ src/cuad.py        CUAD download + official test split
 src/reproduce.py   M0 orchestration (used by the notebook)
 src/edgar.py       M1: rate-limited EDGAR client, HTML -> text, manifest
 configs/           run configs (reproduce.yaml, collect.yaml, credit_schema.yaml, baselines.yaml)
+docs/              upstream notes, next steps, labeling guide
 notebooks/         thin notebooks: clone repo, pip install, call src/
 tests/             CPU unit tests:  python -m pytest -q
 ```
@@ -111,7 +112,7 @@ tests/             CPU unit tests:  python -m pytest -q
 - **Review sheet.** One row per merged quote for conditions b and c, sorted so both
   conditions sit together per document and clause. A clause with no quote gets one row with
   `found=False`, so misses can be reviewed too. Condition a is left out because its output
-  uses CUAD's clause types.
+  uses CUAD's clause types. `docs/labeling_guide.md` sets the rules for `correct` and `note`.
 - **Compute after M3 (decided 2026-10-30).** Teacher pre-labeling uses a DeepSeek model on
   Nebius Token Factory with the existing `NEBIUS_API_KEY`. The calls need no GPU, so they
   can run on Kaggle with no accelerator. Nebius GPU VMs stay a training fallback. Every
