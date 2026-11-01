@@ -26,9 +26,8 @@ Written 2026-10-31 from the reports, run logs, raw records and review sheet, and
    of the right answers.
 4. **Quote marks explain part of the gap.** Treating curly and straight marks as equal lifts
    condition a from 0.8556 to 0.9747, and condition c from 0.6052 to 0.6827. The M1 text has
-   only curly marks, so the models are writing straight ones. The restore step in
-   `docs/next_steps.md` is likely to be needed, and the pre-labeling trial will show whether
-   the teacher does the same.
+   only curly marks, so the models are writing straight ones. A step that restores quotes to
+   the source text is likely to be needed if a trained model keeps doing this.
 5. **Conditions a and c are different tasks.** Condition a's 0.9747 is on CUAD clauses and
    condition c's 0.6827 is on credit clauses, so this is not a fair copying comparison.
 6. **Starting model.** The brief says to start from B if it clearly beats A here, otherwise

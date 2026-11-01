@@ -19,6 +19,7 @@ so `src/` is an independent implementation and does not import it. See
 | M1 collect 5 credit agreements | **done 2026-10-30**: 5 documents on the Hub, cleaned text reviewed after a cleaner fix, manifest in [reports/m1_manifest.csv](reports/m1_manifest.csv) |
 | M2 credit schema + prompts | **approved 2026-10-30**: 10 clause types in [configs/credit_schema.yaml](configs/credit_schema.yaml), exact prompts in [reports/m2_prompts.md](reports/m2_prompts.md) |
 | M3 label-free baselines | **ran 2026-10-30 to 31**: numbers and observations in [reports/baseline_m3.md](reports/baseline_m3.md). All 312 decodes usable after the ladder. Model B ignored the credit schema (0 quotes), and Model A gave 271 quotes in [reports/review_sheet.csv](reports/review_sheet.csv) labeled under [docs/labeling_guide.md](docs/labeling_guide.md). Claude labeled all five agreements on 2026-11-01 at the user's request: 61 of 271 quotes are right, Found F1 0.829, Strict F1 0.657 ([reports/score_m3.md](reports/score_m3.md)) |
+| Next: small SFT + small RLVR on synthetic data | **plan only, nothing has run**: [docs/next_steps.md](docs/next_steps.md). Free Kaggle GPU, no Nebius |
 
 ## Layout
 
@@ -115,7 +116,9 @@ tests/             CPU unit tests:  python -m pytest -q
   conditions sit together per document and clause. A clause with no quote gets one row with
   `found=False`, so misses can be reviewed too. Condition a is left out because its output
   uses CUAD's clause types. `docs/labeling_guide.md` sets the rules for `correct` and `note`.
-- **Compute after M3 (decided 2026-10-30).** Teacher pre-labeling uses a DeepSeek model on
+- **Small plan (decided 2026-11-01).** The next step is a small SFT loop and a small RLVR loop
+  on synthetic data, so the compute plan below is parked and no Nebius call is planned.
+- **Compute after M3 (decided 2026-10-30, parked).** Teacher pre-labeling uses a DeepSeek model on
   Nebius Token Factory with the existing `NEBIUS_API_KEY`. The calls need no GPU, so they
   can run on Kaggle with no accelerator. Nebius GPU VMs stay a training fallback. Every
   Nebius call needs a cost estimate and approval first. Token Factory's terms (effective
