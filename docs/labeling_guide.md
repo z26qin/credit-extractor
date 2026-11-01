@@ -10,12 +10,13 @@ agreements. Change them after the first agreement and log each change under
 
 ## The M3 sheet
 
-After the primary passes the sheet has 327 rows. The ladder can add a few for condition c.
+The final sheet has 330 rows. The earlier 327-row sheet lacks 4 `exlservice-2026` quotes, and
+`quote_no` can differ in that agreement, so copy any labels across by quote text.
 
 | rows | count | what to do |
 |---|---|---|
-| condition c, `found=True` | 267 | label each quote |
-| condition c, `found=False` | 10 | search the agreement, then label `absent` or `missed` |
+| condition c, `found=True` | 271 | label each quote |
+| condition c, `found=False` | 9 | search the agreement, then label `absent` or `missed` |
 | condition b | 50 | skip: Model B answered in CUAD keys, so these rows say nothing about the agreement |
 
 Order of work:
@@ -64,7 +65,7 @@ what a model proposed hides what it missed.
 5. **Headings do not count.** Table of contents entries, section titles, cross-references and
    exhibit titles are `no`, tag `heading`.
 6. **`verbatim=False`.** Judge these by meaning, and do not fix the text. If the quote states
-   terms the agreement does not have, label `no`, tag `invented`. About 31% of condition c's
+   terms the agreement does not have, label `no`, tag `invented`. About 32% of condition c's
    quotes are in this group.
 7. **Flattened tables.** A pricing grid or covenant table reads as a run of values in the
    text. It is `yes` if the values are there.
