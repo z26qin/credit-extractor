@@ -7,8 +7,8 @@ Hub's `m3_baselines/`.
 
 ## Observations
 
-Written 2026-10-31 from the reports, run logs, raw records and review sheet. No quote has been
-judged yet.
+Written 2026-10-31 from the reports, run logs, raw records and review sheet, and updated
+2026-11-01 after the review below.
 
 1. **Model B ignored the credit schema.** Condition b has 0 quotes even after the ladder. Its
    raw records show why: all 104 usable outputs have exactly CUAD's 41 keys and no credit key.
@@ -18,8 +18,12 @@ judged yet.
 2. **Model A follows the schema.** It has one loop in 104 chunks, 97 of 104 outputs have every
    key, and it found quotes for all 10 clause types. Found is not correct, so this says nothing
    about quality yet.
-3. **Model A copies poorly.** With quote marks and case ignored, 68.3% of its quotes are in the
-   document, so about 32% are not. The cause is unknown until the sheet is read.
+3. **Model A copies poorly but rarely invents.** With quote marks and case ignored, 68.3% of
+   its quotes are in the document, so 86 of 271 are not. The review tagged 3 of the 86 as
+   invented. The others are real text with small changes, such as quote marks, page numbers
+   left in the M1 text, dropped clause numbers and added lead-in words. 21 of the 61 right
+   quotes are in this group, so a verbatim check without a restore step would discard a third
+   of the right answers.
 4. **Quote marks explain part of the gap.** Treating curly and straight marks as equal lifts
    condition a from 0.8556 to 0.9747, and condition c from 0.6052 to 0.6827. The M1 text has
    only curly marks, so the models are writing straight ones. The restore step in
@@ -30,23 +34,24 @@ judged yet.
 6. **Starting model.** The brief says to start from B if it clearly beats A here, otherwise
    from A. Model B did not beat A on the credit schema, so the default is A, subject to the
    review.
-7. **Found counts that look wrong against the M1 manifest:**
-   - `viavi-2025` is described as having no financial covenant, but condition c has 7 Financial
-     Maintenance Covenant quotes.
-   - Debt Incurrence General Basket is found in 2 of 5 agreements and Liens General Basket in
-     4 of 5. Secured deals usually have both, so `angi-2025` and `repay-2026` may be misses.
-   - A general basket is usually one clause, but `exlservice-2026` has 19 Liens quotes and
-     `angi-2025` has 17 Restricted Payments quotes. Many may be other exceptions.
-   - `quanta-2024` has none in six clause types, which fits its description as an
-     investment-grade revolver with few baskets.
+7. **Found counts that looked wrong, as the review settled them:**
+   - `viavi-2025` has no financial covenant, and all 7 of its Financial Maintenance Covenant
+     quotes are wrong.
+   - All 5 agreements have a Debt Incurrence General Basket. Model A missed `angi-2025`,
+     `repay-2026` and `quanta-2024`.
+   - In `exlservice-2026`, 1 of 19 Liens quotes is the basket. In `angi-2025`, 1 of 17
+     Restricted Payments quotes is.
+   - `quanta-2024` is an investment-grade term loan. It has no incremental, MFN, restricted
+     payments or builder terms, but it does have debt and liens baskets that Model A missed.
 8. **The ladder recovered every failed chunk.** All 10 recovered, so all 312 decodes are usable:
    6 at 1.05, 2 at 1.15 and 2 at 1.25.
 9. **Recovered chunks did not behave alike.** Condition a gained 37 quotes, and all 37 are in
    the document with quote marks and case ignored (233 of 240 before, 270 of 277 after). Its
    CUAD clause types with a quote rose from 15 to 25. Condition c gained 4 quotes from
-   `exlservice-2026` chunk 0, which holds the table of contents, and the sheet marks none of
-   the 4 as in the document. One is an Available Amount quote, although the agreement never
-   uses the term, so the 4 of 5 agreements found for that clause includes an invented quote.
+   `exlservice-2026` chunk 0, which holds the table of contents. The review tagged 3 of the 4
+   as invented, and these are the only invented quotes in the sheet. One is an Available Amount
+   quote, although the agreement never uses the term. The fourth is the real pricing grid,
+   which fails the verbatim check because a page number sits inside it.
 10. **Most of the runtime is four failed retries.** Stage times add up to 519 minutes (8.7
     hours): 188 for the primary passes and 331 for the ladder. That is 1,038.5 GPU-device
     minutes (17.3 hours). They leave out setup and one 214 s attempt from a session that stopped
@@ -67,7 +72,58 @@ judged yet.
 14. **Resume worked on Kaggle.** The ladder ran across two sessions. The second one skipped all
     312 primary decodes and the finished ladder of condition a, then continued with condition b.
 
-Not yet done: the review of `review_sheet.csv` using `docs/labeling_guide.md`.
+## Review results
+
+Labeled 2026-11-01 by Claude at the user's request, under `docs/labeling_guide.md`, reading each
+quote against the agreement text. These are not the user's labels. Every span was checked against
+the source. Scores come from an ad hoc script, because the gold-set script does not exist yet.
+Condition c only, since Model B gave no credit quotes. Five agreements are too few for confidence
+intervals.
+
+| agreement | quotes | right | not found: absent / missed |
+|---|---|---|---|
+| quanta-2024 | 7 | 4 | 4 / 2 |
+| exlservice-2026 | 64 | 10 | 1 / 0 |
+| angi-2025 | 54 | 13 | 0 / 1 |
+| repay-2026 | 49 | 12 | 0 / 1 |
+| viavi-2025 | 97 | 22 | 0 / 0 |
+| total | 271 | 61 | 5 / 4 |
+
+Right means `yes` (52) or `partial` (9). The 210 wrong quotes are nearby provisions the rules
+exclude (107), text that belongs to no clause (36), mentions of a term (29), right text under the
+wrong clause (18), headings and cross-references (17), and invented text (3).
+
+| clause | agreements that have it | quotes | right | found: hit / false / miss | strict: hit / false / miss |
+|---|---|---|---|---|---|
+| Financial Maintenance Covenant | 4 | 15 | 5 | 3 / 2 / 1 | 3 / 1 / 1 |
+| Incremental Facility | 4 | 48 | 7 | 4 / 0 / 0 | 4 / 0 / 0 |
+| MFN Protection | 2 | 11 | 7 | 2 / 1 / 0 | 0 / 1 / 2 |
+| Restricted Payments General Basket | 4 | 47 | 3 | 3 / 1 / 1 | 3 / 0 / 1 |
+| Available Amount / Builder Basket | 3 | 24 | 13 | 3 / 1 / 0 | 3 / 1 / 0 |
+| Debt Incurrence General Basket | 5 | 12 | 2 | 2 / 0 / 3 | 2 / 0 / 3 |
+| Liens General Basket | 5 | 39 | 3 | 3 / 1 / 2 | 3 / 0 / 2 |
+| Applicable Margin | 5 | 33 | 6 | 5 / 0 / 0 | 4 / 0 / 1 |
+| Maturity Date | 5 | 28 | 7 | 5 / 0 / 0 | 3 / 0 / 2 |
+| Liability Management Protections | 4 | 14 | 8 | 3 / 2 / 1 | 0 / 1 / 4 |
+
+| metric | F1 |
+|---|---|
+| Found, the guide's rule | 0.805 |
+| Strict, the guide's rule | 0.714 |
+| Found, upstream rule | 0.902 |
+| Strict, upstream rule | 0.571 |
+
+What the review shows:
+
+- **Noise is the main problem.** 1 quote in 4.4 is right. Model A finds the right area and then
+  quotes everything near it.
+- **General baskets are the weakest clauses.** Model A has the right text in 8 of the 14 places
+  they exist. All three are wrong in `repay-2026`.
+- **Liability management scores low on Strict** because most agreements hold more than one
+  protection, and Model A rarely quotes all of them.
+- **One open call:** the Drop Down Provision in `exlservice-2026` covers all material property,
+  not only intellectual property, and that agreement has no unrestricted subsidiaries. It is
+  counted as `jcrew` and tagged `unsure`.
 
 ## Generated report
 
