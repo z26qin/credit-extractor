@@ -76,9 +76,8 @@ Written 2026-10-31 from the reports, run logs, raw records and review sheet, and
 
 Labeled 2026-11-01 by Claude at the user's request, under `docs/labeling_guide.md`, reading each
 quote against the agreement text. These are not the user's labels. Every span was checked against
-the source. Scores come from an ad hoc script, because the gold-set script does not exist yet.
-Condition c only, since Model B gave no credit quotes. Five agreements are too few for confidence
-intervals.
+the source. Scores come from `src.score` against `reports/gold_m3.json`, and the full output is in
+[`score_m3.md`](score_m3.md). Condition c only, since Model B gave no credit quotes.
 
 | agreement | quotes | right | not found: absent / missed |
 |---|---|---|---|
@@ -93,25 +92,30 @@ Right means `yes` (52) or `partial` (9). The 210 wrong quotes are nearby provisi
 exclude (107), text that belongs to no clause (36), mentions of a term (29), right text under the
 wrong clause (18), headings and cross-references (17), and invented text (3).
 
-| clause | agreements that have it | quotes | right | found: hit / false / miss | strict: hit / false / miss |
+| clause | agreements that have it | quotes | right | Found F1 | Strict F1 |
 |---|---|---|---|---|---|
-| Financial Maintenance Covenant | 4 | 15 | 5 | 3 / 2 / 1 | 3 / 1 / 1 |
-| Incremental Facility | 4 | 48 | 7 | 4 / 0 / 0 | 4 / 0 / 0 |
-| MFN Protection | 2 | 11 | 7 | 2 / 1 / 0 | 0 / 1 / 2 |
-| Restricted Payments General Basket | 4 | 47 | 3 | 3 / 1 / 1 | 3 / 0 / 1 |
-| Available Amount / Builder Basket | 3 | 24 | 13 | 3 / 1 / 0 | 3 / 1 / 0 |
-| Debt Incurrence General Basket | 5 | 12 | 2 | 2 / 0 / 3 | 2 / 0 / 3 |
-| Liens General Basket | 5 | 39 | 3 | 3 / 1 / 2 | 3 / 0 / 2 |
-| Applicable Margin | 5 | 33 | 6 | 5 / 0 / 0 | 4 / 0 / 1 |
-| Maturity Date | 5 | 28 | 7 | 5 / 0 / 0 | 3 / 0 / 2 |
-| Liability Management Protections | 4 | 14 | 8 | 3 / 2 / 1 | 0 / 1 / 4 |
+| Financial Maintenance Covenant | 4 | 15 | 5 | 0.889 | 0.750 |
+| Incremental Facility | 4 | 48 | 7 | 1.000 | 0.667 |
+| MFN Protection | 2 | 11 | 7 | 0.800 | 0.000 |
+| Restricted Payments General Basket | 4 | 47 | 3 | 0.750 | 0.857 |
+| Available Amount / Builder Basket | 3 | 24 | 13 | 0.857 | 0.667 |
+| Debt Incurrence General Basket | 5 | 12 | 2 | 0.571 | 0.571 |
+| Liens General Basket | 5 | 39 | 3 | 0.667 | 0.750 |
+| Applicable Margin | 5 | 33 | 6 | 1.000 | 0.889 |
+| Maturity Date | 5 | 28 | 7 | 1.000 | 0.750 |
+| Liability Management Protections | 4 | 14 | 8 | 0.667 | 0.000 |
 
-| metric | F1 |
-|---|---|
-| Found, the guide's rule | 0.805 |
-| Strict, the guide's rule | 0.714 |
-| Found, upstream rule | 0.902 |
-| Strict, upstream rule | 0.571 |
+| metric | F1 | 95% CI over agreements |
+|---|---|---|
+| Found, the guide's rule | 0.829 | 0.740-0.905 |
+| Strict, the guide's rule | 0.657 | 0.492-0.744 |
+| detection, upstream rule | 0.902 | |
+| strict, upstream rule | 0.333 | |
+
+These replace the 0.805 and 0.714 first given on 2026-11-01, which came from a quick script. That
+script used the labels instead of the automatic right-quote rule, and it compared `yes` quotes
+with themselves, so it did not count copying errors against Strict. With five agreements, the
+intervals are rough.
 
 What the review shows:
 

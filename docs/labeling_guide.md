@@ -232,15 +232,16 @@ span: [main] any other Indebtedness in an aggregate principal amount ... and 10%
 
 ## How labels become the gold set
 
-The script for this does not exist yet. It is written after the review.
+`python -m src.gold` does this. It writes no gold file until every row can be placed.
 
 - The gold quotes for an agreement and clause type are its `yes` quotes, every `span:`, and
   quotes moved there by `belongs:`.
 - `no` quotes are dropped. A `partial` quote is replaced by its `span:`.
 - An empty result means the clause is absent, which is why that needs a real search: without
   one, a missed clause would enter the gold set as absent.
-- `yes` rows with `verbatim=False` are matched to the source text by the script, and any it
-  cannot place come back for review.
+- Gold text is cut from the agreement with page numbers and footers removed. `yes` and
+  `belongs:` rows with `verbatim=False` are matched to it, and any the script cannot place
+  come back for review.
 - Each span must be found in the source text. Any that is not found comes back for review.
 
 ## How the gold set is scored
@@ -248,13 +249,17 @@ The script for this does not exist yet. It is written after the review.
 Decided 2026-11-01 after the first agreement. The upstream metrics are reported as well, so
 results stay comparable with Model B's card.
 
-- **Found:** a clause counts as found only if at least one predicted quote is right. On a
-  labeled sheet that means `yes` or `partial`. For a model without labels it means a quote
-  with token F1 of at least 0.5 against a gold passage. A clause with only wrong quotes
-  counts as both a false find and a miss. Upstream counts any quote as found.
+- **Found:** a clause counts as found only if at least one predicted quote is right. A quote
+  is right if it holds a gold passage or has token F1 of at least 0.5 against one. A clause
+  with only wrong quotes counts as both a false find and a miss. Upstream counts any quote
+  as found. `src.score` uses this rule for every model, so unlabeled models compare fairly.
+  On the M3 sheet it agrees with the labels on 264 of 271 quotes, which flatters it, since
+  those labels built the gold set.
 - **Strict:** a clause counts as right if every main passage sits inside some predicted
   quote. Upstream requires every gold passage, which the extra spans make almost
   unreachable.
+- **Matching** drops quote marks and ignores case. A quote that changes any other word
+  fails Strict, even if it is `yes`, because Strict is also a test of copying.
 
 ## Rule changes
 
@@ -265,3 +270,4 @@ results stay comparable with Model B's card.
 | 2026-11-01 | Added rule 10, cut off or separate | none |
 | 2026-11-01 | Added main passages, the tag `main` and `[main] ` spans | all labeled rows |
 | 2026-11-01 | Found and Strict use main passages and right quotes | scoring only |
+| 2026-11-01 | `src.score` applies the right-quote rule to every model, labeled or not | scoring only |

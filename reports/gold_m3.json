@@ -1,0 +1,617 @@
+{
+ "sheet_sha256": "9be02d6e85cb9ecbbc81c50bd7ba16a966749fa7c9ddb786a18295687c78da92",
+ "labeled_by": "Claude, 2026-11-01, at the user's request; not reviewed by the user",
+ "documents": {
+  "angi-2025": {
+   "Financial Maintenance Covenant": [
+    {
+     "text": "As of the last day of any Test Period ending on or after December 31, 2025, if the Testing Condition is satisfied, then the Borrower will not permit the Total Net Leverage Ratio as of the last day of such Test Period to exceed 4.00 to 1.00.",
+     "main": true,
+     "origin": "span"
+    },
+    {
+     "text": "Testing Condition” shall be satisfied if either (x) $1.00 or more of Revolving Loans are outstanding or (y) the outstanding face amount of undrawn Letters of Credit (excluding Letters of Credit that have been cash collateralized at 102.0% of the face value thereof) exceeds an amount equal to $10,000,000.",
+     "main": false,
+     "origin": "span"
+    }
+   ],
+   "Incremental Facility": [
+    {
+     "text": "The Borrower may, by written notice to the Administrative Agent from time to time, request Incremental Term Loan Commitments and/or Incremental Revolving Commitments, as applicable, in an amount not to exceed the Incremental Amount available at the time such Incremental Term Loans are funded or established (if commitments in respect of such Incremental Term Loans are established on a date prior to funding) or Incremental Revolving Commitments are established (except, in each case, as set forth in Section 1.08) from one or more Incremental Term Lenders and/or Incremental Revolving Lenders (which, in each case, may include any existing Lender (but no such Lender shall be required to participate in any such Incremental Facility without its consent), but shall be required to be persons which would qualify as assignees of a Lender in accordance with Section 9.05) willing to provide such Incremental Term Loans and/or Incremental Revolving Commitments, as the case may be, in their sole discretion;",
+     "main": true,
+     "origin": "quote"
+    },
+    {
+     "text": "Incremental Amount” means, at any time, the sum of: (a) the excess (if any) of (i) the greater of (x) $65,000,000 and (y) 50% of Consolidated EBITDA for the then most recently ended Test Period, over (ii) the aggregate amount of all (x) Incremental Term Loan Commitments and Incremental Revolving Commitments, in each case, established after the Closing Date and prior to such time and outstanding pursuant to Section 2.02 and (y) Permitted Secured Ratio Debt and Permitted Unsecured Ratio Debt, in each case under clause (I)(1) of the definitions thereof established after the Closing Date and prior to such time and outstanding under Section 6.01(b), in each case, in reliance on this clause (a) (amounts incurred pursuant to this clause (a), the “Cash Capped Amount”), plus (b) any amounts so long as immediately after giving pro forma effect to the establishment of the commitments in respect thereof and any Specified Transaction in connection therewith, the use of proceeds thereof and all other related transactions or events, the First Lien Net Leverage Ratio is equal to or less than 3.00 to 1.00 on the date of the initial incurrence of (or commitment in respect of) the applicable Incremental Facility or on the LCT Test Date",
+     "main": false,
+     "origin": "span"
+    },
+    {
+     "text": "no Incremental Term Loan Commitment or Incremental Revolving Commitment shall become effective under this Section 2.02 unless (i) subject to Section 1.08, no Event of Default shall have occurred and be continuing after giving pro forma effect to such Incremental Term Loan Commitment or Incremental Revolving Commitment and the incurrence of Indebtedness thereunder and use of proceeds therefrom;; (ii) the condition set forth in Section 4.02(a) and (c) have been complied with (provided that clause (c) thereof shall only be required to be complied with if a Borrowing is made on such date)",
+     "main": false,
+     "origin": "span"
+    }
+   ],
+   "MFN Protection": [],
+   "Restricted Payments General Basket": [
+    {
+     "text": "Restricted Payments in an aggregate amount not to exceed the greater of (x) $32,500,000 and (y) 25.0% of Consolidated EBITDA for the then most recently ended Test Period;",
+     "main": true,
+     "origin": "quote"
+    }
+   ],
+   "Available Amount / Builder Basket": [
+    {
+     "text": "Available Amount” means, as at any date of determination, an amount, not less than zero in the aggregate, determined on a cumulative basis equal to, without duplication: (a) the greater of (x) $65,000,000 and (y) 50.0% of Consolidated EBITDA, plus (b) 50% of Consolidated Net Income of the Borrower since October 1, 2025, (ii); provided that the amount of this clause (b) shall not be less than zero, plus (c) [reserved], plus (d) following the Closing Date, the net cash proceeds or Fair Market Value received, as applicable, of any sale of Qualified Equity Interests by, or capital contribution to the common equity of, the Borrower (other than in respect of any Qualified Equity Interests used for, or otherwise having the effect of increasing, any other basket under this Agreement and other than any such proceeds received from a Restricted Subsidiary), plus (e) the net cash proceeds received by the Borrower (other than from a Restricted Subsidiary) from issuances of Indebtedness and Disqualified Equity Interests that have been issued after the Closing Date and which have been exchanged or converted into Qualified Equity Interests, plus (f) [reserved], plus (g) the amount of all Investments of the Borrower and its Restricted Subsidiaries after the Closing Date in any Unrestricted Subsidiary in reliance on the Available Amount that has been re-designated as a Restricted Subsidiary or that has been merged or consolidated with or into the Borrower or any of its Restricted Subsidiaries (up to the Fair Market Value of the Investments of the Borrower and its Restricted Subsidiaries in such Unrestricted Subsidiary at the time of such re-designation or merger or consolidation), plus (h) the amount of all returns, profits, distributions and similar amounts received by the Borrower and its Restricted Subsidiaries on Investments (including Investments in Unrestricted Subsidiaries) made using the Available Amount, minus (i) the net cash proceeds received by the Borrower and its Restricted Subsidiaries from sales of investments made using the Available Amount, minus (j) the cumulative amount of Restricted Payments made from the Available Amount from and after the Closing Date and on or prior to such time, minus (k) the cumulative amount of Investments made from the Available Amount from and after the Closing Date and on or prior to such time.",
+     "main": true,
+     "origin": "belongs"
+    },
+    {
+     "text": "Restricted Payments in an amount not to exceed the portion of the Available Amount on the date of such election that the Borrower elects to apply to this Section 6.05(n);",
+     "main": false,
+     "origin": "belongs"
+    },
+    {
+     "text": "Investments in an amount not to exceed the portion of the Available Amount on the date of such election that the Borrower elects to apply to this Section 6.11(s); provided that after giving effect thereto on a pro forma basis no Event of Default shall have occurred and be continuing",
+     "main": false,
+     "origin": "belongs"
+    }
+   ],
+   "Debt Incurrence General Basket": [
+    {
+     "text": "Indebtedness of the Borrower or any of its Restricted Subsidiaries in an aggregate principal amount under this clause (aa) not to exceed the greater of (x) $65,000,000 and (y) 50.0% of Consolidated EBITDA for the then most recently ended Test Period",
+     "main": true,
+     "origin": "span"
+    }
+   ],
+   "Liens General Basket": [
+    {
+     "text": "Liens securing Indebtedness or other obligations of the Borrower or any Restricted Subsidiary (including any Guarantees thereof) in an aggregate principal amount not to exceed the greater of (x) $65,000,000 and (y) 50.0% of Consolidated EBITDA for the then most recently ended Test Period;",
+     "main": true,
+     "origin": "span"
+    }
+   ],
+   "Applicable Margin": [
+    {
+     "text": "Applicable Rate” means (a) for each Revolving Loan, (i) prior to the first Adjustment Date occurring after the Closing Date, 2.75% for Term Benchmark Loans and 1.75% for ABR Loans and (ii) on and after the first Adjustment Date occurring after the Closing Date, a percentage determined in accordance with the Pricing Grid, and (b) for each Type of Term Loan, such per annum rates as shall be agreed to by the Borrower and the applicable Term Lenders as shown in the applicable Incremental Assumption Agreement, Extension Amendment or Refinancing Amendment, as applicable.",
+     "main": true,
+     "origin": "quote"
+    },
+    {
+     "text": "Pricing Grid” means the table below: Total Net Leverage Ratio Commitment Fee Rate Applicable Rate for Term Benchmark Loans Applicable Rate for ABR Loans > 3.50:1.00 0.50% 3.25% 2.25% > 2.50:1.00 but ≤ 3.50:1.00 0.40% 2.75% 1.75% > 1.50:1.00 but ≤ 2.50:1.00 0.325% 2.25% 1.25% ≤ 1.50:1.00 0.25% 1.75% 0.75% For the purposes of the Pricing Grid, changes in the Applicable Rate and Commitment Fee Rate resulting from changes in the Total Net Leverage Ratio shall become effective on the date (the “Adjustment Date”) on which financial statements are delivered to the Lenders pursuant to Section 5.01 and shall remain in effect until the next change to be effected pursuant to this paragraph. Notwithstanding the foregoing, if any financial statements referred to above are not delivered within the time periods specified in Section 5.01, then, until the date on which such financial statements are delivered, the highest rate set forth in each column of the Pricing Grid shall apply. In addition, at all times while an Event of Default shall have occurred and be continuing, the highest rate set forth in each column of the Pricing Grid shall apply. Each determination of the Total Net Leverage Ratio pursuant to the Pricing Grid shall be made in a manner consistent with the determination thereof pursuant to Section 6.10.",
+     "main": true,
+     "origin": "quote"
+    }
+   ],
+   "Maturity Date": [
+    {
+     "text": "the Borrower is hereby permitted to consummate transactions with individual Lenders that agree to such transactions from time to time to extend the maturity date of such Lender’s Loans and/or Commitments of such Class and to otherwise modify the terms of such Lender’s Loans and/or Commitments of such Class pursuant to the terms of the relevant Pro Rata Extension Offer",
+     "main": false,
+     "origin": "belongs"
+    },
+    {
+     "text": "Revolving Termination Date” means the fifth anniversary of the Closing Date (the “Scheduled Revolving Termination Date”); provided that (i) if on the 91st day prior to the Senior Notes Maturity Date (such date, the “Springing Revolving Termination Date”), any Senior Notes (or any Indebtedness that refinances any Senior Notes) with a maturity date that is not at least 91 days after the Scheduled Revolving Termination Date are outstanding, the Revolving Termination Date shall become the Springing Revolving Termination Date.",
+     "main": true,
+     "origin": "quote"
+    }
+   ],
+   "Liability Management Protections": [
+    {
+     "text": "the Borrower and the Restricted Subsidiaries shall not, directly or indirectly, sell or otherwise transfer any Material Intellectual Property to any Unrestricted Subsidiary and",
+     "main": true,
+     "origin": "quote"
+    },
+    {
+     "text": "no Loan Party shall, directly or indirectly, sell or otherwise transfer any Material Intellectual Property to any Non-Loan Party, other than in the case of this clause (y), any such sale or other transfer in connection with bona fide tax planning.",
+     "main": false,
+     "origin": "quote"
+    },
+    {
+     "text": "Notwithstanding anything to the contrary in this Section 6.11, the Borrower and the Restricted Subsidiaries shall not, directly or indirectly, sell or otherwise transfer any Material Intellectual Property to any Unrestricted Subsidiary",
+     "main": false,
+     "origin": "quote"
+    },
+    {
+     "text": "no Unrestricted Subsidiary may own Material Intellectual Property and no subsidiary may be designated as an Unrestricted Subsidiary if it owns any Material Intellectual Property.",
+     "main": false,
+     "origin": "span"
+    },
+    {
+     "text": "other than in connection with any “debtor-in-possession” financing or use of the Collateral in any insolvency proceeding (or, in each case, similar financing arrangements in insolvency proceedings in non-U.S. jurisdictions), without the consent of each Lender, (x) contractually subordinate, or have the effect of subordinating, any Loans or other Obligations under this Agreement and the other Loan Documents in right of payment to any other Indebtedness of the Borrower and Guarantors and/or (y) contractually subordinate, or have the effect of subordinating, the Liens securing the Loans and other Obligations under this Agreement and the other Loan Documents on a material portion of the Collateral to Liens on a material portion of the Collateral securing other Indebtedness or other obligations (any such other Indebtedness or other obligations, to which such Loans and Obligations under this Agreement and the other Loan Documents or such Liens securing any of the Loans and other Obligations under this Agreement and the other Loan Documents, as applicable, are subordinated (it being understood that this clause (ix) shall not override the permission for (x) Indebtedness or Liens expressly permitted by this Agreement and the other Loan Documents as in effect on the Closing Date or (y) any other Indebtedness, so long as such Indebtedness is offered ratably to all Lenders on the same terms and conditions (other than bona fide backstop fees and similar fees and reimbursement of reasonable and documented out-of-pocket counsel fees and other similar expenses in connection with the negotiation of the terms of such transaction)",
+     "main": true,
+     "origin": "span"
+    }
+   ]
+  },
+  "exlservice-2026": {
+   "Financial Maintenance Covenant": [
+    {
+     "text": "The Borrower will not permit the Interest Coverage Ratio, determined for the four consecutive fiscal quarter period ending on the last day of each fiscal quarter, to be less than 3.00 to 1.00.",
+     "main": true,
+     "origin": "quote"
+    },
+    {
+     "text": "The Borrower will not permit the Total Net Leverage Ratio, determined for the four consecutive fiscal quarter period ending on the last day of each fiscal quarter, to be greater than 3.50:1.00. Notwithstanding the foregoing, the Borrower shall be permitted to allow the maximum Total Net Leverage Ratio permitted under this Section 6.11(b) to be increased to 4.00:1.00 for a period of four consecutive fiscal quarters (such period, an “Adjusted Covenant Period”) in connection with a Qualifying Material Acquisition occurring during the first of such four fiscal quarters (and in respect of which the Borrower shall provide notice in writing to the Administrative Agent (for distribution to the Lenders) of such increase), so long as the Borrower is in compliance on a pro forma basis with the maximum Total Net Leverage Ratio of 4:00:1:00 on the closing date of such Qualifying Material Acquisition immediately after giving effect (including pro forma effect) to such Qualifying Material Acquisition; provided, that it is understood and agreed that (x) the Borrower may not elect a new Adjusted Covenant Period for at least three fiscal quarters following the end of an Adjusted Covenant Period and (y) the maximum Total Net Leverage Ratio permitted under this Section 6.11(b) shall revert to 3.50:1:00 following the end of such Adjusted Covenant Period and thereafter until another Adjusted Covenant Period (if any) is elected pursuant to the terms and conditions described above.",
+     "main": true,
+     "origin": "quote"
+    }
+   ],
+   "Incremental Facility": [
+    {
+     "text": "The Borrower shall have the right at any time after the Effective Date to request that the aggregate Revolving Commitments hereunder be increased (a “Revolving Commitment Increase”) in accordance with the following provisions and subject to the following conditions:",
+     "main": true,
+     "origin": "quote"
+    },
+    {
+     "text": "The Borrower shall have the right at any time after the Effective Date to request one or more tranches of term loans (each an “Incremental Term Loan Facility”; and the commitments with respect thereof, the “Incremental Term Loan Commitments”) in accordance with the following provisions and subject to the following conditions:",
+     "main": true,
+     "origin": "quote"
+    },
+    {
+     "text": "after giving effect thereto, the sum of the total of the additional Revolving Commitments and Incremental Term Loan Commitments incurred after the Effective Date does not exceed the sum of (A) (1) the greater of (i) $470,000,000 and (ii) 100% of EBITDA minus (2) the amount of additional Revolving Commitments, Incremental Term Loan Commitments previously incurred in reliance on clause (A)(1), plus (B) an additional amount so long as, after giving pro forma effect thereto (assuming that any such additional Revolving Commitments are drawn in full) and any related transactions (but excluding the cash proceeds of any such Incremental Term Loan Commitments or additional Revolving Commitments), the pro forma Total Net Leverage Ratio does not exceed 3.25 to 1.00",
+     "main": false,
+     "origin": "span"
+    },
+    {
+     "text": "(x) no Default or Event of Default shall have occurred and be continuing and (y) the condition set forth in Section 4.02(a) shall be required to be satisfied",
+     "main": false,
+     "origin": "span"
+    }
+   ],
+   "MFN Protection": [],
+   "Restricted Payments General Basket": [
+    {
+     "text": "Restricted Payments paid in cash to shareholders of the Borrower, whether in connection with a share buyback plan or otherwise in an amount not to exceed $225,000,000 for any calendar year, so long as no Event of Default has occurred and is continuing;",
+     "main": true,
+     "origin": "quote"
+    }
+   ],
+   "Available Amount / Builder Basket": [],
+   "Debt Incurrence General Basket": [
+    {
+     "text": "other Indebtedness in an aggregate principal amount at any time outstanding not exceeding the greater of (x) $135,000,000 or (y) 30.0% of EBITDA for the period of four consecutive fiscal quarters having most recently ended prior to such date of determination and for which financial statements have been delivered pursuant to Sections 5.01(a) or 5.01(b), as applicable;",
+     "main": true,
+     "origin": "quote"
+    }
+   ],
+   "Liens General Basket": [
+    {
+     "text": "additional Liens not otherwise permitted under this Section 6.02 securing obligations in the aggregate amount not to exceed at any time the greater of (x) 90,000,000 or (y) 20.0% of EBITDA for the period of four consecutive fiscal quarters having most recently ended prior to such date of determination and for which financial statements have been delivered pursuant to Sections 5.01(a) or 5.01(b), as applicable;",
+     "main": true,
+     "origin": "quote"
+    }
+   ],
+   "Applicable Margin": [
+    {
+     "text": "Applicable Rate” means, for any day, with respect to any ABR Loan, Term SOFR Loan or Daily Simple SOFR Loan, or with respect to the commitment fees payable hereunder, as the case may be, the applicable rate per annum set forth below under the caption “ABR Spread”, “Term SOFR Spread”, “Daily Simple SOFR Spread” or “Unused Fee”: Category Total Net Leverage Ratio ABR Spread (Per Annum) Term SOFR Spread (Per Annum) Daily Simple SOFR Spread (Per Annum) Unused Fee (Per Annum) Letter of Credit Fee I < 0.75x 0.0 % 1.00 % 1.00 % 0.125 % 1.00 % II ≥ 0.75x but < 1.50x 0.125 % 1.125 % 1.125 % 0.125 % 1.125 % III ≥ 1.50x but < 2.25x 0.25 % 1.25 % 1.25 % 0.15 % 1.25 % IV ≥ 2.25x but < 3.00x 0.50 % 1.50 % 1.50 % 0.20 % 1.50 % V ≥ 3.00x 0.75 % 1.75 % 1.75 % 0.25 % 1.75 % provided, that until the delivery to the Administrative Agent, pursuant to Section 5.01, of the Borrower’s consolidated financial information for the Borrower’s first fiscal quarter ending after the Effective Date, the “Applicable Rate” shall be the applicable rate per annum set forth above in Category II.",
+     "main": true,
+     "origin": "quote"
+    }
+   ],
+   "Maturity Date": [
+    {
+     "text": "The Borrower may, by written notice to the Administrative Agent from time to time, request an extension (each, a “Revolving Extension”) of the Revolving Maturity Date to the extended maturity date specified in such notice. Such notice shall (i) set forth the amount of Revolving Commitments that will be subject to the Revolving Extension (which request shall be in minimum increments of $1,000,000 and a minimum amount of $5,000,000) and (ii) set forth the date on which such Revolving Extension is requested to become effective (which shall be not less than ten (10) Business Days nor more than sixty (60) days after the date of such Revolving Extension notice (or such longer or shorter periods as the Administrative Agent shall agree in its sole discretion)).",
+     "main": false,
+     "origin": "belongs"
+    },
+    {
+     "text": "Term Loan Maturity Date” means the earliest to occur of (a) August 18, 2031 and (b) any earlier date on which the Term Loans are declared due and payable pursuant to Article VII hereof; provided, that individual Term Lenders may elect to extend the Term Loan Maturity Date applicable to their Term Loans and Term Loan Commitments pursuant to the terms and conditions of Section 2.22.",
+     "main": true,
+     "origin": "quote"
+    },
+    {
+     "text": "The Borrower may, by written notice to the Administrative Agent from time to time, request an extension (each, a “Revolving Extension”) of the Revolving Maturity Date to the extended maturity date specified in such notice.",
+     "main": false,
+     "origin": "quote"
+    },
+    {
+     "text": "Revolving Maturity Date” means the earliest to occur of (a) August 18, 2031, (b) any earlier date on which the Revolving Commitments are reduced to zero or otherwise terminated pursuant to the terms hereof and (c) the date that the Revolving Loans, if any, are declared due and payable pursuant to Article VII hereof",
+     "main": true,
+     "origin": "span"
+    }
+   ],
+   "Liability Management Protections": [
+    {
+     "text": "subordinate the Liens on all or substantially all the value of the Collateral to the Liens securing any other Indebtedness, or contractually subordinate with respect to payment any Obligations, without the written consent of each Lender (this clause (x), the “Serta Provision”)",
+     "main": true,
+     "origin": "span"
+    },
+    {
+     "text": "in the event that any Loan Guarantor that is a wholly-owned Subsidiary becomes a non-wholly-owned Subsidiary after the Effective Date as a result of (x) the sale of Equity Interests to a Person or (y) issuance of Equity Interests by such Subsidiary, such Subsidiary will remain a Loan Guarantor notwithstanding its status as a non-wholly-owned Subsidiary unless such (1)(A) sale or issuance is such sale or issuance is not to a Loan Party or any of Affiliate of any Loan Party or (B) the Loan Parties provide a replacement guaranty or replacement assets with a substantially similar book value (in the reasonable determination of the Administrative Agent) and (2) sale or issuance is for bona fide business purposes (this clause (c)(ii), the “Chewy Provision”)",
+     "main": true,
+     "origin": "span"
+    },
+    {
+     "text": "the Borrower will not, and will not permit any of its respective Subsidiaries to, make or permit to exist any investment of Material Property (or the Equity Interests of any Person that has an interest in Material Property) in any other Person other than (i) to another Loan Party or (ii) the grant non-exclusive licenses in such Material Property in the ordinary course of business.",
+     "main": true,
+     "origin": "span"
+    }
+   ]
+  },
+  "quanta-2024": {
+   "Financial Maintenance Covenant": [
+    {
+     "text": "Permit the Consolidated Leverage Ratio as of the end of any fiscal quarter of the Borrower to be greater than 3.5 to 1.0; provided, that, in connection with any Permitted Acquisition where the aggregate consideration payable is in excess of $200,000,000, for the fiscal quarter in which such Acquisition is consummated and the four (4) fiscal quarters immediately thereafter, the Borrower shall not permit the Consolidated Leverage Ratio as of the end of any such fiscal quarter to be greater than 4.0 to 1.0.",
+     "main": true,
+     "origin": "quote"
+    },
+    {
+     "text": "Permit the Consolidated Interest Coverage Ratio as of the end of any fiscal quarter of the Borrower to be less than 3.0:1.0.",
+     "main": true,
+     "origin": "quote"
+    }
+   ],
+   "Incremental Facility": [],
+   "MFN Protection": [],
+   "Restricted Payments General Basket": [],
+   "Available Amount / Builder Basket": [],
+   "Debt Incurrence General Basket": [
+    {
+     "text": "secured Indebtedness in an aggregate principal amount not to exceed $200,000,000 at any one time outstanding;",
+     "main": true,
+     "origin": "span"
+    }
+   ],
+   "Liens General Basket": [
+    {
+     "text": "other Liens on assets of the Borrower and its Subsidiaries (other than the Foreign Borrowers) securing Indebtedness or other obligations in an aggregate amount outstanding not exceeding $75,000,000 at any time;",
+     "main": true,
+     "origin": "span"
+    },
+    {
+     "text": "other Liens on assets of the Foreign Borrowers securing Indebtedness or other obligations in an aggregate amount outstanding not exceeding $20,000,000 at any time;",
+     "main": false,
+     "origin": "span"
+    }
+   ],
+   "Applicable Margin": [
+    {
+     "text": "Applicable Rate” means a per annum rate equal to (a) with respect to Term SOFR Loans, 1.375% and (b) with respect to Base Rate Loans, 0.375%.",
+     "main": true,
+     "origin": "quote"
+    }
+   ],
+   "Maturity Date": [
+    {
+     "text": "Maturity Date” means October 14, 2024; provided, that, if such date is not a Business Day, the Maturity Date shall be the immediately preceding Business Day.",
+     "main": true,
+     "origin": "quote"
+    }
+   ],
+   "Liability Management Protections": []
+  },
+  "repay-2026": {
+   "Financial Maintenance Covenant": [
+    {
+     "text": "Each Loan Party covenants and agrees until the payment in full of the Obligations: Section 6.1 Total Net Leverage Ratio. Parent and its Restricted Subsidiaries, on a consolidated basis, will maintain, as of the end of each Fiscal Quarter, commencing with the Fiscal Quarter ending September 30, 2026, a Total Net Leverage Ratio of not greater than 6.10:1.00 for each such Fiscal Quarter.",
+     "main": true,
+     "origin": "quote"
+    }
+   ],
+   "Incremental Facility": [
+    {
+     "text": "The Borrower may at any time or from time to time after the Closing Date, by notice to the Administrative Agent, request (i) an increase in the principal amount of Term Loan Commitments of any then existing Class of Term Loans (a “Term Loan Increase”) or the establishment of a new Class of Term Loan Commitments (collectively with any Term Loan Increase, the “Incremental Term Commitments”; and the Term Loans made in respect of Incremental Term Commitments, the “Incremental Term Loans”) and/or (ii) one or more increases in the principal amount of the then existing Revolving Commitments (each, a “Revolving Commitment Increase” and, collectively with any Incremental Term Commitments, the “Incremental Commitments”; and the loan facilities established hereunder in respect of such Incremental Commitments, each, an “Incremental Facility”), in each case, in Dollars and in an aggregate principal amount not to exceed the Incremental Cap (assuming for such purposes that the full amount of any Revolving Commitment Increase being established at such time was fully drawn).",
+     "main": true,
+     "origin": "quote"
+    },
+    {
+     "text": "The effectiveness of any Incremental Commitments and Incremental Facility shall be subject only to the satisfaction of each of the following conditions, together with any other conditions set forth in the applicable instrument of joinder or amendment to this Agreement (an “Incremental Amendment”): (i) immediately before and after giving effect to any proposed Incremental Facility (determined, in the case of any Incremental Facility that is to be used to fund a Limited Condition Transaction, as of the LCT Test Date (other than the determination of whether any Specified Event of Default shall have occurred and be continuing, which shall be determined as of the date such Limited Condition Transaction is consummated)), no Event of Default (or, in the case of any Incremental Facility that is to be used to fund a Permitted Acquisition or other Investment permitted by this Agreement, the consummation of which is not conditioned on the availability of, or on obtaining, third party financing, no Specified Event of Default) shall have occurred and be continuing; (ii) the representations and warranties in the Loan Documents will be true and correct in all material respects (except for representations and warranties that are already qualified by materiality, which representations and warranties will be true and correct in all respects) immediately before and after giving effect to any proposed Incremental Facility (except to the extent that any such representation or warranty expressly relates to an earlier date, in which case such representation or warranty shall be true and correct in all material respects (except for representations and warranties that are already qualified by materiality, which representations and warranties will be true and correct in all respects) as of such earlier date); provided that in the case of any Incremental Facility that is to be used to fund a Permitted Acquisition or other Investment permitted by this Agreement, the consummation of which is not conditioned on the availability of, or on obtaining, third party financing, the condition set forth in this clause (ⅱ) may be satisfied with respect only to the Specified Representations and customary “specified acquisition agreement representations",
+     "main": false,
+     "origin": "span"
+    },
+    {
+     "text": "Incremental Cap” shall mean the sum of the Fixed Incremental Amount and the Ratio Incremental Amount.",
+     "main": false,
+     "origin": "span"
+    },
+    {
+     "text": "Fixed Incremental Amount” shall mean an aggregate principal amount at any time outstanding equal to the greater of (1) $200,000,000 and (2) 100.0% of Consolidated EBITDA (for the most recently ended four consecutive Fiscal Quarter period for which financial statements have been delivered, calculated on a pro forma basis) less the aggregate principal amount of Incremental Facilities and Incremental Equivalent Debt incurred and then outstanding in reliance on the Fixed Incremental Amount (after giving effect to any reallocation).",
+     "main": false,
+     "origin": "span"
+    },
+    {
+     "text": "Ratio Incremental Amount” shall mean, at any time, the maximum aggregate principal amount of Incremental Facilities or Incremental Equivalent Debt that could be incurred at such time without, on a pro forma basis after giving effect to such incurrence (assuming that the full amount of any Revolving Commitment Increase or revolving commitment in respect of Incremental Equivalent Debt, in each case, established at such time was fully drawn), causing (1) with respect to Incremental Equivalent Debt that is Pari Passu Lien Debt or any Incremental Facility, the First Lien Net Leverage Ratio to exceed 2.40:1.00 as of the end of the most recently ended four consecutive Fiscal Quarter period for which financial statements shall have been delivered, or (2) with respect to Incremental Equivalent Debt that is Junior Lien Debt or that is unsecured, the Total Net Leverage Ratio to exceed 3.80:1.00 as of the most recently ended four consecutive Fiscal Quarter period for which financial statements shall have been delivered.",
+     "main": false,
+     "origin": "span"
+    }
+   ],
+   "MFN Protection": [
+    {
+     "text": "in the case of any term Incremental Equivalent Debt that comprises Pari Passu Lien Debt and is incurred on or prior to the date that is twenty-four (24) months after the Closing Date, the Initial Term Loans shall benefit from the MFN Protection with respect to such Incremental Equivalent Debt, other than to the extent such Incremental Equivalent Debt (x) has a scheduled maturity date more than two years after the Term Facility Maturity Date of the Initial Term Loans or (y) is not extended under a syndicated term loan “B” facility;",
+     "main": false,
+     "origin": "quote"
+    },
+    {
+     "text": "with respect to any Incremental Term Loans that (a) are incurred on or prior to the date that is twenty-four (24) months after the Closing Date, (b) are syndicated term “B” loans, and (c) have a scheduled maturity date prior to the date that is two years after the Term Facility Maturity Date of the Initial Term Loans, the Yield applicable to such Incremental Term Loans shall not be greater than the applicable Yield payable pursuant to the terms of this Agreement as amended through the date of such calculation with respect to Initial Term Loans plus 50 basis points per annum unless the Yield with respect to the Initial Term Loans is increased so as to cause the then applicable Yield under this Agreement on the Initial Term Loans to equal the Yield then applicable to the Incremental Term Loans minus 50 basis points (the “MFN Protection”)",
+     "main": true,
+     "origin": "span"
+    }
+   ],
+   "Restricted Payments General Basket": [
+    {
+     "text": "Restricted Payments, so long as (i) no Event of Default shall exist or result therefrom and (ii) the aggregate amount of all such Restricted Payments shall not exceed an amount equal to the sum of (A) (1) the greater of $40,000,000 and (2) 20.0% of Consolidated EBITDA (for the most recently ended four consecutive Fiscal Quarter period for which financial statements have been delivered, calculated on a pro forma basis)",
+     "main": true,
+     "origin": "span"
+    }
+   ],
+   "Available Amount / Builder Basket": [
+    {
+     "text": "Available Amount” shall mean, at any date, an amount, not less than zero in the aggregate, determined on a cumulative basis equal to, without duplication: (a) the greater of (x) $50,000,000 and (y) 25.0% of Consolidated EBITDA (for the most recently ended four consecutive Fiscal Quarter period for which financial statements have been delivered, calculated on a pro forma basis), plus (b) 50.0% of the cumulative amount of Consolidated Net Income (which may be negative for any period but not less than zero on a cumulative basis), taken as one accounting period, commencing on April 1, 2026 and ending on the last day of the most recently ended four consecutive Fiscal Quarter period for which financial statements have been delivered, plus (c) the cumulative amount of cash and Permitted Investment proceeds from the sale or issuance of Qualified Capital Stock of Parent after the Closing Date and on or prior to the date of determination (including upon exercise of warrants or options) (other than Specified Equity Contributions), which proceeds have been contributed to the capital of the Borrower and not previously applied for any purpose other than use in the Available Amount, plus (d) the cumulative amount of all Returns (to the extent not included in Consolidated Net Income) actually received in cash by Parent and its Restricted Subsidiaries after the Closing Date and on or prior to the date of such determination in respect of all Investments made utilizing the Available Amount pursuant to Section 7.4(i) (in each case, up to the amount of the original Investment), minus (e) any amount of the Available Amount used to make Investments pursuant to Section 7.4(i) after the Closing Date, minus (f) any amount of the Available Amount used to make Restricted Payments pursuant to Section 7.5(h) after the Closing Date, minus (g) any amount of the Available Amount used to prepay, redeem, repurchase or otherwise acquire for value, or make any principal, interest or other payments on, any Junior Financing pursuant to Section 7.12(b) after the Closing Date.",
+     "main": true,
+     "origin": "belongs"
+    },
+    {
+     "text": "Restricted Payments in an aggregate amount not to exceed the Available Amount at such time, so long as no Event of Default shall exist or result therefrom;",
+     "main": false,
+     "origin": "belongs"
+    },
+    {
+     "text": "Investments in an aggregate amount outstanding pursuant to this subsection (valued at the time of the making thereof, and without giving effect to any write downs or write offs thereof) not to exceed the Available Amount at such time, so long as no Event of Default shall exist or result therefrom;",
+     "main": false,
+     "origin": "quote"
+    },
+    {
+     "text": "prepay, redeem, repurchase or otherwise acquire for value, or make any principal, interest or other payments on, any Junior Financing in an aggregate amount not to exceed the Available Amount at such time, so long as no Event of Default shall exist or result therefrom",
+     "main": false,
+     "origin": "span"
+    }
+   ],
+   "Debt Incurrence General Basket": [
+    {
+     "text": "other Indebtedness of the Borrower or any Restricted Subsidiary in an aggregate principal amount not to exceed the greater of (x) $50,000,000 and (y) 25.0% of Consolidated EBITDA (for the most recently ended four consecutive Fiscal Quarter period for which financial statements have been delivered, calculated on a pro forma basis) at any time outstanding",
+     "main": true,
+     "origin": "span"
+    }
+   ],
+   "Liens General Basket": [
+    {
+     "text": "Liens on any property of the Loan Parties (other than Parent and Kubra Newco) securing any of their Indebtedness or their other liabilities; provided, however, that the aggregate outstanding principal amount of all such Indebtedness and other liabilities secured by such Liens shall not exceed the greater of (x) $30,000,000 and (y) 15.0% of Consolidated EBITDA (for the most recently ended four consecutive Fiscal Quarter period for which financial statements have been delivered, calculated on a pro forma basis) at any time",
+     "main": true,
+     "origin": "span"
+    }
+   ],
+   "Applicable Margin": [
+    {
+     "text": "Applicable Margin” shall mean, as of any date, (a) with respect to any Initial Term Loan, 5.50% per annum in the case of any SOFR Loan and 4.50% per annum in the case of any Base Rate Loan and (b) with respect to any Revolving Loan, the percentage per annum determined by reference to the applicable First Lien Net Leverage Ratio in effect on such date as set forth in the Pricing Grid below (the “Pricing Grid”); provided that a change in the Applicable Margin resulting from a change in the First Lien Net Leverage Ratio shall be effective on the second Business Day after which the Borrower delivers each of the applicable financial statements required by Sections 5.1(a) and 5.1(b) and the Compliance Certificate required by Section 5.1(c); provided, further, that if at any time the Borrower shall have failed to deliver such financial statements and such Compliance Certificate when so required, the Applicable Margin during the period of such failure shall, if so directed in writing by the Required Revolving Lenders, be at Level I as set forth in the Pricing Grid until such time as such financial statements and Compliance Certificate are delivered, at which time the Applicable Margin shall be determined as provided above. Notwithstanding the foregoing, the Applicable Margin with respect to any Revolving Loan shall be at Level Ⅰ as set forth in the Pricing Grid from the Closing Date through the date on which the financial statements required by Section 5.1(b) and the Compliance Certificate required by Section 5.1(c) for Fiscal Quarter ending September 30, 2026 are delivered. In the event that any financial statement or Compliance Certificate delivered hereunder is shown to be inaccurate prior to the termination of this Agreement, and such inaccuracy, if corrected, would have led to the application of a higher Applicable Margin based upon the Pricing Grid (the “Accurate Applicable Margin”) for any period that such financial statement or Compliance Certificate covered, then (i) the Borrower shall promptly deliver to the Administrative Agent a corrected financial statement or Compliance Certificate, as the case may be, for such period, (ii) the Applicable Margin shall be adjusted such that after giving effect to the corrected financial statement or Compliance Certificate, as the case may be, the Applicable Margin shall be reset to the Accurate Applicable Margin based upon the Pricing Grid for such period and (iii) the Borrower shall promptly pay to the Administrative Agent, for the account of the Revolving Lenders, the accrued additional interest owing as a result of such Accurate Applicable Margin for such period. The provisions of this definition shall not limit the rights of the Administrative Agent and the Lenders with respect to Section 2.13(c) or Article VIII.",
+     "main": true,
+     "origin": "belongs"
+    },
+    {
+     "text": "Level First Lien Net Leverage Ratio SOFR Loans and CORRA Loans Base Rate Loans and Canadian Prime Rate Loans Commitment Fee I > 1.90:1.00 4.25% 3.25% 0.50% II > 1.40:1.00 but ≤ 1.90:1.00 4.00% 3.00% 0.375% III ≤ 1.40:1.00 3.75% 2.75% 0.250%",
+     "main": true,
+     "origin": "span"
+    }
+   ],
+   "Maturity Date": [
+    {
+     "text": "the Borrower may, by written notice to the Administrative Agent from time to time, make one or more offers (each, an “Extension Offer”) to all the Lenders of any Class to make one or more amendments or modifications to (A) allow the maturity and scheduled amortization of the Loans and/or Commitments of such Class of the accepting Lenders to be extended and/or (B) increase the Applicable Margin, Applicable Percentage or other fees payable with respect to the Loans and/or Commitments of such Class of the accepting Lenders (each, an “Extension Amendment”) pursuant to procedures reasonably specified by the Administrative Agent and reasonably acceptable to the Borrower.",
+     "main": false,
+     "origin": "belongs"
+    },
+    {
+     "text": "the Borrower may, by written notice to the Administrative Agent from time to time, make one or more offers (each, an “Extension Offer”) to all the Lenders of any Class to make one or more amendments or modifications to (A) allow the maturity and scheduled amortization of the Loans and/or Commitments of such Class of the accepting Lenders to be extended and/or (B) increase the Applicable Margin, Applicable Percentage or other fees payable with respect to the Loans and/or Commitments of such Class of the accepting Lenders (each, an “Extension Amendment”)",
+     "main": false,
+     "origin": "belongs"
+    },
+    {
+     "text": "Term Facility Maturity Date” shall mean (ⅰ) with respect to the Initial Term Loans, the earliest of (a) the seventh (7th) anniversary of the Closing Date, (b) the date on which all amounts outstanding under this Agreement have been declared or have automatically become due and payable (whether by acceleration or otherwise) and (c) unless Liquidity as of such date exceeds the sum of (1) the amount required to redeem the 2029 Convertible Notes in full on such date plus (2) $15,000,000, the date that is ninety-one (91) days prior to the maturity date of the 2029 Convertible Notes, as such maturity date of the 2029 Convertible Notes may be extended (pursuant to a refinancing or otherwise) from time to time;",
+     "main": true,
+     "origin": "span"
+    },
+    {
+     "text": "Revolving Commitment Termination Date” shall mean the earliest of (i) the fifth (5th) anniversary of the Closing Date, (ii) the date on which the Revolving Commitments are terminated in whole pursuant to Section 2.8, (iii) the date on which all amounts outstanding under this Agreement have been declared or have automatically become due and payable (whether by acceleration or otherwise), (iv) unless Liquidity as of such date exceeds the sum of (A) the amount required to redeem the 2029 Convertible Notes in full on such date plus (B) $15,000,000, the date that is one hundred eighty-two (182) days prior to the maturity date of the 2029 Convertible Notes, as such maturity date of the 2029 Convertible Notes may be extended (pursuant to a refinancing or otherwise) from time to time and (v) unless Liquidity as of such date exceeds the sum of (1) the amount required to redeem the 2029 Convertible Notes in full on such date plus (2) $15,000,000, the date that is ninety-one (91) days prior to the maturity date of the 2029 Convertible Notes, as such maturity date of the 2029 Convertible Notes may be extended (pursuant to a refinancing or otherwise) from time to time.",
+     "main": true,
+     "origin": "span"
+    }
+   ],
+   "Liability Management Protections": [
+    {
+     "text": "subordinate the Lien of the Administrative Agent on, in each case, all or substantially all Collateral (if any) securing any of the Obligations, without the written consent of each Lender",
+     "main": false,
+     "origin": "belongs"
+    },
+    {
+     "text": "Notwithstanding the foregoing or anything else to the contrary in the Loan Documents, the Borrower will not, and will not permit any Subsidiary to, permit any transfer of Material IP owned by a Loan Party to Parent, Kubra Newco or a Subsidiary that is not a Loan Party (including any Unrestricted Subsidiary).",
+     "main": true,
+     "origin": "quote"
+    },
+    {
+     "text": "subordinate the payment priority of the Obligations (provided that this clause (C) shall not apply to the incurrence of any “debtor-in-possession” financing (or similar financing arrangements in insolvency proceedings in non-U.S. jurisdictions) approved by the applicable bankruptcy court)",
+     "main": true,
+     "origin": "quote"
+    },
+    {
+     "text": "no Subsidiary shall become an Excluded Subsidiary pursuant to clause (a) above unless (i) such Subsidiary became non-wholly owned by Parent and/or one or more of its wholly owned Subsidiaries as the result of a sale, disposition, or other transfer of the Capital Stock of such Subsidiary to a third party that is not an Affiliate of Parent for a bona fide business purpose and not effected in contemplation of adversely affecting the Secured Parties’ interests in the Guarantees of the Obligations or in the Collateral and (ii) Parent or its applicable Restricted Subsidiary that is the holder of the Capital Stock of such Subsidiary shall be deemed to have made an Investment at such time in a Subsidiary that is not a Guarantor in the amount of its remaining outstanding Investment in such Subsidiary at such time and such Investment is permitted hereunder at such time.",
+     "main": true,
+     "origin": "span"
+    },
+    {
+     "text": "Notwithstanding the foregoing, the Borrower will not designate any Restricted Subsidiary that owns Material IP as an Unrestricted Subsidiary.",
+     "main": false,
+     "origin": "span"
+    }
+   ]
+  },
+  "viavi-2025": {
+   "Financial Maintenance Covenant": [],
+   "Incremental Facility": [
+    {
+     "text": "Incremental Cap” means, as of any date of determination, (I)an amount equal to the sum of (the “Free and Clear Incremental Amount”): (a)the greater of (x) $245,000,000 and (y) 100% of LTM Consolidated EBITDA, plus (b)the General Debt Basket Reallocated Amount, plus (c)the sum of the aggregate principal amount of voluntary prepayments, repayments, redemptions, repurchases and debt buybacks (in an amount equal to the principal amount of the Indebtedness subject thereto) of Term Loans (including open market purchases at or below par, payments through Dutch auction procedures and payments utilizing Section 9.04(h) or any other analogous “yank-a-bank” provision in the documentation governing such Indebtedness) by the Borrower or any of the Subsidiaries, except to the extent funded with proceeds of long-term Indebtedness of the Borrower or the Restricted Subsidiaries (other than (1) any revolving Indebtedness, (2) any intercompany loans among the Borrower and the Restricted Subsidiaries or (3) Incremental Facilities or Incremental Equivalent Debt then being incurred in reliance on this clause (c) or clause (d) below), plus (d)the sum of the aggregate principal amount of voluntary prepayments, repayments, redemptions, and repurchases and buybacks of (in each case, in an amount equal to the principal amount of the Indebtedness subject thereto) any Credit Agreement Refinancing Indebtedness, Other Term Loan or any Permitted Refinancing, as applicable, previously applied, directly or indirectly, to the prepayment, repayment, redemption, repurchase or buyback, as applicable, of the Term Loans (including open market purchases at or below par, payments through Dutch auction procedures and payments utilizing Section 9.04(h) or any other analogous “yank-a-bank” provision in the documentation governing such Indebtedness) by the Borrower or any of the Subsidiaries, except, in each case under this clause (d), to the extent funded with proceeds of long-term Indebtedness of the Borrower or the Restricted Subsidiaries (other than (1) any revolving Indebtedness, (2) any intercompany loans among the Borrower and the Restricted Subsidiaries or (3) Incremental Facilities or Incremental Equivalent Debt then being incurred in reliance on this clause (d) or clause (c) above), minus (e)the aggregate principal amount of all Incremental Facilities and all Incremental Equivalent Debt outstanding at such time that was incurred in reliance on any of the foregoing clauses (a) through (d), and (II)the maximum aggregate principal amount (the “Ratio Incremental Amount”) that can be incurred without causing the First Lien Leverage Ratio, after giving effect to the incurrence or establishment, as applicable, of any Incremental Facilities or Incremental Equivalent Debt (which shall assume that all such Indebtedness is Consolidated First Lien Debt) and the use of proceeds thereof, on a Pro Forma Basis (but without giving effect to any substantially simultaneous incurrence of any Incremental Facility or Incremental Equivalent Debt made pursuant to the Free and Clear Incremental Amount), to exceed the greater of (a) the First Lien Leverage Ratio immediately prior to the incurrence of such Incremental Facility or Incremental Equivalent Debt for the most recent Test Period then last ended and (b) 3.00 to 1.00. Notwithstanding anything to the contrary in this Agreement, in the case of any Incremental Facility or Incremental Equivalent Debt in the form of a delayed draw term loan facility (an “Incremental Delayed Draw Term Facility”, and the loans thereunder, “Incremental Delayed Draw Term Loans”), the Borrower may elect, in its sole discretion, to incur such Incremental Delayed Draw Term Facility under the Incremental Cap either (A) at the time the delayed draw term loan commitments in respect of such Incremental Delayed Draw Term Facility (the “Incremental Delayed Draw Term Commitments”) are established, in which case, solely for purposes of determining availability under the Incremental Cap, such Incremental Delayed Draw Term Commitments shall be deemed to be fully drawn at the time the relevant Incremental Delayed Draw Term Facility is established (and, for the avoidance of doubt, the subsequent funding of Incremental Delayed Draw Term Loans under such Incremental Delayed Draw Term Facility shall not further reduce available capacity under the Incremental Cap) or (B) at the time the relevant Incremental Delayed Draw Term Loans are funded, in which case available capacity under the Incremental Cap shall be reduced as and when each such Incremental Delayed Draw Term Loan is funded (and, for the avoidance of doubt, the initial establishment of Incremental Delayed Draw Term Commitments in respect of such Incremental Delayed Draw Term Facility shall not reduce available capacity under the Incremental Cap).",
+     "main": false,
+     "origin": "quote"
+    },
+    {
+     "text": "The Borrower or any Guarantor may at any time and from time to time after the Effective Date, subject to the terms and conditions set forth herein, by notice to the Administrative Agent request one or more additional Classes of term loans or additional term loans of the same Class of any existing Class of term loans (which may include Incremental Delayed Draw Term Loans) (the “Incremental Term Loans”); provided that, subject to Section 1.08, after giving effect to the effectiveness of any Incremental Facility Amendment referred to below and at the time that any such Incremental Term Loan is made or effected, no Event of Default (or, in the case of the incurrence or provision of any Incremental Facility in connection with an Acquisition Transaction or other Investment not prohibited by the terms of this Agreement, no Event of Default under clause (a), (b), (h) or (i) of Section 7.01) shall have occurred and be continuing or would result therefrom. Notwithstanding anything to the contrary herein, the sum of (i) the aggregate principal amount of the Incremental Facilities, and (ii) the aggregate outstanding principal amount of Incremental Equivalent Debt shall not at the time of incurrence of any such Incremental Facilities or Incremental Equivalent Debt (and after giving effect to such incurrence) exceed the Incremental Cap at such time (calculated in a manner consistent with the definition of “Incremental Cap”).",
+     "main": true,
+     "origin": "quote"
+    }
+   ],
+   "MFN Protection": [
+    {
+     "text": "with respect to any Incremental Term Loans funded after the Effective Date that (i) are secured by a Lien on the Collateral that ranks pari passu with the Liens securing the Term Loans, (ii) are incurred pursuant to the Free and Clear Incremental Amount (other than Incremental Term Loans incurred in reliance on the General Debt Basket Reallocated Amount), (iii) mature on or prior to the first anniversary of the Term Maturity Date, (iv) are incurred prior to the date that is six months after the Effective Date, (v) are in the form of dollar-denominated broadly syndicated floating rate term B loans and (vi) are not incurred or established in connection with any Permitted Acquisition or other permitted Investment (provided that the Borrower may, in its sole discretion, exclude any Class of Incremental Term Loans from application of the MFN Protection to the extent such Class is in an aggregate initial principal amount not exceeding the greater of (x) $245,000,000 and (y) 100% of LTM Consolidated EBITDA), in the event that the interest rate margins for any Incremental Term Loan are greater than the Applicable Rates for the Term Loans by more than 0.75% per annum, then the Applicable Rates for the Term Loans shall be increased to the extent necessary so that the Applicable Rates for the Term Loans are equal to the interest rate margins for such Incremental Term Loans minus 0.75% per annum (the “MFN Protection”);",
+     "main": false,
+     "origin": "belongs"
+    },
+    {
+     "text": "solely with respect to any such Indebtedness in the form of a broadly syndicated floating rate term loan B that is pari passu with the initial Term Facility, the MFN Protection shall apply, subject to the terms of Section 2.20(b)(F) (with such terms applying to such Indebtedness mutatis mutandis)",
+     "main": false,
+     "origin": "quote"
+    },
+    {
+     "text": "with respect to any Incremental Term Loans funded after the Effective Date that (i) are secured by a Lien on the Collateral that ranks pari passu with the Liens securing the Term Loans, (ii) are incurred pursuant to the Free and Clear Incremental Amount (other than Incremental Term Loans incurred in reliance on the General Debt Basket Reallocated Amount), (iii) mature on or prior to the first anniversary of the Term Maturity Date, (iv) are incurred prior to the date that is six months after the Effective Date, (v) are in the form of dollar-denominated broadly syndicated floating rate term B loans and (vi) are not incurred or established in connection with any Permitted Acquisition or other permitted Investment (provided that the Borrower may, in its sole discretion, exclude any Class of Incremental Term Loans from application of the MFN Protection to the extent such Class is in an aggregate initial principal amount not exceeding the greater of (x) $245,000,000 and (y) 100% of LTM Consolidated EBITDA), in the event that the interest rate margins for any Incremental Term Loan are greater than the Applicable Rates for the Term Loans by more than 0.75% per annum, then the Applicable Rates for the Term Loans shall be increased to the extent necessary so that the Applicable Rates for the Term Loans are equal to the interest rate margins for such Incremental Term Loans minus 0.75% per annum (the “MFN Protection”)",
+     "main": true,
+     "origin": "span"
+    },
+    {
+     "text": "provided, further, that with respect to any Incremental Term Loans that do not bear interest at a rate determined by reference to Term SOFR, for purposes of calculating the applicable increase (if any) in the Applicable Rates for the Term Loans in the preceding provisos, the interest rate margin for such Incremental Term Loans shall be deemed to be the interest rate (calculated after giving effect to any increases required pursuant to the immediately succeeding proviso) of such Incremental Term Loans less the then applicable Term SOFR;",
+     "main": false,
+     "origin": "quote"
+    },
+    {
+     "text": "the MFN Protection may be waived at any time with the consent of the Required Class Lenders with respect to the applicable Class of Term Loans.",
+     "main": false,
+     "origin": "quote"
+    },
+    {
+     "text": "in the event that the interest rate margins for any Incremental Term Loan are greater than the Applicable Rates for the Term Loans by more than 0.75% per annum, then the Applicable Rates for the Term Loans shall be increased to the extent necessary so that the Applicable Rates for the Term Loans are equal to the interest rate margins for such Incremental Term Loans minus 0.75% per annum (the “MFN Protection”); provided, further, that with respect to any Incremental Term Loans that do not bear interest at a rate determined by reference to Term SOFR, for purposes of calculating the applicable increase (if any) in the Applicable Rates for the Term Loans in the preceding provisos, the interest rate margin for such Incremental Term Loans shall be deemed to be the interest rate (calculated after giving effect to any increases required pursuant to the immediately succeeding proviso) of such Incremental Term Loans less the then applicable",
+     "main": false,
+     "origin": "belongs"
+    },
+    {
+     "text": "the Applicable Rates for the Term Loans shall be increased to the extent necessary so that the Applicable Rates for the Term Loans are equal to the interest rate margins for such Incremental Term Loans minus 0.75% per annum",
+     "main": false,
+     "origin": "belongs"
+    },
+    {
+     "text": "the Applicable Rate for the Term Loans and the interest rate margin for the Incremental Term Loans shall be deemed to include the credit spread or similar adjustment, if any, applicable to a one-month Term SOFR Borrowing",
+     "main": false,
+     "origin": "belongs"
+    }
+   ],
+   "Restricted Payments General Basket": [
+    {
+     "text": "Restricted Payments (including Restricted Payments to Borrower, the proceeds of which may be utilized by Borrower to make additional Restricted Payments or by Borrower to make any payments in respect of any Indebtedness of Borrower) (A) in an aggregate amount not to exceed, at the time of making any such Restricted Payment, the sum of (A) the greater of $61,500,000 and 25% of LTM Consolidated EBITDA plus (B) the Available Amount that is Not Otherwise Applied (provided that, with respect to any Restricted Payment made in reliance on clause (b) of the definition of “Available Amount” pursuant to this clause (B), no Event of Default shall be continuing or would result therefrom) plus (C) the Available Equity Amount that is Not Otherwise Applied",
+     "main": true,
+     "origin": "quote"
+    }
+   ],
+   "Available Amount / Builder Basket": [
+    {
+     "text": "Available Amount” means, on any date of determination, a cumulative amount equal to (without duplication): (a)the greater of (i) $122,500,000 and (ii) 50% of LTM Consolidated EBITDA, plus (b)the greatest of (1) an amount equal to 50% of Consolidated Net Income for the period (treated as one accounting period) from the first day of the fiscal quarter of the Borrower commencing immediately before the Effective Date to the end of the most recent Test Period (which amount under this clause (1) shall not be less than zero for such period), (2) an amount equal to (i) 100% of cumulative Consolidated EBITDA for each fiscal quarter of the Borrower commencing with the first fiscal quarter of the Borrower commencing immediately before the Effective Date through the most recent Test Period then last ended minus (ii) 1.5x cumulative Fixed Charges for the same period (which amount under this clause (2) shall not be less than zero for such period) and (3) the Cumulative Retained Excess Cash Flow Amount, plus (c)returns, profits, distributions and similar amounts received in cash or Permitted Investments and the Fair Market Value of any in-kind amounts received by the Borrower or any Restricted Subsidiary on Investments made using the Available Amount (not to exceed the amount of such Investments), plus (d)the Fair Market Value of Investments of the Borrower or any of the Restricted Subsidiaries in any Unrestricted Subsidiary that has been re-designated as a Restricted Subsidiary or that has been merged or consolidated with or into the Borrower or any of the Restricted Subsidiaries, plus (e)the Net Proceeds of a sale or other Disposition of any Unrestricted Subsidiary (including the issuance or sale of Equity Interests of an Unrestricted Subsidiary) received by the Borrower or any Restricted Subsidiary, plus (f)to the extent not included in Consolidated Net Income, dividends or other distributions or returns on capital received by the Borrower or any Restricted Subsidiary from an Unrestricted Subsidiary, plus (g)the aggregate amount of any Retained Declined Proceeds, Retained Asset Sale Proceeds and any Net Proceeds below the amount specified in the definition of “Asset Sale Prepayment Event” since the Effective Date.",
+     "main": true,
+     "origin": "belongs"
+    },
+    {
+     "text": "the aggregate amount of any Retained Declined Proceeds, Retained Asset Sale Proceeds and any Net Proceeds below the amount specified in the definition of “Asset Sale Prepayment Event” since the Effective Date.",
+     "main": false,
+     "origin": "belongs"
+    },
+    {
+     "text": "Available Equity Amount” means a cumulative amount equal to (without duplication): (a)the Net Proceeds of new public or private issuances of Qualified Equity Interests in the Borrower after the Effective Date, plus (b)capital contributions received by the Borrower after the Effective Date in cash or Permitted Investments (other than in respect of any Disqualified Equity Interest) and the Fair Market Value of any in-kind contributions after the Effective Date, plus (c)the net cash proceeds received by the Borrower or any Restricted Subsidiary from Indebtedness and Disqualified Equity Interest issuances issued after the Effective Date and which have been exchanged or converted into Qualified Equity Interests, plus (d)returns, profits, distributions and similar amounts received in cash or Permitted Investments and the Fair Market Value of any in-kind amounts received by the Borrower and the Restricted Subsidiaries on Investments made using the Available Equity Amount (not to exceed the amount of such Investments); provided that the Available Equity Amount shall not include any amounts used to make Restricted Payments pursuant to Section 6.08(a)(viii)(C) or any amounts used to make Investments pursuant to Section 6.04(n)(iii).",
+     "main": false,
+     "origin": "span"
+    },
+    {
+     "text": "(a)the Net Proceeds of new public or private issuances of Qualified Equity Interests in the Borrower after the Effective Date, plus",
+     "main": false,
+     "origin": "quote"
+    },
+    {
+     "text": "(b)capital contributions received by the Borrower after the Effective Date in cash or Permitted Investments (other than in respect of any Disqualified Equity Interest) and the Fair Market Value of any in-kind contributions after the Effective Date, plus",
+     "main": false,
+     "origin": "quote"
+    },
+    {
+     "text": "(c)the net cash proceeds received by the Borrower or any Restricted Subsidiary from Indebtedness and Disqualified Equity Interest issuances issued after the Effective Date and which have been exchanged or converted into Qualified Equity Interests, plus",
+     "main": false,
+     "origin": "quote"
+    },
+    {
+     "text": "(d)returns, profits, distributions and similar amounts received in cash or Permitted Investments and the Fair Market Value of any in-kind amounts received by the Borrower and the Restricted Subsidiaries on Investments made using the Available Equity Amount (not to exceed the amount of such Investments);",
+     "main": false,
+     "origin": "quote"
+    },
+    {
+     "text": "provided that the Available Equity Amount shall not include any amounts used to make Restricted Payments pursuant to Section 6.08(a)(viii)(C) or any amounts used to make Investments pursuant to Section 6.04(n)(iii).",
+     "main": false,
+     "origin": "quote"
+    },
+    {
+     "text": "in an amount not to exceed the Available Amount that is Not Otherwise Applied as in effect immediately prior to the time of making of such Investment, (iii) in an amount not to exceed the Available Equity Amount that is Not Otherwise Applied as in effect immediately prior to the time of making of such Investment and (iv) in an amount not to exceed the Available RP Capacity Amount as in effect immediately prior to the time of making of such Investment",
+     "main": false,
+     "origin": "quote"
+    },
+    {
+     "text": "the Available Amount that is Not Otherwise Applied (provided that, with respect to any Restricted Payment made in reliance on clause (b) of the definition of “Available Amount” pursuant to this clause (B), no Event of Default shall be continuing or would result therefrom) plus (C) the Available Equity Amount that is Not Otherwise Applied",
+     "main": false,
+     "origin": "span"
+    },
+    {
+     "text": "Restricted Debt Payments in an aggregate amount not to exceed the sum of (A) an amount at the time of making any such Restricted Debt Payment and when taken together with the aggregate amount of any other Restricted Debt Payments made utilizing this subclause (A), the greater of $61,500,000 and 25% of Consolidated EBITDA for the most recently ended Test Period as of such time determined on a Pro Forma Basis plus (B) the Available Amount that is Not Otherwise Applied; provided that, with respect to any Restricted Payment made in reliance on clause (b) of the definition of “Available Amount” pursuant to this clause (B), no Event of Default shall be continuing or would result therefrom, plus (C) the Available Equity Amount that is Not Otherwise Applied plus (D) an amount not to exceed the Available RP Capacity Amount as in effect immediately prior to the time of making of such Restricted Debt Payment",
+     "main": false,
+     "origin": "belongs"
+    }
+   ],
+   "Debt Incurrence General Basket": [
+    {
+     "text": "Indebtedness of the Borrower and the Restricted Subsidiaries; provided that, at the time of the incurrence thereof and after giving Pro Forma Effect thereto, the aggregate principal amount of Indebtedness outstanding in reliance on this clause (xiv) shall not exceed (x) the greater of $122,500,000 and 50% of LTM Consolidated EBITDA (this clause (x), the “General Debt Basket”), minus (y) the General Debt Basket Reallocated Amount (if any); provided that the aggregate amount of Indebtedness outstanding in reliance on this clause (xiv) of which the primary obligor or a guarantor is a Restricted Subsidiary that is not or does not become a Guarantor, together with the aggregate amount of Indebtedness outstanding in reliance on Sections 6.01(a)(vii), (xix) and (xxvi) of which the primary obligor or a guarantor is a Restricted Subsidiary that is not or does not become a Guarantor, shall not exceed the greater of $122,500,000 and 50% of LTM Consolidated EBITDA",
+     "main": true,
+     "origin": "quote"
+    }
+   ],
+   "Liens General Basket": [
+    {
+     "text": "other Liens; provided that at the time of incurrence of the obligations secured thereby (after giving Pro Forma Effect to any such obligations) the aggregate outstanding face amount of obligations secured by Liens existing in reliance on this clause (xx) shall not exceed the greater of $122,500,000 and 50% of LTM Consolidated EBITDA",
+     "main": true,
+     "origin": "quote"
+    }
+   ],
+   "Applicable Margin": [
+    {
+     "text": "Applicable Rate” means, for any day, (a) 1.50% per annum, in the case of an ABR Loan, or (b) 2.50% per annum, in the case of a Term SOFR Loan; provided that, from and after the delivery of the financial statements and related Compliance Certificate for the first full fiscal quarter of the Borrower completed after the Effective Date pursuant to Section 5.01, the Applicable Rate shall be based on the First Lien Leverage Ratio set forth in the most recent Compliance Certificate in accordance with the pricing grid below: Level First Lien Leverage Ratio ABR Applicable Rate Term SOFR Applicable Rate 1 > 0.90 to 1.00 1.50% 2.50% 2 ≤ 0.90 to 1.00 1.25% 2.25% Any increase or decrease in the Applicable Rate resulting from a change in the First Lien Leverage Ratio shall become effective as of the first Business Day immediately following the date a Compliance Certificate is delivered pursuant to Section 5.01; provided that, at the option of the Administrative Agent (at the direction of the Required Lenders and upon notice to the Borrower of such determination), the highest pricing level shall apply as of the first Business Day after the date on which a Compliance Certificate was required to have been delivered but was not delivered, and shall continue to so apply to and including the date immediately prior to the date on which such Compliance Certificate is so delivered (and thereafter the pricing level otherwise determined in accordance with this definition shall apply). Upon the request of the Administrative Agent or the Required Lenders, on and after receipt of a notice that an Event of Default under Section 7.01(a) or (b) has occurred, the highest pricing level shall apply as of the date of such Event of Default (as reasonably determined by the Borrower) and shall continue to so apply to but excluding the date on which such Event of Default shall cease to be continuing (and thereafter, in each case, the pricing level otherwise determined in accordance with this definition shall apply).",
+     "main": true,
+     "origin": "quote"
+    }
+   ],
+   "Maturity Date": [
+    {
+     "text": "Term Maturity Date” means, subject to Section 2.25, October 16, 2032.",
+     "main": true,
+     "origin": "quote"
+    },
+    {
+     "text": "The Borrower may at any time and from time to time request that all or a portion, including one or more tranches, of the Loans (including any Extended Loans), in each case existing at the time of such request (each such tranche of existing Loans, an “Existing Tranche” and the Loans of any such tranche, the “Existing Loans”) be converted to extend the termination date thereof and/or the scheduled maturity date(s) of any payment of principal with respect to all or a portion of any such Existing Tranche",
+     "main": false,
+     "origin": "span"
+    }
+   ],
+   "Liability Management Protections": [
+    {
+     "text": "Notwithstanding anything herein to the contrary, neither the Borrower nor any of the Restricted Subsidiaries shall make any Investment consisting of any Material Intellectual Property, or otherwise dispose of or transfer, any Material Intellectual Property (other than non-exclusive licenses with respect to any Material Intellectual Property) to, any Unrestricted Subsidiary.",
+     "main": true,
+     "origin": "quote"
+    },
+    {
+     "text": "provided that no Guarantor shall be released from its Guarantee of the Secured Obligations solely due to the fact that such Guarantor ceases to be a wholly-owned Subsidiary of the Borrower, unless the Equity Interests of such Guarantor were sold to a person, other than an Affiliate of the Borrower, for a bona fide business purpose",
+     "main": true,
+     "origin": "span"
+    },
+    {
+     "text": "contractually subordinate, or have the effect of subordinating, the Loan Document Obligations in right of payment to any other Indebtedness of the type referred to in clause (a) or (b) of the definition of “Indebtedness” or (B) except as permitted by the Credit Agreement on the Effective Date, contractually subordinate, or have the effect of subordinating, all or substantially all of the Collateral securing the Secured Obligations to the Liens on such Collateral securing any other Indebtedness of the type referred to in clause (a) or (b) of the definition of “Indebtedness” (any such Indebtedness in the immediately foregoing clause (A) or (B), the “Priority Debt”)",
+     "main": true,
+     "origin": "span"
+    },
+    {
+     "text": "a Subsidiary that ceases to be a wholly-owned Subsidiary shall not be an Excluded Subsidiary under this clause (a) unless the conditions to its release as a Guarantor set forth in the proviso in Section 9.15 have been satisfied",
+     "main": false,
+     "origin": "span"
+    },
+    {
+     "text": "if any Restricted Subsidiary owns or holds any Material Intellectual Property, such Restricted Subsidiary may not be designated as an Unrestricted Subsidiary.",
+     "main": false,
+     "origin": "span"
+    }
+   ]
+  }
+ }
+}
