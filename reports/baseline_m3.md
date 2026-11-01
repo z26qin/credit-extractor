@@ -1,22 +1,20 @@
 # Milestone 3: label-free baselines on 5 credit agreements
 
 **Final report.** All primary passes and ladders ran. The generated section below is the
-notebook's report as written on 2026-10-31 at 19:52. `review_sheet.csv` has 330 rows and is on
-the Hub under `m3_baselines/`. It is not in `reports/` yet, because this machine is not logged
-in to the private Hub repo.
+notebook's report as written on 2026-10-31 at 19:52, checked against the copy on the Hub.
+[`review_sheet.csv`](review_sheet.csv) is the notebook's final sheet, 330 rows, copied from the
+Hub's `m3_baselines/`.
 
 ## Observations
 
-Written 2026-10-31 from the reports and run logs of both sessions. Nothing in this section comes
-from reading raw outputs or the review sheet, and no quote has been judged yet.
+Written 2026-10-31 from the reports, run logs, raw records and review sheet. No quote has been
+judged yet.
 
-1. **Model B ignored the credit schema.** Condition b has 0 quotes even after the ladder. All
-   104 outputs have unknown keys, and none has every credit key. Its empty answers are 291
-   tokens, the same as condition a's 41-key empty answer, while condition c's 10-key empty
-   answer is 82 tokens. So Model B very likely kept answering in CUAD's 41 keys. That is an
-   inference from these counts, because the raw outputs were not opened. The `0/5` in the table
-   says nothing about the agreements, and this is the risk of a model trained on one prompt
-   shape.
+1. **Model B ignored the credit schema.** Condition b has 0 quotes even after the ladder. Its
+   raw records show why: all 104 usable outputs have exactly CUAD's 41 keys and no credit key.
+   The 49 empty answers are all 291 tokens long, the length of a 41-key empty answer. The
+   `0/5` in the table says nothing about the agreements, and this is the risk of a model
+   trained on one prompt shape.
 2. **Model A follows the schema.** It has one loop in 104 chunks, 97 of 104 outputs have every
    key, and it found quotes for all 10 clause types. Found is not correct, so this says nothing
    about quality yet.
@@ -45,9 +43,10 @@ from reading raw outputs or the review sheet, and no quote has been judged yet.
    6 at 1.05, 2 at 1.15 and 2 at 1.25.
 9. **Recovered chunks did not behave alike.** Condition a gained 37 quotes, and all 37 are in
    the document with quote marks and case ignored (233 of 240 before, 270 of 277 after). Its
-   CUAD clause types with a quote rose from 15 to 25. Condition c gained 4 quotes, all in
-   `exlservice-2026`, and none of the 4 is in the document (185 of 267 before, 185 of 271
-   after). These counts are worked out from the reported rates.
+   CUAD clause types with a quote rose from 15 to 25. Condition c gained 4 quotes from
+   `exlservice-2026` chunk 0, which holds the table of contents, and the sheet marks none of
+   the 4 as in the document. One is an Available Amount quote, although the agreement never
+   uses the term, so the 4 of 5 agreements found for that clause includes an invented quote.
 10. **Most of the runtime is four failed retries.** Stage times add up to 519 minutes (8.7
     hours): 188 for the primary passes and 331 for the ladder. That is 1,038.5 GPU-device
     minutes (17.3 hours). They leave out setup and one 214 s attempt from a session that stopped
@@ -147,5 +146,3 @@ Quotes per document (b / c):
 ### Condition a: CUAD clauses found
 
 25 of 41 CUAD clause types have a quote in at least one document: Document Name (100%), Parties (100%), Agreement Date (100%), Governing Law (100%), Change of Control (100%), Anti-Assignment (100%), Minimum Commitment (100%), Volume Restriction (100%), Audit Rights (100%), Cap on Liability (100%), Insurance (100%), Effective Date (40%), Expiration Date (20%), Most Favored Nation (20%), Competitive Restriction Exception (20%), Termination for Convenience (20%), Rofr/Rofo/Rofn (20%), Price Restrictions (20%), Joint IP Ownership (20%), Non-Transferable License (20%), Affiliate License-Licensee (20%), Post-Termination Services (20%), Uncapped Liability (20%), Liquidated Damages (20%), Covenant Not to Sue (20%).
-
-Review sheet: 330 rows.
