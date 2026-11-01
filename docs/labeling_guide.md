@@ -19,6 +19,8 @@ The final sheet has 330 rows. The earlier 327-row sheet lacks 4 `exlservice-2026
 | condition c, `found=False` | 9 | search the agreement, then label `absent` or `missed` |
 | condition b | 50 | skip: Model B answered in CUAD keys, so these rows say nothing about the agreement |
 
+`repay-2026` was labeled on 2026-11-01 by Claude at the user's request, not by the user.
+
 Order of work:
 
 1. Start with `repay-2026`: 49 quotes across most clause types, plus one clause to search for.
@@ -188,6 +190,7 @@ Put tags first, separated by `;`, and spans last.
 | `mention` | uses the term but states no term |
 | `heading` | a heading, contents entry or cross-reference |
 | `adjacent` | a nearby provision the rules exclude |
+| `unrelated` | text that belongs to no clause type, such as EBITDA add-backs |
 | `belongs: <clause name>` | the right text under the wrong clause type |
 | `invented` | states terms the agreement does not have |
 | `jcrew`, `chewy`, `serta`, `other_lme` | liability management type |
@@ -225,3 +228,4 @@ The script for this does not exist yet. It is written after the review.
 
 | date | change | rows affected |
 |---|---|---|
+| 2026-11-01 | Added the tag `unrelated` | 12 rows in `repay-2026` |
