@@ -1,0 +1,9 @@
+# Training runtime for the small SFT and RLVR loop (Kaggle / Colab). Installed into its own venv
+# (/tmp/train-env) by the notebook, like vLLM, so it cannot touch the platform's Python.
+# These versions ran the CPU tests with a tiny model (tests/test_small_loop.py).
+transformers==5.22.1
+peft==0.21.2
+trl==1.17.1
+accelerate==1.15.0
+datasets==5.1.0
+bitsandbytes==0.50.2

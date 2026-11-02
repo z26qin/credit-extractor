@@ -1,0 +1,473 @@
+# Text bank for the synthetic credit excerpts (src/synth.py, docs/next_steps.md).
+# Written for this project from the clause definitions and docs/labeling_guide.md, not from the
+# gold passages. `{name}` is a slot filled per excerpt. A template that starts with `{item} `
+# gets a clause label such as (k) in the excerpt, and the label stays out of the answer.
+#
+# clauses:     text that counts. The last template of each clause type is held out.
+# lookalikes:  text that does not count, listed under the clause type it sits beside. They copy
+#              what Model A quoted by mistake in Milestone 3: neighboring items, sentences that
+#              only use a term, and headings. The last one of each list is held out.
+# general:     text that belongs to no clause type. The last two are held out.
+multi:          # clause types that can appear more than once in an excerpt
+  - Liability Management Protections
+
+clauses:
+  Financial Maintenance Covenant:
+    - >-
+      Section {sec}. Financial Covenant. {Borrower} shall not permit the {ratio_name} as of the
+      last day of any fiscal quarter, beginning with the first full fiscal quarter after the
+      Closing Date, to exceed {ratio}.
+    - >-
+      Springing Leverage Test. On the last day of any Test Period on which the aggregate
+      Revolving Exposure exceeds {pct} of the Revolving Commitments, the {ratio_name} shall not
+      be greater than {ratio}. This test applies solely for the benefit of the Revolving
+      Lenders, and it is not tested on any other date.
+    - >-
+      Minimum Interest Coverage. {Borrower} will maintain, as of the end of each fiscal quarter,
+      a ratio of {ebitda} to Consolidated Cash Interest Expense for the four fiscal quarters
+      then ended of not less than {cover}.
+    - >-
+      Maximum Leverage. As of the last day of each fiscal quarter set out below, the
+      {ratio_name} shall not exceed the ratio opposite that quarter: fiscal quarters ending in
+      {year}, {ratio}; fiscal quarters ending in {year2}, {ratio2}; and each fiscal quarter
+      after that, {ratio3}. Following a Material Acquisition, {Borrower} may raise the
+      applicable level by 0.50:1.00 for four consecutive fiscal quarters.
+    - >-
+      Fixed Charge Coverage. During any Covenant Period, {Borrower} must maintain a Fixed Charge
+      Coverage Ratio of at least {cover}, measured on the last day of the most recent fiscal
+      quarter for which financial statements have been delivered. A Covenant Period starts when
+      Excess Availability falls below the greater of {amount} and {pct} of the Line Cap.
+    - >-
+      Leverage Maintenance. {Holdings} shall cause the {ratio_name}, tested each quarter on a
+      trailing four-quarter basis, to remain at or below {ratio}, and shall also hold
+      unrestricted cash of no less than {amount} at all times.
+
+  Incremental Facility:
+    - >-
+      Section {sec}. Incremental Commitments. {Borrower} may, by written notice to the {agent} at
+      any time after the Closing Date, request one or more new term loan tranches or increases
+      in the Revolving Commitments in an aggregate amount not to exceed the sum of (i) the
+      greater of {amount} and {pct} of {ebitda}, plus (ii) all voluntary prepayments of the
+      {loans}, plus (iii) an unlimited amount so long as the {ratio_name}, on a pro forma basis,
+      does not exceed {ratio}.
+    - >-
+      Additional Term Facilities. At any time, and from time to time, {borrower} may add one or
+      more additional tranches of term loans under this Agreement, in a total principal amount
+      of up to {amount}. No Lender is obligated to provide any portion of an Incremental Term
+      Loan.
+    - >-
+      Increase Option. Subject to the conditions in this Section, {borrower} may increase the
+      aggregate Commitments by up to {amount} in total during the term of this Agreement. Any
+      increase requires that no Default exists and that the representations in Article {art}
+      are true in all material respects on the date of the increase.
+    - >-
+      “Incremental Cap” means, as of any date of determination, (a) the greater of {amount} and
+      {pct} of {ebitda} for the most recent Test Period, less amounts previously used, plus (b)
+      unused capacity reallocated from the general debt basket, plus (c) any amount that would
+      not cause the {ratio_name} to exceed {ratio}.
+    - >-
+      Incremental Loans. So long as no Event of Default exists after giving effect to the
+      borrowing, {borrower} may obtain Incremental Loans from existing Lenders or other Eligible
+      Assignees, up to a maximum of {amount} plus the amount of any Commitment reductions made
+      before that date.
+    - >-
+      Accordion. {Borrower} may ask existing Lenders or new lenders to commit to extra term
+      loans of up to {amount} in total, and this right may be used on no more than {count}
+      occasions before the Maturity Date.
+
+  MFN Protection:
+    - >-
+      Most Favored Nation. If the All-In Yield on any Incremental Term Loans incurred within
+      {months} months after the Closing Date exceeds the All-In Yield on the {loans} by more
+      than {bps} basis points, the Applicable Margin on the {loans} shall be increased so that
+      the difference equals {bps} basis points.
+    - >-
+      The Effective Yield on pari passu Incremental Term Loans may not be more than {bps} basis
+      points above the Effective Yield then in effect for the {loans}, unless the margin on the
+      {loans} is raised by the amount of the excess. This protection does not apply to
+      Incremental Term Loans (x) in an amount up to the greater of {amount} and {pct} of
+      {ebitda}, (y) that mature more than two years after the Latest Maturity Date, or (z)
+      incurred to fund a Permitted Acquisition.
+    - >-
+      MFN Adjustment. If the interest rate margins for any new term facility are higher than
+      those for the {loans} by more than {bps} basis points, the margins for the {loans} shall
+      rise on the effective date of that facility by the amount needed to reduce the gap to
+      {bps} basis points.
+    - >-
+      “MFN Sunset Date” means the date that is {months} months after the Closing Date. After the
+      MFN Sunset Date, no increase in the pricing of the {loans} is required because of any
+      Incremental Facility.
+    - >-
+      “MFN Protection” means, for any Incremental Term Facility secured on a pari passu basis,
+      that the weighted average yield of that facility shall not exceed the corresponding yield
+      of the {loans} by more than {bps} basis points. Any excess is cured by increasing the
+      yield of the {loans}.
+    - >-
+      Pricing Protection for Existing Lenders. Should {borrower} obtain new pari passu term debt
+      at a yield higher by {bps} basis points or more than the yield on the {loans}, the pricing
+      on the {loans} adjusts upward at the same time to remove the excess, and this adjustment
+      ceases to apply {months} months after the Closing Date.
+
+  Restricted Payments General Basket:
+    - >-
+      {item} {borrower} may make other Restricted Payments in an aggregate amount not to exceed
+      the greater of {amount} and {pct} of {ebitda} since the Closing Date;
+    - >-
+      {item} so long as no Event of Default has occurred and is continuing, additional Restricted
+      Payments in an aggregate amount during the term of this Agreement of up to {amount};
+    - >-
+      {item} Restricted Payments not otherwise permitted by this Section in a total amount that,
+      when combined with all other payments made under this clause, does not exceed the greater
+      of {amount} and {pct} of Consolidated Total Assets;
+    - >-
+      {item} dividends and other distributions on Equity Interests of {holdings}, without regard
+      to purpose, of up to the greater of (A) {amount} and (B) {pct} of {ebitda} for the most
+      recently ended Test Period, in each fiscal year, with unused amounts carried forward to
+      the next fiscal year;
+    - >-
+      Notwithstanding the foregoing limits, {borrower} and its Restricted Subsidiaries may
+      declare and pay any dividend or other distribution in an amount that, together with all
+      prior payments under this sentence, is no greater than {amount}.
+    - >-
+      {item} any other payment on account of Equity Interests, with a cap for all such payments
+      of {amount} or, if higher, {pct} of {ebitda};
+
+  Available Amount / Builder Basket:
+    - >-
+      “Available Amount” means, at any time, a cumulative amount equal to (a) the greater of
+      {amount} and {pct} of {ebitda}, plus (b) {pct2} of Consolidated Net Income from the first
+      day of the fiscal quarter in which the Closing Date occurs, plus (c) the Net Cash Proceeds
+      of Qualified Equity Interests issued after the Closing Date, plus (d) returns on
+      Investments made with the Available Amount, minus (e) prior uses of the Available Amount.
+    - >-
+      “Cumulative Credit” means the sum, without duplication, of (i) {amount}, (ii) Retained
+      Excess Cash Flow for each fiscal year starting with the fiscal year ending {date}, (iii)
+      the net proceeds of equity contributions to {borrower}, and (iv) declined proceeds, in each
+      case reduced by amounts applied to Restricted Payments, Investments or prepayments of
+      Junior Debt.
+    - >-
+      {item} Restricted Payments in an amount not to exceed the Available Amount at that time, so
+      long as no Event of Default exists and the {ratio_name} on a pro forma basis is less than
+      {ratio};
+    - >-
+      “Builder Basket” means an amount, never less than zero, which starts at {amount} on the
+      Closing Date and grows by (1) {pct2} of cumulative Consolidated Net Income and (2) the cash
+      proceeds of any capital contribution received by {borrower}. Amounts in the Builder Basket
+      may be spent on dividends, Investments and the repayment of subordinated debt.
+    - >-
+      “Growth Amount” means the sum of the Starter Amount of {amount}, cumulative Retained Excess
+      Cash Flow since the Closing Date, and the proceeds of new common equity of {holdings}, less
+      all earlier use of the Growth Amount.
+    - >-
+      “Retained Amount Basket” means, on any date, an accumulating sum made up of a starting
+      balance of {amount}, plus retained cash flow for all completed fiscal years, plus proceeds
+      from new common equity, less all previous usage of that sum for distributions, Investments
+      or junior debt payments.
+
+  Debt Incurrence General Basket:
+    - >-
+      {item} other Indebtedness of {borrower} and its Restricted Subsidiaries in a total principal
+      amount at any time outstanding not to exceed the greater of {amount} and {pct} of {ebitda};
+    - >-
+      {item} additional unsecured Indebtedness in a principal amount of up to {amount} outstanding
+      at any time;
+    - >-
+      {item} Indebtedness not otherwise permitted by this Section, provided that the total
+      principal amount incurred under this clause and then outstanding does not exceed the
+      greater of {amount} and {pct} of Consolidated Total Assets;
+    - >-
+      In addition to the Indebtedness described above, the Loan Parties may incur further
+      Indebtedness of any type, so long as the sum of all such Indebtedness does not at any time
+      exceed {amount}.
+    - >-
+      {item} general purpose debt capacity, being any Indebtedness up to the greater of (x)
+      {amount} and (y) {pct} of {ebitda} as of the date of incurrence, measured on a pro forma
+      basis for the most recent Test Period;
+    - >-
+      {item} any other debt for borrowed money, limited for all debt under this clause to {amount}
+      or, if more, {pct} of {ebitda} at the time it is incurred;
+
+  Liens General Basket:
+    - >-
+      {item} other Liens securing obligations in a total amount at any time outstanding not to
+      exceed the greater of {amount} and {pct} of {ebitda};
+    - >-
+      {item} additional Liens on assets of {borrower} or any Restricted Subsidiary securing
+      Indebtedness or other obligations of up to {amount} at any one time;
+    - >-
+      {item} Liens not otherwise permitted by this Section, so long as the obligations they secure
+      do not exceed, in total, the greater of {amount} and {pct} of Consolidated Total Assets;
+    - >-
+      {item} Liens on Collateral that rank junior to the Liens securing the Obligations, and on
+      other property, securing obligations permitted under this Agreement and not exceeding
+      {amount} in the aggregate;
+    - >-
+      Beyond the Permitted Liens listed above, the Loan Parties may grant Liens on their property
+      so long as the amount of all obligations so secured does not exceed {amount}.
+    - >-
+      {item} any other Lien on any asset, provided that the debt secured by all Liens under this
+      clause never exceeds {amount} or, if more, {pct} of {ebitda};
+
+  Applicable Margin:
+    - >-
+      “Applicable Margin” means (a) for {rate} Loans, {margin} per annum and (b) for {base} Loans,
+      {margin2} per annum.
+    - >-
+      “Applicable Rate” means, for any day, the rate per annum set out below opposite the Pricing
+      Level in effect on that day, based on the {ratio_name} in the most recent Compliance
+      Certificate: Pricing Level I, greater than {ratio}, {margin} for SOFR Loans and {margin2}
+      for {base} Loans; Pricing Level II, less than or equal to {ratio} but greater than {ratio2},
+      {margin3} for SOFR Loans and {margin4} for {base} Loans; Pricing Level III, less than or
+      equal to {ratio2}, {margin5} for SOFR Loans and {margin6} for {base} Loans.
+    - >-
+      “Applicable Margin” means, for the {loans}, {margin} per annum for {rate} Loans and {margin2}
+      per annum for {base} Loans; provided that on and after the first date on which financial
+      statements are delivered for the first full fiscal quarter after the Closing Date, each
+      rate falls by 0.25% if the {ratio_name} is at or below {ratio}.
+    - >-
+      “Applicable Spread” means, until delivery of the first Compliance Certificate, {margin} for
+      Revolving Loans bearing interest at {rate} and {margin2} for {base} Revolving Loans, and
+      after that the spread for the level matching the {ratio_name} shown in that certificate.
+    - >-
+      “Pricing Margin” means {margin3} per annum for each {loans} borrowing at {rate} and {margin4}
+      per annum for each borrowing at the {base}.
+    - >-
+      “Interest Margin” means, for any Term Benchmark Borrowing, {margin} a year, and for any ABR
+      Borrowing, {margin2} a year, in each case stepping down by 25 basis points once {borrower}
+      completes a Qualified IPO.
+
+  Maturity Date:
+    - >-
+      “Maturity Date” means {date}; provided that if that day falls on a non-Business Day, the
+      Loans are instead due on the Business Day just before it.
+    - >-
+      “Term Loan Maturity Date” means the {nth} anniversary of the Closing Date.
+    - >-
+      “Revolving Maturity Date” means the earlier of (a) {date} and (b) the date on which the
+      Revolving Commitments terminate in full under Section {sec}.
+    - >-
+      “Maturity Date” means {date}; provided, however, that if on the date {days} days before the
+      stated maturity of the Senior Notes any of those notes remain outstanding in an amount above
+      {amount}, the Maturity Date shall instead be that earlier date.
+    - >-
+      “Scheduled Maturity Date” means {date}, as it may be extended once at the election of
+      {borrower} by one year, subject to payment of an extension fee of {fee} on the Commitments
+      then in effect and the absence of any Default.
+    - >-
+      The Term Loans fall due in full on the {nth} anniversary of the Closing Date, and all unpaid
+      principal and accrued interest on that day must be paid in cash.
+
+  Liability Management Protections:
+    - >-
+      Notwithstanding anything in this Agreement to the contrary, no Unrestricted Subsidiary may
+      own or hold an exclusive license of any Material Intellectual Property, and {borrower} shall
+      not transfer any Material Intellectual Property to an Unrestricted Subsidiary.
+    - >-
+      No Subsidiary Guarantor shall be released from its Guarantee solely because it ceases to be
+      a wholly owned Subsidiary, unless the transfer that caused it to do so was made to a Person
+      that is not an Affiliate of {borrower}, was for a bona fide business purpose, and was not
+      made with the primary purpose of obtaining that release.
+    - >-
+      Without the written consent of each Lender directly and adversely affected, no amendment,
+      waiver or consent shall subordinate the Liens on the Collateral or the Obligations in right
+      of payment to any other Indebtedness, unless each such Lender has been offered a bona fide
+      opportunity to provide its pro rata share of that senior debt on the same terms.
+    - >-
+      The designation of a Subsidiary as an Unrestricted Subsidiary is not permitted if, at that
+      time, the Subsidiary owns intellectual property that is material to the business of
+      {borrower} and its Restricted Subsidiaries, taken as a whole.
+    - >-
+      Any amendment that would rank the Obligations behind any other debt for borrowed money, or
+      would rank the Liens on the Collateral behind the Liens securing that debt, requires the
+      consent of every Lender holding the affected Class of Loans.
+    - >-
+      A Guarantor that becomes a non-wholly owned Subsidiary stays a Guarantor under the Loan
+      Documents, except where that change resulted from a genuine joint venture or a sale to an
+      unaffiliated third party for fair value.
+
+lookalikes:
+  Financial Maintenance Covenant:
+    - >-
+      {Borrower} shall deliver to the {agent}, within 45 days after the end of each fiscal
+      quarter, unaudited consolidated financial statements and a Compliance Certificate showing
+      the calculation of the {ratio_name}.
+    - >-
+      Equity Cure. If {Borrower} fails to comply with the financial covenant, {holdings} may
+      receive cash common equity within ten Business Days after the required delivery date, and
+      that amount is added to {ebitda} for the relevant fiscal quarter.
+    - >-
+      “{ratio_name}” means, on any date, the ratio of Consolidated Total Net Debt on that date to
+      {ebitda} for the most recent Test Period.
+    - >-
+      Section {sec}. Financial Covenant ........ {page}
+
+  Incremental Facility:
+    - >-
+      Each Incremental Amendment shall be signed by {borrower}, the {agent} and each lender
+      providing the new commitments, and the {agent} shall promptly notify the Lenders of its
+      effective date.
+    - >-
+      Incremental Term Loans shall mature no earlier than the Latest Maturity Date, and their
+      weighted average life shall be no shorter than the remaining weighted average life of the
+      {loans}.
+    - >-
+      {item} Incremental Equivalent Debt in the form of senior secured notes, so long as the
+      {ratio_name} on a pro forma basis does not exceed {ratio};
+    - >-
+      Refinancing Facilities. {Borrower} may obtain Credit Agreement Refinancing Indebtedness to
+      exchange or replace all or part of any Class of Loans, and the proceeds shall be applied to
+      that Class on the date of incurrence.
+
+  MFN Protection:
+    - >-
+      “All-In Yield” means, for any Indebtedness, the yield taking into account the interest rate
+      margin, any interest rate floor and original issue discount, with upfront fees spread over
+      an assumed four-year average life.
+    - >-
+      {Borrower} shall pay the {agent} and the Lenders the fees set out in the Fee Letter on the
+      dates stated there.
+    - >-
+      Most Favored Lender. If {borrower} agrees to a tighter financial covenant in any other debt
+      agreement, that covenant shall be deemed to be included in this Agreement for the benefit of
+      the Lenders.
+    - >-
+      Repricing Transaction. If a Repricing Transaction occurs within {months} months after the
+      Closing Date, {borrower} shall pay each Lender a premium of 1.00% of the principal amount of
+      the {loans} affected.
+
+  Restricted Payments General Basket:
+    - >-
+      {item} any Restricted Subsidiary may pay dividends ratably to the holders of its Equity
+      Interests;
+    - >-
+      {item} payments to {holdings} to cover franchise taxes and ordinary operating expenses of up
+      to {amount2} in any fiscal year;
+    - >-
+      {item} repurchases of Equity Interests held by current or former officers and employees of up
+      to {amount2} in any fiscal year;
+    - >-
+      {Borrower} shall not, and shall not permit any Restricted Subsidiary to, declare or make any
+      Restricted Payment, except that:
+    - >-
+      {item} tax distributions for any period in which {borrower} is a member of a consolidated
+      group, in the amount that group would owe on a standalone basis;
+
+  Available Amount / Builder Basket:
+    - >-
+      “Available Tenor” means, for any Benchmark, any tenor for that Benchmark that is then used to
+      determine the length of an Interest Period.
+    - >-
+      “Available Commitment” means, for any Lender, its Revolving Commitment less its Revolving
+      Exposure on that date.
+    - >-
+      Any Investment made under clause {item} above shall reduce the Available Amount by the amount
+      of that Investment.
+    - >-
+      “Excess Cash Flow” means, for any fiscal year, {ebitda} less cash taxes, cash interest,
+      scheduled principal payments and capital expenditures for that fiscal year.
+
+  Debt Incurrence General Basket:
+    - >-
+      {item} Indebtedness under the Loan Documents;
+    - >-
+      {item} Indebtedness owed by one Loan Party to another Loan Party;
+    - >-
+      {item} Capital Lease Obligations and purchase money Indebtedness of up to {amount2} outstanding
+      at any time;
+    - >-
+      {item} Indebtedness assumed in a Permitted Acquisition, so long as the {ratio_name} does not
+      exceed {ratio} on a pro forma basis;
+    - >-
+      {item} Guarantees by any Loan Party of Indebtedness that is otherwise permitted under this
+      Section;
+
+  Liens General Basket:
+    - >-
+      {item} Liens for taxes, assessments or governmental charges that are not yet overdue or that
+      are being contested in good faith;
+    - >-
+      {item} carriers’, warehousemen’s, mechanics’ and similar Liens arising in the ordinary course
+      of business;
+    - >-
+      {item} Liens securing Capital Lease Obligations and purchase money Indebtedness, limited to
+      the assets financed;
+    - >-
+      {item} Liens existing on the Closing Date and listed on Schedule {sec}, and any renewals of
+      them;
+    - >-
+      {item} easements, rights-of-way and other minor title defects that do not materially
+      interfere with the ordinary conduct of business;
+
+  Applicable Margin:
+    - >-
+      Each {rate} Loan shall bear interest at a rate per annum equal to {rate} for the Interest
+      Period in effect plus the Applicable Margin.
+    - >-
+      “Commitment Fee Rate” means {fee} per annum on the unused Revolving Commitments.
+    - >-
+      “Default Rate” means, for any Obligation, {fee} per annum above the rate otherwise applicable
+      to that Obligation.
+    - >-
+      “Floor” means a rate of interest equal to 0.00% per annum, and if {rate} as determined would
+      be below the Floor, it shall be deemed to be the Floor.
+
+  Maturity Date:
+    - >-
+      {Borrower} shall repay the {loans} in equal quarterly installments of {fee} of their original
+      principal amount on the last Business Day of each March, June, September and December.
+    - >-
+      “Interest Payment Date” means the last day of each Interest Period and the Maturity Date of
+      the relevant Loan.
+    - >-
+      “Latest Maturity Date” means, on any date, the latest maturity date applicable to any Loan or
+      Commitment then outstanding.
+    - >-
+      All Letters of Credit shall expire no later than five Business Days before the Maturity Date.
+
+  Liability Management Protections:
+    - >-
+      Section {sec}. Designation of Subsidiaries. {Borrower} may designate any Restricted Subsidiary
+      as an Unrestricted Subsidiary so long as no Event of Default exists and the resulting
+      Investment is permitted under this Agreement.
+    - >-
+      Subject to the rest of this Section, this Agreement may be amended with the written consent
+      of {borrower} and the Required Lenders.
+    - >-
+      A Guarantor shall be released automatically upon any sale of its Equity Interests that is
+      permitted under this Agreement.
+    - >-
+      {Borrower} may purchase Term Loans through open market purchases or Dutch auctions, and any
+      Term Loans so purchased shall be cancelled at once.
+
+general:
+  - >-
+    “Consolidated EBITDA” means, for any period, Consolidated Net Income plus interest, taxes,
+    depreciation and amortization, plus restructuring charges of up to {pct} of that amount, plus
+    run-rate cost savings expected within {months} months.
+  - >-
+    “Change of Control” means that any person or group, other than the Permitted Holders, acquires
+    beneficial ownership of more than {pct2} of the voting Equity Interests of {holdings}.
+  - >-
+    Section {sec}. Notices. All notices under this Agreement shall be in writing and delivered by
+    hand, by overnight courier or by email to the address set out on Schedule {sec2}.
+  - >-
+    Section {sec}. Governing Law. This Agreement shall be governed by the law of the State of New
+    York, and each party submits to the jurisdiction of the courts located in that State.
+  - >-
+    Section {sec}. Expenses. {Borrower} shall pay all reasonable out-of-pocket costs of the {agent}
+    in connection with the preparation and administration of the Loan Documents.
+  - >-
+    ARTICLE {art}. NEGATIVE COVENANTS
+  - >-
+    Section {sec}. Assignments. Each Lender may assign all or part of its Loans to an Eligible
+    Assignee with the consent of {borrower} and the {agent}, such consent not to be unreasonably
+    withheld.
+  - >-
+    “Excluded Subsidiary” means any Subsidiary that is not wholly owned, is prohibited by law from
+    giving a Guarantee, or is an immaterial Subsidiary.
+  - >-
+    “Business Day” means any day other than a Saturday, a Sunday or a day on which banks in New York
+    City are authorized or required to close.
+  - >-
+    Section {sec}. Use of Proceeds. The proceeds of the {loans} shall be used to fund the
+    Transactions and to pay related fees and expenses.

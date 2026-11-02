@@ -1,0 +1,63 @@
+# Small SFT and RLVR loop on synthetic data (notebooks/04_small_loop.ipynb, docs/next_steps.md).
+seed: 42
+base_model: Qwen/Qwen3-4B-Instruct-2507
+hub_prefix: small_loop
+gate_min_gain: 0.10       # SFT's mean reward on the held-out set must beat Model A's by this
+
+synth:
+  defaults:
+    min_chars: 3000
+    max_chars: 13000
+    max_clauses: 4
+    min_lookalikes: 2
+    max_lookalikes: 6
+    empty_share: 0.25     # Model A's main fault in M3 was quoting too much
+    page_break_share: 0.15
+  train:
+    n: 300
+  rlvr:                   # short, so sampling stays cheap and answers fit in 512 tokens
+    n: 200
+    min_chars: 2000
+    max_chars: 5000
+    max_clauses: 2
+    max_passage_chars: 1000
+    max_quote_chars: 1600
+  held_out:
+    n: 60
+
+sft:                      # recipe in docs/repo_notes.md, with fp16 and a shorter sequence limit
+  max_seq_length: 4096
+  epochs: 2
+  learning_rate: 2.0e-4
+  warmup_ratio: 0.06
+  grad_accum: 8
+  r: 16
+  alpha: 32
+  save_steps: 25
+
+rlvr:
+  prompts: 200
+  num_generations: 4
+  max_completion_length: 512
+  learning_rate: 1.0e-5
+  save_steps: 50
+
+short_test:
+  sft_steps: 10
+  rlvr_steps: 3
+  max_rlvr_hours: 4       # projected time above this cuts RLVR to fewer prompts
+  fewer_prompts: 100
+
+# Scoring runs through the M3 runner with M3's chunks, so Model A's M3 scores stay the baseline.
+chunk_chars: 32000
+overlap: 4000
+max_tokens: 4096          # the longest valid M3 output was 2,529 tokens
+ladder: [1.05, 1.15, 1.25]
+batch_size: 16
+max_model_len_cap: 65536
+vllm_kwargs:
+  gpu_memory_utilization: 0.90
+  enforce_eager: false
+m1_prefix: m1_collect
+manifest: reports/m1_manifest.csv
+sync_every_minutes: 3

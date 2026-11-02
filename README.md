@@ -19,7 +19,7 @@ so `src/` is an independent implementation and does not import it. See
 | M1 collect 5 credit agreements | **done 2026-10-30**: 5 documents on the Hub, cleaned text reviewed after a cleaner fix, manifest in [reports/m1_manifest.csv](reports/m1_manifest.csv) |
 | M2 credit schema + prompts | **approved 2026-10-30**: 10 clause types in [configs/credit_schema.yaml](configs/credit_schema.yaml), exact prompts in [reports/m2_prompts.md](reports/m2_prompts.md) |
 | M3 label-free baselines | **ran 2026-10-30 to 31**: numbers and observations in [reports/baseline_m3.md](reports/baseline_m3.md). All 312 decodes usable after the ladder. Model B ignored the credit schema (0 quotes), and Model A gave 271 quotes in [reports/review_sheet.csv](reports/review_sheet.csv) labeled under [docs/labeling_guide.md](docs/labeling_guide.md). Claude labeled all five agreements on 2026-11-01 at the user's request: 61 of 271 quotes are right, Found F1 0.829, Strict F1 0.657 ([reports/score_m3.md](reports/score_m3.md)) |
-| Next: small SFT + small RLVR on synthetic data | **plan only, nothing has run**: [docs/next_steps.md](docs/next_steps.md). Free Kaggle GPU, no Nebius |
+| M4 small SFT + small RLVR on synthetic data | **code written, CPU tests pass, nothing has run on a GPU**: [docs/next_steps.md](docs/next_steps.md), [notebooks/04_small_loop.ipynb](notebooks/04_small_loop.ipynb). Free Kaggle GPU, no Nebius |
 
 ## Layout
 
@@ -29,6 +29,10 @@ src/prompts.py     prompt strings (Model B's, byte-identical), credit prompt, cl
 src/baselines.py   M3 orchestration, report, review sheet
 src/gold.py        labeled review sheet -> gold set (docs/labeling_guide.md)
 src/score.py       scores models against a gold set
+src/synth.py       synthetic credit excerpts with known answers
+src/train.py       small SFT (QLoRA), adapter merge
+src/rlvr.py        verifiable reward, small RLVR (TRL GRPO)
+src/small_loop.py  M4 orchestration: data, training, gate, scoring, report
 src/chunking.py    char windows with overlap
 src/parsing.py     JSON parsing, loop detection, key canonicalization
 src/merge.py       per-document union of chunk outputs (deduplicated)
@@ -118,6 +122,11 @@ tests/             CPU unit tests:  python -m pytest -q
   uses CUAD's clause types. `docs/labeling_guide.md` sets the rules for `correct` and `note`.
 - **Small plan (decided 2026-11-01).** The next step is a small SFT loop and a small RLVR loop
   on synthetic data, so the compute plan below is parked and no Nebius call is planned.
+- **Training stack.** The brief reuses upstream's Unsloth recipe. M4 keeps the recipe's settings
+  and uses transformers, peft, bitsandbytes and TRL directly, in their own venv
+  (`requirements-train.txt`). Unsloth needs a GPU and caps transformers at 5.17, and this stack
+  lets the whole loop run in CPU tests on a tiny model. The cost may be speed on a T4, which the
+  notebook's short test measures.
 - **Compute after M3 (decided 2026-10-30, parked).** Teacher pre-labeling uses a DeepSeek model on
   Nebius Token Factory with the existing `NEBIUS_API_KEY`. The calls need no GPU, so they
   can run on Kaggle with no accelerator. Nebius GPU VMs stay a training fallback. Every

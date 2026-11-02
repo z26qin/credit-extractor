@@ -8,6 +8,8 @@ Gold set labeled by: Claude, 2026-11-01, at the user's request; not reviewed by 
 | Strict F1 | 0.657 (0.492-0.744) | 0.000 (0.000-0.000) |
 | upstream detection F1 | 0.902 | 0.000 |
 | upstream strict F1 | 0.333 | 0.000 |
+| mean reward | 0.422 | 0.000 |
+| share of quotes right | 0.2362 | None |
 | quotes | 271 | 0 |
 | verbatim, quote marks and case ignored | 0.6827 | None |
 | same, page numbers removed | 0.7269 | None |

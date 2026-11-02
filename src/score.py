@@ -18,6 +18,7 @@ from .gold import clean_source, read_sheet
 from .metrics import (_agg, bootstrap_ci, detection_report, guide_counts, match_key, paired_diff,
                       right_quote, verbatim_flags)
 from .prompts import REPO_ROOT, clauses_for
+from .rlvr import reward_quotes
 
 Preds = dict[str, dict[str, list[str]]]
 
@@ -58,6 +59,20 @@ def verbatim(preds: Preds, sources: dict[str, str]) -> dict:
             "rate_no_page_lines": rate({d: clean_source(t) for d, t in sources.items()})}
 
 
+def right_share(gold: dict, preds: Preds, clauses: list[str]) -> float | None:
+    """Share of quotes the automatic rule calls right. Found and Strict miss extra wrong quotes."""
+    flags = [right_quote(match_key(q), [match_key(p["text"]) for p in gold[d].get(c, [])])
+             for d, by_clause in preds.items() for c in clauses for q in by_clause.get(c, [])]
+    return round(sum(flags) / len(flags), 4) if flags else None
+
+
+def mean_reward(gold: dict, preds: Preds, clauses: list[str], sources: dict[str, str]) -> float:
+    """The RLVR reward with each document as one excerpt. A document with no answer scores 0."""
+    rewards = [reward_quotes(preds[d], gold[d], sources[d], clauses) if d in preds else 0.0
+               for d in gold]
+    return round(sum(rewards) / len(rewards), 4)
+
+
 def score(gold: dict, preds: Preds, clauses: list[str], sources: dict[str, str],
           n_boot: int = 1000) -> dict:
     counts = guide_counts(gold, preds, clauses)
@@ -73,6 +88,8 @@ def score(gold: dict, preds: Preds, clauses: list[str], sources: dict[str, str],
         "per_clause": {c: {k: _f1(one, f"{k}_") for k in ("found", "main")}
                        for c in clauses for one in [guide_counts(gold, preds, [c])]},
         "verbatim": verbatim(preds, sources),
+        "right_share": right_share(gold, preds, clauses),
+        "mean_reward": mean_reward(gold, preds, clauses, sources),
     }
 
 
@@ -107,6 +124,8 @@ def report(gold: dict, results: dict[str, dict], clauses: list[str], labeled_by:
             ("Strict F1", lambda r: f"{r['strict_f1']:.3f} ({ci(r['strict_ci95'])})"),
             ("upstream detection F1", lambda r: f"{r['upstream_detection_f1']:.3f}"),
             ("upstream strict F1", lambda r: f"{r['upstream_strict_f1']:.3f}"),
+            ("mean reward", lambda r: f"{r['mean_reward']:.3f}"),
+            ("share of quotes right", lambda r: r["right_share"]),
             ("quotes", lambda r: r["verbatim"]["quotes"]),
             ("verbatim, quote marks and case ignored", lambda r: r["verbatim"]["rate"]),
             ("same, page numbers removed", lambda r: r["verbatim"]["rate_no_page_lines"])):

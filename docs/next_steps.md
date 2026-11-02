@@ -1,7 +1,7 @@
 # Next steps
 
-Plan only: nothing here has run, and every time below is an estimate unless it says measured.
-No step uses Nebius or costs money.
+The code is written and passes its CPU tests, but nothing has run on a GPU. Every time below is an
+estimate unless it says measured. No step uses Nebius or costs money.
 
 The goal is one small SFT loop and one small RLVR loop on Model A, end to end, on free Kaggle
 GPU, trained on synthetic data. The larger plan (about 155 real agreements, teacher pre-labeling,
@@ -22,20 +22,23 @@ GPU, trained on synthetic data. The larger plan (about 155 real agreements, teac
   of 0.657 stay the baseline, so Model A does not rerun on real text.
 - **Our own code.** Upstream code has no license, so `src/train.py` follows the documented recipe
   in `docs/repo_notes.md`. RLVR uses `GRPOTrainer` from TRL.
+- **No Unsloth.** Training uses transformers, peft and bitsandbytes directly, with the same recipe.
+  Unsloth needs a GPU and caps transformers at 5.17, while this stack lets the whole loop run in
+  CPU tests. It may be slower on a T4, and the short test will show the real pace.
 
 ## 1. Synthetic data
 
-New `src/synth.py` builds the data from a fixed seed, on CPU inside the notebook.
+`src/synth.py` builds the data from a fixed seed, on CPU inside the notebook.
 
-**Text bank,** in new `configs/synth_bank.yaml`, written from the clause definitions and not from
-the gold passages:
+**Text bank,** in `configs/synth_bank.yaml`, written from the clause definitions and not from the
+gold passages:
 
 - **60 clause passages:** 6 templates for each of the 10 clause types, with slots for amounts,
   percentages, dates and names. Lengths follow the gold set: median 362 characters, 90th
   percentile 1,430 (measured).
-- **40 look-alikes,** aimed at M3's wrong quotes: neighboring basket items (`adjacent`, 107 wrong
-  quotes), cross-references (`mention`, 29), headings (`heading`, 17), and text that belongs to
-  another clause type (`belongs`, 18).
+- **43 look-alikes,** aimed at M3's wrong quotes: neighboring basket items (`adjacent`, 107 wrong
+  quotes), sentences that only use a term (`mention`, 29), and headings (`heading`, 17).
+- **10 general passages** that belong to no clause type (`unrelated`, 36).
 - **Filler:** paragraphs from the 408 CUAD training contracts, loaded by `src/cuad.py`. They are
   commercial contracts, and any paragraph using terms such as "Indebtedness" or "Applicable
   Margin" is dropped.
@@ -58,19 +61,20 @@ the gold passages:
 | RLVR | 200 | shorter excerpts: 2,000 to 5,000 characters, at most 2 clause passages of up to 1,000 characters each, so answers fit in 512 tokens |
 | held out | 60 | scoring only |
 
-One template per clause type and 8 look-alikes appear only in the held-out set, so that set tests
-wording the model has not seen. A leak check confirms that no run of 15 words from the bank appears
-in the 5 M1 agreements.
+One template per clause type, 10 look-alikes, 2 general passages and a fifth of the filler contracts
+appear only in the held-out set, so that set tests wording the model has not seen. The leak check
+finds no run of 15 words from the bank in the 5 M1 agreements (measured).
 
 ## 2. Small SFT
 
-New `src/train.py` runs Unsloth QLoRA on Model A.
+`src/train.py` runs QLoRA on Model A.
 
-- **Recipe from the model card:** 4-bit base, r=16, alpha=32, dropout 0, all linear modules,
+- **Recipe from the model card:** 4-bit base, r=16, alpha=32, dropout 0, the same linear layers,
   `adamw_8bit`, learning rate 2e-4, warmup 6%, 2 epochs, batch 1 with 8 accumulation steps.
-- **Changes for T4:** fp16 and `max_seq_length` of 4,096. Examples over the limit are dropped and
-  counted.
-- **Size:** 600 example passes, or 75 optimizer steps. An average example is about 2,500 tokens.
+- **Changes for T4:** fp16 and `max_seq_length` of 4,096. With the real tokenizer, 1 of the 300
+  examples is over the limit and gets dropped (measured).
+- **Size:** about 600 example passes, or 75 optimizer steps. An average example is 2,478 tokens
+  (measured).
 - **Saving:** the adapter goes to the private model repo every 25 steps, and a restart resumes
   from the latest one.
 - **Time:** 0.5 to 2 hours. This assumes a T4 is 3 to 7 times slower than upstream's RTX 5090, at
@@ -81,8 +85,8 @@ it does not, the notebook stops, because RLVR would be building on a setup that 
 
 ## 3. Small RLVR
 
-New `src/rlvr.py` starts from the SFT adapter and calls TRL's `GRPOTrainer`. We write only the data
-and the reward.
+`src/rlvr.py` starts from the SFT adapter and calls TRL's `GRPOTrainer`. We write only the data and
+the reward.
 
 **Reward,** computed by code for each sampled answer:
 
@@ -119,10 +123,13 @@ excerpt (measured). The reward reuses `parse_output`, `canonicalize`, `guide_cou
 - `num_generations=4`, `max_completion_length=512`, `beta=0` (no reference model), learning rate
   1e-5, batch 1 with 4 accumulation steps.
 - The adapter goes to the private model repo every 50 steps.
+- TRL turns QLoRA adapter weights into bf16, which a T4 cannot compute with, so `src/rlvr.py` turns
+  them back to fp32 before training, as in SFT.
 
-**Time:** 1 to 3 hours, or 20 to 50 seconds per prompt. This assumes 15 to 30 tokens per second on
-excerpts of about 1,500 tokens. The M3 transformers ladder reached only about 3 tokens per second
-on much longer context (measured), so the short test below checks this first.
+**Time:** 1 to 3 hours, or 20 to 50 seconds per prompt. This assumes 15 to 30 tokens per second.
+Prompts average 1,294 tokens, and the longest answer is 343 (measured). The M3 transformers ladder
+reached only about 3 tokens per second on much longer context (measured), so the short test below
+checks this first.
 
 ## 4. Comparison
 
@@ -152,8 +159,10 @@ GPUs, and the comparison uses both, as in M3.
 **Short test:** 10 SFT steps and 3 RLVR steps, about 20 minutes, recording seconds per step and peak
 memory.
 
-- Out of memory: lower `max_seq_length` to 3,000 and shorten the excerpts to match.
-- RLVR projects over 4 hours: cut to 100 prompts.
+- Out of memory: the notebook stops. Lower `max_seq_length` to 3,000 and shorten the excerpts in
+  `configs/small_loop.yaml` to match.
+- A loss that is NaN or infinite: the notebook stops.
+- RLVR projects over 4 hours: it cuts to 100 prompts on its own.
 
 **Total:** 4 to 10 session hours, against about 30 GPU hours a week. If T4 x2 counts double, which
 Kaggle does not confirm, that is 8 to 20 hours of quota, and it still fits in one week.
@@ -168,11 +177,15 @@ Kaggle does not confirm, that is 8 to 20 hours of quota, and it still fits in on
 - **Main risk:** the model learns the bank's wording rather than the clauses. The real-agreement
   row is the only direct check, and a gap there is a finding, not a failure of the loop.
 
-## To build
+## Checked so far
 
-- `configs/synth_bank.yaml` and `src/synth.py`
-- `src/train.py`, `src/rlvr.py` and `requirements-train.txt`, with `unsloth` and `trl` pinned
-- `configs/small_loop.yaml`, and `src/baselines.py` taking its conditions from the config
-- `src/score.py` reporting the share of right quotes and the mean reward
-- `notebooks/04_small_loop.ipynb`
-- CPU tests for the generator and the reward
+Measured on CPU, with `tests/test_small_loop.py`:
+
+- The real SFT, restart, RLVR and merge code runs end to end on a tiny random model, through the
+  same command lines the notebook uses.
+- Every synthetic answer scores a reward of exactly 1.0 on its own excerpt.
+- RLVR changes the adapter when rewards differ, keeps it in fp32, and samples with the cache on.
+- Scoring, the gate and the report run end to end with a fake model.
+
+Not checked until the notebook runs on a T4: 4-bit loading, fp16 training, memory, speed, and vLLM
+loading a merged model.
