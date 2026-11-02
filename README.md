@@ -21,6 +21,7 @@ so `src/` is an independent implementation and does not import it. See
 | M3 label-free baselines | **ran 2026-10-30 to 31**: numbers and observations in [reports/baseline_m3.md](reports/baseline_m3.md). All 312 decodes usable after the ladder. Model B ignored the credit schema (0 quotes), and Model A gave 271 quotes in [reports/review_sheet.csv](reports/review_sheet.csv) labeled under [docs/labeling_guide.md](docs/labeling_guide.md). Claude labeled all five agreements on 2026-11-01 at the user's request: 61 of 271 quotes are right, Found F1 0.829, Strict F1 0.657 ([reports/score_m3.md](reports/score_m3.md)) |
 | M4 small SFT + small RLVR on synthetic data | **ran once on Kaggle T4 x2 on 2026-11-02, in about 6.5 hours**: [reports/small_loop.md](reports/small_loop.md). SFT passed the gate with a held-out mean reward of 0.982, against 0.675 for Model A. On the 5 M1 agreements, Strict F1 went from 0.657 (Model A) to 0.778 (SFT) and 0.806 (RLVR), a direction only. RLVR added little. Plan in [docs/next_steps.md](docs/next_steps.md), run in [notebooks/04_small_loop.ipynb](notebooks/04_small_loop.ipynb). No Nebius |
 | Teacher trial, the first step of the parked plan | **ran 2026-11-02 on DeepSeek's own API, for $0.25 at peak price**: [reports/teacher_trial.md](reports/teacher_trial.md). Passed its gate on the 5 M1 agreements with Found F1 0.951 and 80% of quotes right, against 0.90 and 60% needed. Full pre-labeling is not approved |
+| Data scale-up, step 1a of the parked plan | **collected 2026-11-02**: 150 credit agreements from 150 issuers, found by EDGAR full-text search with 2,460 SEC requests, not counting a first run stopped to add the fund filter: 30 investment grade, 60 secured mid-cap and 60 leveraged, split by CIK hash into 120 train and 30 test. Text on the Hub under `collect_full/`. Manifest in [reports/collect_full_manifest.csv](reports/collect_full_manifest.csv), and the mix and archetypes, which you have not reviewed yet, in [reports/collect_full_mix.md](reports/collect_full_mix.md) |
 
 ## Layout
 
@@ -35,6 +36,7 @@ src/train.py       small SFT (QLoRA), adapter merge
 src/rlvr.py        verifiable reward, small RLVR (TRL GRPO)
 src/small_loop.py  M4 orchestration: data, training, gate, scoring, report
 src/teacher.py     teacher pre-labeling trial: DeepSeek labels, checked quotes, spend cap
+src/discover.py    data scale-up: EDGAR full-text search, filters, archetypes, issuer split
 src/chunking.py    char windows with overlap
 src/parsing.py     JSON parsing, loop detection, key canonicalization
 src/merge.py       per-document union of chunk outputs (deduplicated)
@@ -146,8 +148,18 @@ tests/             CPU unit tests:  python -m pytest -q
   machine, because it needs no GPU and the key is kept there. Thinking is off, because the
   approved estimate assumed no hidden reasoning. `max_usd` in `configs/teacher.yaml` is a hard
   cap: no request starts if the spend so far plus its worst case would pass it. Only public
-  EDGAR text is sent. DeepSeek's terms on training with its outputs have not been checked yet.
-  They need checking before teacher labels are used for training.
+  EDGAR text is sent. DeepSeek's Open Platform Terms of Service (section 4.2, read 2026-11-02)
+  allow using inputs and outputs for "training other models (such as model distillation)", as
+  long as the use is legal and follows the terms. The model weights are MIT.
+- **Data scale-up (2026-11-02).** `src/discover.py` finds the agreements by EDGAR full-text
+  search, so no pick is made by hand. It keeps EX-10 and EX-4 exhibits, drops amendments,
+  fund and BDC facilities, and texts outside 200,000 to 1,000,000 characters or dated before
+  2023, and takes one agreement per issuer, visiting issuers in the order of a hash of their
+  CIK. The archetype comes from defined terms: unsecured is investment grade, and secured with
+  two or more leveraged-loan terms (such as `Available Amount` or `Excess Cash Flow`) is
+  leveraged. On the 5 M1 agreements, this matches the hand labels. It runs on the local
+  machine, like the teacher trial: it needs no GPU, and the outputs go to the Hub as before.
+  `SEC_USER_AGENT` comes from the environment.
 - **Latency:** vLLM rows report batch wall time divided by batch size, which is amortized
   rather than true single-request latency. transformers rows report true per-request
   time. `latency.csv` has one row per decode attempt.

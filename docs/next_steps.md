@@ -204,6 +204,11 @@ quotes right, against 0.90 and 60% needed. It cost $0.25 at the peak price. Resu
 `reports/teacher_trial.md`. Full pre-labeling (about $14-22 in the parked plan) needs its own
 estimate and approval.
 
+The same day, `src/discover.py` collected 150 more agreements (README, Status). They make about
+4,435 chunks at 24,000 characters with 4,000 overlap. At the trial's measured $0.00174 per chunk
+at peak price, full pre-labeling would cost about $7.70 at peak, or about $3.90 off-peak, plus
+retries. This is an estimate and is not approved.
+
 ## Checked so far
 
 Measured on CPU, with `tests/test_small_loop.py`:

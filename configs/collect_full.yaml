@@ -1,0 +1,26 @@
+# Data scale-up, step 1a of the parked plan (docs/next_steps.md): about 150 more credit
+# agreements from EDGAR, found by full-text search, one per issuer, for 120 train and 30 test.
+# The 5 M1 agreements stay the development set and are left out here. src/discover.py.
+hub_prefix: collect_full
+min_interval_s: 0.2               # <= 5 requests/s (SEC limit is 10/s)
+date_from: "2023-01-01"           # filing dates searched; agreements must also be dated 2023 on
+date_to: "2026-10-31"
+queries:                          # every phrase must appear; one search per form
+  - q: '"credit agreement" "administrative agent" "term sofr" "applicable rate"'
+    forms: [8-K, 10-Q, 10-K]
+  - q: '"credit agreement" "administrative agent" "term sofr" "applicable margin"'
+    forms: [8-K, 10-Q, 10-K]
+exhibit_types: '^EX-(10|4)\b'     # agreements are filed as material contracts or debt instruments
+# a file name or description matching this is not a full agreement; "amended and restated" is
+exclude_names: 'amend(?!ed.?and.?restat)|waiver|joinder|supplement|consent|assumption|conform|libor|transition|refinanc|extension|increase|incremental|termination|guarant|security|pledge|collateral|intercreditor|letter|note.?purchase|indenture|purchase.?agreement|lease'
+exclude_sic_prefix: ["67"]        # funds and investment offices (BDC and subscription lines)
+keep_sic: ["6798"]                # REITs stay
+exclude_issuer: '\bfund\b|\bdebt\b.*\btrust\b|\blending\b|\bbdc\b'   # funds the text check missed
+html_bytes: [250000, 6000000]     # before download; text is 1.7 to 3.0 times smaller in M1
+text_chars: [200000, 1000000]     # the plan's size range, on the cleaned text
+max_docs_per_issuer: 2            # newest first; the first that passes is the issuer's pick
+quotas:                           # the M1 mix, scaled to 150
+  investment_grade: 30
+  secured_mid_cap: 60
+  leveraged: 60
+test_share: 0.2                   # by hash of the CIK, within each archetype: 6 + 12 + 12 test
