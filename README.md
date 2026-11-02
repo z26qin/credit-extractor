@@ -19,7 +19,7 @@ so `src/` is an independent implementation and does not import it. See
 | M1 collect 5 credit agreements | **done 2026-10-30**: 5 documents on the Hub, cleaned text reviewed after a cleaner fix, manifest in [reports/m1_manifest.csv](reports/m1_manifest.csv) |
 | M2 credit schema + prompts | **approved 2026-10-30**: 10 clause types in [configs/credit_schema.yaml](configs/credit_schema.yaml), exact prompts in [reports/m2_prompts.md](reports/m2_prompts.md) |
 | M3 label-free baselines | **ran 2026-10-30 to 31**: numbers and observations in [reports/baseline_m3.md](reports/baseline_m3.md). All 312 decodes usable after the ladder. Model B ignored the credit schema (0 quotes), and Model A gave 271 quotes in [reports/review_sheet.csv](reports/review_sheet.csv) labeled under [docs/labeling_guide.md](docs/labeling_guide.md). Claude labeled all five agreements on 2026-11-01 at the user's request: 61 of 271 quotes are right, Found F1 0.829, Strict F1 0.657 ([reports/score_m3.md](reports/score_m3.md)) |
-| M4 small SFT + small RLVR on synthetic data | **code written, CPU tests pass, nothing has run on a GPU**: [docs/next_steps.md](docs/next_steps.md), [notebooks/04_small_loop.ipynb](notebooks/04_small_loop.ipynb). Free Kaggle GPU, no Nebius |
+| M4 small SFT + small RLVR on synthetic data | **ran once on Kaggle T4 x2 on 2026-11-02, in about 6.5 hours**: [reports/small_loop.md](reports/small_loop.md). SFT passed the gate with a held-out mean reward of 0.982, against 0.675 for Model A. On the 5 M1 agreements, Strict F1 went from 0.657 (Model A) to 0.778 (SFT) and 0.806 (RLVR), a direction only. RLVR added little. Plan in [docs/next_steps.md](docs/next_steps.md), run in [notebooks/04_small_loop.ipynb](notebooks/04_small_loop.ipynb). No Nebius |
 
 ## Layout
 

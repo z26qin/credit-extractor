@@ -1,7 +1,8 @@
 # Next steps
 
-The code is written and passes its CPU tests, but nothing has run on a GPU. Every time below is an
-estimate unless it says measured. No step uses Nebius or costs money.
+This plan ran once, on Kaggle GPU T4 x2 on 2026-11-02, and the results are in
+`reports/small_loop.md`. Times marked measured come from that run. The rest of this file is the
+plan as written before it ran. No step used Nebius or cost money.
 
 The goal is one small SFT loop and one small RLVR loop on Model A, end to end, on free Kaggle
 GPU, trained on synthetic data. The larger plan (about 155 real agreements, teacher pre-labeling,
@@ -34,8 +35,9 @@ GPU, trained on synthetic data. The larger plan (about 155 real agreements, teac
 gold passages:
 
 - **60 clause passages:** 6 templates for each of the 10 clause types, with slots for amounts,
-  percentages, dates and names. Lengths follow the gold set: median 362 characters, 90th
-  percentile 1,430 (measured).
+  percentages, dates and names. They were meant to follow the gold set's lengths (median 362
+  characters, 90th percentile 1,430), but the training answers came out shorter: median 255, 90th
+  percentile 417 and longest 563 (measured after the run).
 - **43 look-alikes,** aimed at M3's wrong quotes: neighboring basket items (`adjacent`, 107 wrong
   quotes), sentences that only use a term (`mention`, 29), and headings (`heading`, 17).
 - **10 general passages** that belong to no clause type (`unrelated`, 36).
@@ -77,8 +79,8 @@ finds no run of 15 words from the bank in the 5 M1 agreements (measured).
   (measured).
 - **Saving:** the adapter goes to the private model repo every 25 steps, and a restart resumes
   from the latest one.
-- **Time:** 0.5 to 2 hours. This assumes a T4 is 3 to 7 times slower than upstream's RTX 5090, at
-  about half the sequence length.
+- **Time:** 61 minutes, at 49.1 seconds per step, with a 12.5 GB memory peak (measured). The plan
+  estimated 0.5 to 2 hours.
 
 **Gate:** SFT's mean reward (section 3) on the held-out set must beat Model A's by at least 0.10. If
 it does not, the notebook stops, because RLVR would be building on a setup that does not work.
@@ -126,10 +128,9 @@ excerpt (measured). The reward reuses `parse_output`, `canonicalize`, `guide_cou
 - TRL turns QLoRA adapter weights into bf16, which a T4 cannot compute with, so `src/rlvr.py` turns
   them back to fp32 before training, as in SFT.
 
-**Time:** 1 to 3 hours, or 20 to 50 seconds per prompt. This assumes 15 to 30 tokens per second.
-Prompts average 1,294 tokens, and the longest answer is 343 (measured). The M3 transformers ladder
-reached only about 3 tokens per second on much longer context (measured), so the short test below
-checks this first.
+**Time:** 131 minutes for 200 prompts, at 39.2 seconds per prompt, with a 7.7 GB memory peak
+(measured). The plan estimated 1 to 3 hours. On 88% of prompts all 4 answers got the same reward,
+so most steps changed nothing (measured).
 
 ## 4. Comparison
 
@@ -142,8 +143,9 @@ the longest valid M3 output was 2,529 tokens.
 | 60 held-out excerpts | runs | runs | runs |
 | 5 M1 agreements | already measured | runs | runs |
 
-**Time:** about 30 minutes for the held-out set. On real agreements, 1 to 2 hours per adapter;
-Model A took 52 minutes (measured).
+**Time (measured):** 5 to 6 minutes per model on the held-out set. On the real agreements, SFT took
+87 minutes and RLVR took 68, because some chunks fell back to the slow transformers ladder. Model A
+took 52 minutes in M3.
 
 Results go to `reports/small_loop.md`: Found F1, Strict F1, verbatim rate, share of quotes that are
 right and mean reward for each model, plus measured training times. The share of right quotes
@@ -164,8 +166,8 @@ memory.
 - A loss that is NaN or infinite: the notebook stops.
 - RLVR projects over 4 hours: it cuts to 100 prompts on its own.
 
-**Total:** 4 to 10 session hours, against about 30 GPU hours a week. If T4 x2 counts double, which
-Kaggle does not confirm, that is 8 to 20 hours of quota, and it still fits in one week.
+**Total:** about 6.5 session hours, with one Save & Run All and no restart (measured). The plan
+estimated 4 to 10.
 
 ## What this will show
 
@@ -177,6 +179,22 @@ Kaggle does not confirm, that is 8 to 20 hours of quota, and it still fits in on
 - **Main risk:** the model learns the bank's wording rather than the clauses. The real-agreement
   row is the only direct check, and a gap there is a finding, not a failure of the loop.
 
+## What it showed
+
+Measured, from `reports/small_loop.md`:
+
+- **Both loops ran end to end** on free Kaggle GPU, in one session and with no restart.
+- **SFT works on synthetic wording it has not seen.** On the held-out set, its mean reward was
+  0.982 against 0.675 for Model A, and its Strict F1 was 0.983 against 0.701.
+- **RLVR added almost nothing.** SFT already scored near 1.0 on the synthetic prompts, so most
+  groups of 4 answers had no reward spread. On the held-out set RLVR and SFT tie.
+- **On the 5 M1 agreements the direction is good.** Strict F1 rose from 0.657 for Model A to 0.778
+  for SFT and 0.806 for RLVR, and the share of right quotes rose from 24% to 56% and 57%. Almost
+  all of this gain comes from fewer wrong quotes: 271 quotes became 113, while right quotes
+  stayed at about 63.
+- **A sign of the main risk:** some real quotes stop too early. No synthetic training answer is
+  longer than 563 characters, while a tenth of the real gold passages are over 1,430.
+
 ## Checked so far
 
 Measured on CPU, with `tests/test_small_loop.py`:
@@ -187,5 +205,5 @@ Measured on CPU, with `tests/test_small_loop.py`:
 - RLVR changes the adapter when rewards differ, keeps it in fp32, and samples with the cache on.
 - Scoring, the gate and the report run end to end with a fake model.
 
-Not checked until the notebook runs on a T4: 4-bit loading, fp16 training, memory, speed, and vLLM
-loading a merged model.
+Checked on the T4 run of 2026-11-02 (measured): 4-bit loading, fp16 training, memory, speed, and
+vLLM loading a merged model all worked.
