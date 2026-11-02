@@ -23,6 +23,7 @@ so `src/` is an independent implementation and does not import it. See
 | Teacher trial, the first step of the parked plan | **ran 2026-11-02 on DeepSeek's own API, for $0.25 at peak price**: [reports/teacher_trial.md](reports/teacher_trial.md). Passed its gate on the 5 M1 agreements with Found F1 0.951 and 80% of quotes right, against 0.90 and 60% needed. Full pre-labeling is not approved |
 | Data scale-up, step 1a of the parked plan | **collected 2026-11-02**: 150 credit agreements from 150 issuers, found by EDGAR full-text search with 2,460 SEC requests, not counting a first run stopped to add the fund filter: 30 investment grade, 60 secured mid-cap and 60 leveraged, split by CIK hash into 120 train and 30 test. Text on the Hub under `collect_full/`. Manifest in [reports/collect_full_manifest.csv](reports/collect_full_manifest.csv), and the mix and archetypes, which you have not reviewed yet, in [reports/collect_full_mix.md](reports/collect_full_mix.md) |
 | Teacher pre-labeling, step 1c of the parked plan | **ran 2026-11-02, approved by the user at about $7.70 at peak price**: [reports/prelabel_full.md](reports/prelabel_full.md). All 4,430 chunks of the 150 agreements were labeled for $7.56 at peak price, about half that off-peak. 2,415 quotes were kept, and 9 chunks are left out of training. Records are on the Hub under `prelabel_full/`. Nobody has reviewed the labels yet |
+| SFT on the pre-labels, step 2 of the parked plan | **code written, CPU tests pass, nothing has trained on a GPU yet**: [notebooks/05_real_sft.ipynb](notebooks/05_real_sft.ipynb), [configs/real_sft.yaml](configs/real_sft.yaml). The data are built (1,447 examples from the 120 train agreements, 8.5 million tokens, none over 8,192) and on the Hub under `real_sft/data/`. Scoring on the 30 test agreements waits for your review of them |
 
 ## Layout
 
@@ -38,6 +39,7 @@ src/rlvr.py        verifiable reward, small RLVR (TRL GRPO)
 src/small_loop.py  M4 orchestration: data, training, gate, scoring, report
 src/teacher.py     teacher pre-labeling trial: DeepSeek labels, checked quotes, spend cap
 src/discover.py    data scale-up: EDGAR full-text search, filters, archetypes, issuer split
+src/real_loop.py   step 2: SFT on the teacher's pre-labels, scored on the 5 M1 agreements
 src/chunking.py    char windows with overlap
 src/parsing.py     JSON parsing, loop detection, key canonicalization
 src/merge.py       per-document union of chunk outputs (deduplicated)
@@ -161,6 +163,16 @@ tests/             CPU unit tests:  python -m pytest -q
   leveraged. On the 5 M1 agreements, this matches the hand labels. It runs on the local
   machine, like the teacher trial: it needs no GPU, and the outputs go to the Hub as before.
   `SEC_USER_AGENT` comes from the environment.
+- **SFT on the pre-labels (step 2, 2026-11-02).** The M4 recipe, with these changes. Examples
+  are the teacher's 24,000-character chunks with page numbers removed, so `max_seq_length` is
+  8,192, the parked plan's Path 1. Full-vocabulary logits for every position of such a prompt
+  need about 4 GB in fp32 plus their gradient, so the trainer projects only the answer's
+  positions (`answer_trainer` in `src/train.py`). The loss is the same: on a tiny model, the
+  adapter after 2 steps matches full-logit training within 1e-5. One epoch instead of two, about
+  6 T4 hours, and the short test cuts the steps if one epoch would pass 6.5 hours, so scoring
+  fits the same 12-hour session. Empty chunks are capped at 30% of the examples, and 434 of 2,495
+  were sampled. Scoring uses the 5 M1 agreements, the only gold set, on the same chunks, and
+  Model A runs again on them so both rows compare.
 - **Latency:** vLLM rows report batch wall time divided by batch size, which is amortized
   rather than true single-request latency. transformers rows report true per-request
   time. `latency.csv` has one row per decode attempt.

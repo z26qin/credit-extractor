@@ -365,7 +365,7 @@ def test_sft_rlvr_and_merge_run_end_to_end_and_resume(tiny, tiny_cfg, tmp_path):
 
 
 def test_command_lines_run_each_stage(tiny, tiny_cfg, tmp_path, monkeypatch):
-    monkeypatch.setattr(train, "load_cfg", lambda: dict(tiny_cfg, base_model=tiny))
+    monkeypatch.setattr(train, "load_cfg", lambda path=None: dict(tiny_cfg, base_model=tiny))
     small_sets(tmp_path / "data")
     sft, rl = tmp_path / "sft", tmp_path / "rlvr"
     assert train.main(["--data", str(tmp_path / "data" / "train.jsonl"), "--out", str(sft),

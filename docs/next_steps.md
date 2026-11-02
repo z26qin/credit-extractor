@@ -211,6 +211,10 @@ retries. The user approved it, and it ran the same day for $7.56 at peak price, 
 minutes (`reports/prelabel_full.md`). Next in the parked plan is your review of the 30 test
 agreements (step 1d), then training on the 120 train agreements (step 2).
 
+Step 2 comes first, at the user's request: `notebooks/05_real_sft.ipynb` trains on the 1,447
+examples from the train agreements and scores the result on the 5 M1 agreements, the only gold
+set so far (README, Decisions). Scoring on the 30 test agreements waits for step 1d.
+
 ## Checked so far
 
 Measured on CPU, with `tests/test_small_loop.py`:

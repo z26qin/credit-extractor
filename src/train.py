@@ -60,6 +60,49 @@ def collate(rows: list[dict]) -> dict:
     return {k: torch.tensor([r[k] for r in rows]) for k in rows[0]}
 
 
+def answer_loss(logits, labels, num_items: int | None = None):
+    """Summed cross-entropy over the labeled tokens, from logits of the last positions only.
+
+    `logits` covers the last `labels`-suffix length + 1 positions: each predicts the next token,
+    so the first of them predicts the first answer token. Divided by `num_items` if given.
+    """
+    import torch.nn.functional as F
+    n = labels.shape[1] - logits.shape[1] + 1
+    target = labels[:, n:]
+    total = F.cross_entropy(logits[:, :-1].float().reshape(-1, logits.shape[-1]),
+                            target.reshape(-1), ignore_index=-100, reduction="sum")
+    return total / (num_items if num_items is not None else (target != -100).sum())
+
+
+def answer_trainer():
+    """A Trainer that projects only the answer's positions onto the vocabulary.
+
+    With a 24,000-character prompt, full logits are about 151,936 x 7,000 values in fp32, near
+    4 GB, plus their gradient, too much for a T4. Only the answer has loss, so only its logits
+    are needed; the loss is the same, normalized over the accumulated batch as Trainer does.
+    """
+    from transformers import Trainer
+
+    class AnswerLossTrainer(Trainer):
+        loss_is_scaled_for_ga = True
+
+        def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
+            labels = inputs.pop("labels")
+            labeled = (labels != -100).nonzero()[:, 1]
+            first = int(labeled.min()) if len(labeled) else labels.shape[1] - 1
+            if len(labeled) and int(labeled.max()) - first + 1 != len(labeled):
+                raise ValueError("labels must be one suffix of the sequence")
+            keep = labels.shape[1] - first + 1
+            outputs = model(**inputs, logits_to_keep=keep)
+            n = num_items_in_batch
+            if n is None:
+                n = (labels[:, 1:] != -100).sum() * self.current_gradient_accumulation_steps
+            loss = answer_loss(outputs.logits, labels, n)
+            return (loss, outputs) if return_outputs else loss
+
+    return AnswerLossTrainer
+
+
 def load_base(model_id: str):
     """Model A in 4-bit on a GPU, or as it is on CPU, where only the tests run."""
     import torch
@@ -175,12 +218,13 @@ def run(cfg: dict, data: Path, out_dir: Path, base: str | None = None,
         logging_steps=5, disable_tqdm=True, report_to="none", remove_unused_columns=False,
         **precision_args())
     clock, hub = trainer_callbacks(hub_repo, hub_prefix)
-    trainer = Trainer(model=model, args=args, train_dataset=encoded, data_collator=collate,
-                      callbacks=[clock, hub])
+    trainer_cls = answer_trainer() if sft.get("answer_logits_only") else Trainer
+    trainer = trainer_cls(model=model, args=args, train_dataset=encoded, data_collator=collate,
+                          callbacks=[clock, hub])
     trainer.train(resume_from_checkpoint=resume_point(out_dir))
     return finish(model, trainer, clock, out_dir,
-                  {"stage": "sft", "examples": len(encoded), "dropped": dropped}, hub_repo,
-                  hub_prefix)
+                  {"stage": "sft", "examples": len(encoded), "dropped": dropped,
+                   "tokens": sum(len(e["input_ids"]) for e in encoded)}, hub_repo, hub_prefix)
 
 
 def merge(base: str, adapter: Path, out_dir: Path) -> Path:
@@ -208,8 +252,9 @@ def main(argv=None) -> int:
     ap.add_argument("--hub-prefix")
     ap.add_argument("--merge", action="store_true")
     ap.add_argument("--adapter", type=Path)
+    ap.add_argument("--config", type=Path, help="default configs/small_loop.yaml")
     a = ap.parse_args(argv)
-    cfg = load_cfg()
+    cfg = load_cfg(a.config)
     if a.merge:
         merge(cfg["base_model"], a.adapter, a.out)
     else:
