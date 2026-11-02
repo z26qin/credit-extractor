@@ -215,6 +215,13 @@ Step 2 comes first, at the user's request: `notebooks/05_real_sft.ipynb` trains 
 examples from the train agreements and scores the result on the 5 M1 agreements, the only gold
 set so far (README, Decisions). Scoring on the 30 test agreements waits for step 1d.
 
+It ran the same day on Kaggle (`reports/real_sft.md`, measured): 146 steps, about 81% of one
+epoch, in 6.0 hours. On the 5 M1 agreements, against Model A on the same chunks, Found F1 went
+from 0.756 to 0.951 and Strict F1 from 0.542 to 0.776. The student matches the teacher's Found
+F1 but not its Strict F1 (0.829) or its share of right quotes (80% against 55%). Most of the extra
+wrong quotes are whole incremental sections quoted sentence by sentence, mention-only Maturity
+Date sentences, and builder-basket items quoted again on their own.
+
 ## Checked so far
 
 Measured on CPU, with `tests/test_small_loop.py`:
