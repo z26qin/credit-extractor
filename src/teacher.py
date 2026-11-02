@@ -1,6 +1,10 @@
-"""Teacher pre-labeling trial on the 5 M1 agreements (configs/teacher.yaml).
+"""Teacher pre-labeling (configs/teacher.yaml): the trial on the 5 M1 agreements, scored
+against their gold set, and the full run on the collected agreements.
 
     python -m src.teacher --text-dir <M1 text dir> [--out work/teacher_trial]
+    python -m src.teacher --text-dir <dir> --manifest reports/collect_full_manifest.csv \
+        --split reports/collect_full_split.json --out work/prelabel_full \
+        --report reports/prelabel_full.md --max-usd <approved cap>
 
 DeepSeek labels each chunk of the agreement text, with page numbers removed, and code keeps only
 quotes it can check: the JSON parses, the key is a clause type, and the quote is in the chunk
@@ -271,25 +275,16 @@ def stats(records: list[dict], clauses: list[str]) -> dict:
     }
 
 
-def write_report(cfg: dict, records: list[dict], docs: dict[str, str], gold_path: Path,
-                 sheet: Path, n_chunks: int) -> tuple[str, bool]:
-    clauses = credit_clauses()
-    raw = json.loads(gold_path.read_text("utf-8"))
-    gold = load_gold(gold_path)
-    preds = {"Model A": preds_from_sheet(sheet, "c"), "Teacher": preds_from_records(records),
-             "Teacher, kept chunks only": preds_from_records(records, kept_only=True)}
-    results = {n: score(gold, p, clauses, docs) for n, p in preds.items()}
-    t, s, g = results["Teacher"], stats(records, clauses), cfg["gate"]
-    passed = t["found_f1"] >= g["found_f1"] and (t["right_share"] or 0) >= g["right_share"]
-    L = ["# Teacher trial", "",
-         f"`{cfg['model']}` at `{cfg['base_url']}` labeled the 5 M1 agreements in "
-         f"{cfg['chunk_chars']:,}-character chunks with {cfg['overlap']:,} overlap, page numbers "
-         f"removed, thinking off, at temperature 0, with up to {cfg['retries']} more answers at "
-         f"{cfg['retry_temperature']} for a chunk with a failed quote.", "",
-         f"**Gate: {'pass' if passed else 'FAIL'}.** Found F1 {t['found_f1']:.3f} against "
-         f"{g['found_f1']:.2f} needed, and share of quotes right {t['right_share']} against "
-         f"{g['right_share']:.2f} needed.", "",
-         "## Spend", "",
+def how_labeled(cfg: dict, what: str) -> str:
+    return (f"`{cfg['model']}` at `{cfg['base_url']}` labeled {what} in "
+            f"{cfg['chunk_chars']:,}-character chunks with {cfg['overlap']:,} overlap, page numbers "
+            f"removed, thinking off, at temperature 0, with up to {cfg['retries']} more answers at "
+            f"{cfg['retry_temperature']} for a chunk with a failed quote.")
+
+
+def run_lines(cfg: dict, s: dict, n_chunks: int) -> list[str]:
+    """The Spend and Checks sections, shared by the trial and the full run."""
+    L = ["## Spend", "",
          "| chunks labeled | requests | input tokens | of them cached | output tokens | cost at peak price |",
          "|---|---|---|---|---|---|",
          f"| {s['chunks']} of {n_chunks} | {s['requests']} | {s['tokens_in']:,} | "
@@ -307,8 +302,27 @@ def write_report(cfg: dict, records: list[dict], docs: dict[str, str], gold_path
         total = n["passing"] + n["failed"]
         L.append(f"| {c} | {n['passing']} | {n['failed']} | "
                  f"{n['failed'] / total:.2f} |" if total else f"| {c} | 0 | 0 | - |")
-    L += ["", "Passing and failing are counted per answer, so a chunk asked again counts twice.",
-          "", "## Scores", "",
+    return L + ["", "Passing and failing are counted per answer, so a chunk asked again counts "
+                "twice.", ""]
+
+
+def write_report(cfg: dict, records: list[dict], docs: dict[str, str], gold_path: Path,
+                 sheet: Path, n_chunks: int) -> tuple[str, bool]:
+    """The trial on the 5 M1 agreements, scored against their gold set."""
+    clauses = credit_clauses()
+    raw = json.loads(gold_path.read_text("utf-8"))
+    gold = load_gold(gold_path)
+    preds = {"Model A": preds_from_sheet(sheet, "c"), "Teacher": preds_from_records(records),
+             "Teacher, kept chunks only": preds_from_records(records, kept_only=True)}
+    results = {n: score(gold, p, clauses, docs) for n, p in preds.items()}
+    t, g = results["Teacher"], cfg["gate"]
+    passed = t["found_f1"] >= g["found_f1"] and (t["right_share"] or 0) >= g["right_share"]
+    L = ["# Teacher trial", "", how_labeled(cfg, "the 5 M1 agreements"), "",
+         f"**Gate: {'pass' if passed else 'FAIL'}.** Found F1 {t['found_f1']:.3f} against "
+         f"{g['found_f1']:.2f} needed, and share of quotes right {t['right_share']} against "
+         f"{g['right_share']:.2f} needed.", ""]
+    L += run_lines(cfg, stats(records, clauses), n_chunks)
+    L += ["## Scores", "",
           "\"Teacher\" is every passing quote. \"Kept chunks only\" leaves out the chunks that "
           "would not enter training. Five agreements are few, and they shaped the labeling "
           "rules, so read this as a direction.", "",
@@ -316,8 +330,41 @@ def write_report(cfg: dict, records: list[dict], docs: dict[str, str], gold_path
     return "\n".join(L), passed
 
 
+def prelabel_report(cfg: dict, records: list[dict], parts: dict[str, list[str]],
+                    n_chunks: int) -> str:
+    """The full run: spend, checks, and what the labels hold, per split. No gold set exists."""
+    clauses = credit_clauses()
+    split_of = {d: name for name, ids in parts.items() for d in ids}
+    n_docs = len(split_of)
+    L = ["# Teacher pre-labeling", "",
+         how_labeled(cfg, f"{n_docs} agreements ({', '.join(f'{len(v)} {k}' for k, v in parts.items())})"),
+         "", "These are pre-labels. Test labels come from your review, and no pre-label enters "
+         "them unreviewed.", ""]
+    L += run_lines(cfg, stats(records, clauses), n_chunks)
+    L += ["## What the labels hold", "", "| | " + " | ".join(parts) + " |",
+          "|---|" + "---|" * len(parts)]
+    rows = {"agreements": {}, "chunks": {}, "chunks with a quote": {}, "chunks left out": {},
+            "quotes kept": {}}
+    for name in parts:
+        recs = [r for r in records if split_of.get(r["doc_id"]) == name]
+        rows["agreements"][name] = len(parts[name])
+        rows["chunks"][name] = len(recs)
+        rows["chunks with a quote"][name] = sum(bool(r["kept"]) and not r["left_out"] for r in recs)
+        rows["chunks left out"][name] = sum(r["left_out"] for r in recs)
+        rows["quotes kept"][name] = sum(len(q) for r in recs for q in r["kept"].values())
+    L += [f"| {k} | " + " | ".join(str(v[n]) for n in parts) + " |" for k, v in rows.items()]
+    preds = preds_from_records(records)
+    L += ["", "Agreements with at least one quote for each clause type, after merging chunks:", "",
+          "| clause | " + " | ".join(parts) + " |", "|---|" + "---|" * len(parts)]
+    for c in clauses:
+        L.append(f"| {c} | " + " | ".join(
+            f"{sum(bool(preds.get(d, {}).get(c)) for d in parts[n])} of {len(parts[n])}"
+            for n in parts) + " |")
+    return "\n".join(L) + "\n"
+
+
 def load_docs(text_dir: Path, manifest: Path) -> dict[str, str]:
-    """M1 text, checked against the reviewed manifest."""
+    """Agreement text, checked against its manifest."""
     docs = {}
     for doc_id, row in read_manifest(manifest).items():
         text = (text_dir / f"{doc_id}.txt").read_text(encoding="utf-8")
@@ -328,19 +375,34 @@ def load_docs(text_dir: Path, manifest: Path) -> dict[str, str]:
 
 
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(description="Teacher pre-labeling trial.")
+    ap = argparse.ArgumentParser(description="Teacher pre-labeling: the M1 trial by default, or "
+                                             "the full run with --split.")
     ap.add_argument("--text-dir", type=Path, required=True)
+    ap.add_argument("--manifest", type=Path, default=REPO_ROOT / "reports" / "m1_manifest.csv")
+    ap.add_argument("--split", type=Path, help="train/test ids: a full run, with no gold scoring")
     ap.add_argument("--out", type=Path, default=Path("work/teacher_trial"))
     ap.add_argument("--report", type=Path, default=REPO_ROOT / "reports" / "teacher_trial.md")
     ap.add_argument("--config", type=Path)
+    ap.add_argument("--max-usd", type=float, help="the cap the user approved for this run")
+    ap.add_argument("--probe-chunks", type=int)
+    ap.add_argument("--workers", type=int)
     ap.add_argument("--score-only", action="store_true", help="report on what is recorded")
     a = ap.parse_args(argv)
     cfg = load_cfg(a.config)
-    docs = load_docs(a.text_dir, REPO_ROOT / "reports" / "m1_manifest.csv")
+    for key in ("max_usd", "probe_chunks", "workers"):
+        if getattr(a, key) is not None:
+            cfg[key] = getattr(a, key)
+    docs = load_docs(a.text_dir, a.manifest)
     if not a.score_only:
         print(json.dumps(run(cfg, docs, a.out)), flush=True)
-    md, passed = write_report(cfg, load_records(a.out), docs, REPO_ROOT / "reports" / "gold_m3.json",
-                              REPO_ROOT / "reports" / "review_sheet.csv", len(chunks_for(docs, cfg)))
+    n_chunks = len(chunks_for(docs, cfg))
+    if a.split:
+        md, passed = prelabel_report(cfg, load_records(a.out),
+                                     json.loads(a.split.read_text("utf-8")), n_chunks), True
+    else:
+        md, passed = write_report(cfg, load_records(a.out), docs,
+                                  REPO_ROOT / "reports" / "gold_m3.json",
+                                  REPO_ROOT / "reports" / "review_sheet.csv", n_chunks)
     a.report.write_text(md, encoding="utf-8")
     print(md)
     return 0 if passed else 1

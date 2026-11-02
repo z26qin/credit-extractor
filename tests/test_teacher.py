@@ -173,6 +173,19 @@ def test_run_labels_everything_once_and_a_rerun_spends_nothing(tmp_path):
         teacher.run(c, DOCS, tmp_path, transport=httpx.MockTransport(api))
 
 
+def test_full_run_report_counts_labels_per_split(tmp_path):
+    api = FakeAPI(default=good)
+    c = cfg(max_usd=1.0)
+    teacher.run(c, DOCS, tmp_path, transport=httpx.MockTransport(api), api_key="k")
+    recs = teacher.load_records(tmp_path)
+    md = teacher.prelabel_report(c, recs, {"train": ["alpha"], "test": ["beta"]},
+                                 len(teacher.chunks_for(DOCS, c)))
+    n_alpha = sum(r["doc_id"] == "alpha" for r in recs)
+    assert md.startswith("# Teacher pre-labeling") and "(1 train, 1 test)" in md
+    assert f"| chunks | {n_alpha} | {len(recs) - n_alpha} |" in md
+    assert "| Maturity Date | 1 of 1 | 1 of 1 |" in md and "| MFN Protection | 0 of 1 | 0 of 1 |" in md
+
+
 def test_report_scores_the_pooled_quotes_against_the_gold_set(tmp_path):
     api = FakeAPI(default=good)
     c = cfg(max_usd=1.0)
