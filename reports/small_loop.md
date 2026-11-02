@@ -126,7 +126,11 @@ from the raw records on the Hub.
   | RLVR | 108 | 62 | 6 | 40 |
 
   Two of SFT's cut-short quotes are Applicable Rate definitions. In viavi-2025, SFT stops at 523
-  of the gold passage's 2,012 characters, and in exlservice-2026 at 329 of 1,073. No answer in the
-  synthetic training set is longer than 563 characters (90th percentile 417), while a tenth of the
-  real gold passages are over 1,430.
+  of the gold passage's 2,012 characters, and in exlservice-2026 at 329 of 1,073. Both stop at the
+  colon before a flattened pricing grid, which the gold passage includes.
+- **Correction, 2026-11-02, after the teacher trial (`reports/teacher_trial.md`).** An earlier
+  version of this section blamed short synthetic answers for those two quotes. No synthetic
+  training answer is longer than 563 characters, which is true, but DeepSeek, which saw no
+  synthetic data, stops the same two quotes at the same points. So the cause is more likely how
+  models treat a grid after a definition than the synthetic data.
 - Both SFT and RLVR miss angi-2025's Maturity Date.

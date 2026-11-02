@@ -1,0 +1,47 @@
+# Teacher pre-labeling trial on the 5 M1 agreements (src/teacher.py, docs/next_steps.md).
+# The user approved about $0.5-0.7 for this trial on 2026-11-02 and chose DeepSeek's own API,
+# the one their other projects use. deepseek-flash is DeepSeek-V4.1-Flash-1017, the model chosen
+# for pre-labeling on 2026-10-30.
+base_url: https://api.deepseek.com
+model: deepseek-flash
+api_key_env: LLM_API_KEY          # read from the environment, never stored
+# USD per million tokens at DeepSeek's peak rate (checked 2026-11-02). Off-peak is half, so the
+# recorded cost is an upper bound.
+price_per_million: {input_cache_hit: 0.006, input: 0.3, output: 1.2}
+max_usd: 0.70                     # no request starts if spend plus its worst case would pass this
+probe_chunks: 3                   # labeled first; the run stops if they project over max_usd
+chunk_chars: 24000                # the parked plan's chunks, cut from text with page numbers removed
+overlap: 4000
+max_tokens: 4096                  # the student's cap; the longest valid M3 answer was 2,529 tokens
+retries: 2                        # more answers for a chunk with a failed quote
+retry_temperature: 0.3
+workers: 4
+timeout_s: 240
+http_tries: 4
+backoff_s: 2
+gate: {found_f1: 0.90, right_share: 0.60}
+# Thinking off keeps the cost inside the approved estimate, which assumed no hidden reasoning.
+request:
+  thinking: {type: disabled}
+  response_format: {type: json_object}
+# From docs/labeling_guide.md, the rules the gold set was labeled under.
+rules: |
+  General:
+  - Quote a passage only if it states the term itself: the level, cap, date, condition or protection. A sentence that only uses a defined term does not count.
+  - A definition counts when it carries the substance.
+  - Headings, table of contents entries, section titles and cross-references never count.
+  - A pricing grid or covenant table counts if its values are there, even when it reads as a run of values.
+  - Quote the smallest complete passage that states the term: the sentence, clause or table, not the whole section. Do not cut off a key term of the same sentence.
+  - Copy the text exactly, character for character, including its quote marks. Do not fix, shorten or join text.
+  - Several quotes can be right for one clause type. Put each passage under one clause type only.
+  Per clause type:
+  - Financial Maintenance Covenant. Counts: the covenant that sets a ratio and its level, including a table of levels; the condition that springs the test; a temporary step-up after an acquisition. Does not count: ratio conditions on a basket or incremental facility; pro forma compliance requirements; ratio definitions on their own; equity cure; compliance certificates; the event of default for a breach.
+  - Incremental Facility. Counts: the right to add term loans or increase commitments; the size limit, including definitions such as Incremental Cap; the conditions on using it. Does not count: incremental equivalent debt under the debt covenant; refinancing facilities; extensions of existing loans; mechanics such as notices, joinders and allocations; limits on the terms of incremental loans; the MFN test on its own, which is MFN Protection.
+  - MFN Protection. Counts: the test comparing the yield or margin of new debt with the existing term loans, and its threshold; its sunset; its carve-outs. Does not count: yield definitions on their own, such as All-In Yield; most favored lender clauses on covenants; other pricing terms.
+  - Restricted Payments General Basket. Counts: the general-purpose exception capped by a dollar amount or a share of EBITDA or assets, usually one clause per agreement. Does not count: the other exceptions, such as tax distributions, management equity repurchases, ratio-based capacity and Available Amount spending; the covenant's lead-in.
+  - Available Amount / Builder Basket. Counts: the definition with its starter amount and build-up parts; a permission to spend it on restricted payments, investments or junior debt prepayments. Does not count: other uses of the word, such as Available Tenor or Available Commitment; passing references.
+  - Debt Incurrence General Basket. Counts: the general-purpose exception to the debt covenant capped by a dollar amount or a share of EBITDA or assets, usually one clause per agreement. Does not count: the specific exceptions, such as capital leases, purchase money debt, acquired debt, ratio debt, incremental equivalent debt, refinancing debt, intercompany debt and non-guarantor caps.
+  - Liens General Basket. Counts: the general-purpose exception to the liens covenant capped by a dollar amount or a share of EBITDA or assets, usually one clause per agreement. Does not count: the specific permitted liens, such as tax, landlord, deposit, purchase money and existing liens, and liens securing ratio debt.
+  - Applicable Margin. Counts: the definition with its rates; the pricing grid, including fee columns in the same grid; the rule that sets the grid level; fixed pricing until a first compliance certificate. Does not count: interest clauses that only add the margin; benchmark floors; default interest; fee clauses outside the grid.
+  - Maturity Date. Counts: the definition or clause that gives the final date of each facility; a springing maturity; extension terms. Does not count: sentences that only use the term; amortization dates; limits on other debt, such as not earlier than the Latest Maturity Date; a Latest Maturity Date definition with no date.
+  - Liability Management Protections. Counts: a limit on moving material intellectual property to unrestricted subsidiaries, or on those subsidiaries owning it (J.Crew); a limit on releasing a guarantor that stops being wholly owned (Chewy); a requirement for each affected lender's consent to subordinate the loans or liens, and its exceptions (Serta). Does not count: other amendment voting rules; ordinary guarantee release terms; ordinary conditions for designating an unrestricted subsidiary; other lender protections, such as limits on open market buybacks or pro rata sharing.

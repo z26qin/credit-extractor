@@ -3,3 +3,4 @@ huggingface_hub>=0.30
 pyyaml>=6
 transformers>=4.51     # Qwen3 support
 accelerate>=0.30
+httpx>=0.27            # teacher trial API client (src/teacher.py)

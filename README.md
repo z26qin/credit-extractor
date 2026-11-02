@@ -20,6 +20,7 @@ so `src/` is an independent implementation and does not import it. See
 | M2 credit schema + prompts | **approved 2026-10-30**: 10 clause types in [configs/credit_schema.yaml](configs/credit_schema.yaml), exact prompts in [reports/m2_prompts.md](reports/m2_prompts.md) |
 | M3 label-free baselines | **ran 2026-10-30 to 31**: numbers and observations in [reports/baseline_m3.md](reports/baseline_m3.md). All 312 decodes usable after the ladder. Model B ignored the credit schema (0 quotes), and Model A gave 271 quotes in [reports/review_sheet.csv](reports/review_sheet.csv) labeled under [docs/labeling_guide.md](docs/labeling_guide.md). Claude labeled all five agreements on 2026-11-01 at the user's request: 61 of 271 quotes are right, Found F1 0.829, Strict F1 0.657 ([reports/score_m3.md](reports/score_m3.md)) |
 | M4 small SFT + small RLVR on synthetic data | **ran once on Kaggle T4 x2 on 2026-11-02, in about 6.5 hours**: [reports/small_loop.md](reports/small_loop.md). SFT passed the gate with a held-out mean reward of 0.982, against 0.675 for Model A. On the 5 M1 agreements, Strict F1 went from 0.657 (Model A) to 0.778 (SFT) and 0.806 (RLVR), a direction only. RLVR added little. Plan in [docs/next_steps.md](docs/next_steps.md), run in [notebooks/04_small_loop.ipynb](notebooks/04_small_loop.ipynb). No Nebius |
+| Teacher trial, the first step of the parked plan | **ran 2026-11-02 on DeepSeek's own API, for $0.25 at peak price**: [reports/teacher_trial.md](reports/teacher_trial.md). Passed its gate on the 5 M1 agreements with Found F1 0.951 and 80% of quotes right, against 0.90 and 60% needed. Full pre-labeling is not approved |
 
 ## Layout
 
@@ -33,6 +34,7 @@ src/synth.py       synthetic credit excerpts with known answers
 src/train.py       small SFT (QLoRA), adapter merge
 src/rlvr.py        verifiable reward, small RLVR (TRL GRPO)
 src/small_loop.py  M4 orchestration: data, training, gate, scoring, report
+src/teacher.py     teacher pre-labeling trial: DeepSeek labels, checked quotes, spend cap
 src/chunking.py    char windows with overlap
 src/parsing.py     JSON parsing, loop detection, key canonicalization
 src/merge.py       per-document union of chunk outputs (deduplicated)
@@ -136,6 +138,16 @@ tests/             CPU unit tests:  python -m pytest -q
   outputs. Each model's own license also applies. The chosen model is
   `deepseek-ai/DeepSeek-V4.1-Flash-1017`, listed as MIT at $0.30 input and $1.20 output per
   million tokens. Only public EDGAR text is sent. Nothing has run.
+- **Teacher trial (decided 2026-11-02).** After M4, the user approved about $0.5-0.7 for the
+  parked plan's teacher trial and chose DeepSeek's own API, the one their other projects use,
+  instead of Nebius Token Factory. The model is the same, DeepSeek-V4.1-Flash-1017 (named
+  `deepseek-flash` there), at the same peak list price of $0.30 input and $1.20 output per million
+  tokens. The key comes from `LLM_API_KEY` in the environment. The trial runs on the local
+  machine, because it needs no GPU and the key is kept there. Thinking is off, because the
+  approved estimate assumed no hidden reasoning. `max_usd` in `configs/teacher.yaml` is a hard
+  cap: no request starts if the spend so far plus its worst case would pass it. Only public
+  EDGAR text is sent. DeepSeek's terms on training with its outputs have not been checked yet.
+  They need checking before teacher labels are used for training.
 - **Latency:** vLLM rows report batch wall time divided by batch size, which is amortized
   rather than true single-request latency. transformers rows report true per-request
   time. `latency.csv` has one row per decode attempt.

@@ -192,8 +192,17 @@ Measured, from `reports/small_loop.md`:
   for SFT and 0.806 for RLVR, and the share of right quotes rose from 24% to 56% and 57%. Almost
   all of this gain comes from fewer wrong quotes: 271 quotes became 113, while right quotes
   stayed at about 63.
-- **A sign of the main risk:** some real quotes stop too early. No synthetic training answer is
-  longer than 563 characters, while a tenth of the real gold passages are over 1,430.
+- **Some real quotes stop too early,** at the colon before a flattened pricing grid. DeepSeek
+  stops at the same points in the teacher trial, so this is not clearly an effect of the short
+  synthetic answers.
+
+## After the small loop: teacher trial
+
+On 2026-11-02 the parked plan's teacher trial ran, on DeepSeek's own API, as the user chose
+(README, Decisions). It passed its gate on the 5 M1 agreements: Found F1 0.951 and 80% of
+quotes right, against 0.90 and 60% needed. It cost $0.25 at the peak price. Results are in
+`reports/teacher_trial.md`. Full pre-labeling (about $14-22 in the parked plan) needs its own
+estimate and approval.
 
 ## Checked so far
 
