@@ -26,10 +26,18 @@ if [ ! -x /tmp/uv-env/bin/uv ]; then
   python3 -m venv /tmp/uv-env && /tmp/uv-env/bin/pip install -q uv
 fi
 UV=/tmp/uv-env/bin/uv
+# vLLM's PyPI wheel needs CUDA 13, so driver 580 or later. The 2026-11-02 H100 image had driver
+# 570 (CUDA 12.8) and failed on libcudart.so.13; older drivers get vLLM's own CUDA 12.9 build.
+CUDA_MAJOR=$(nvidia-smi | grep -oE "CUDA Version: [0-9]+" | grep -oE "[0-9]+$" || echo 13)
+if [ "$CUDA_MAJOR" -lt 13 ]; then
+  VLLM_PKGS=(--torch-backend=cu129 --extra-index-url https://wheels.vllm.ai/0.32.0/cu129
+             "vllm==0.32.0+cu129")
+else
+  VLLM_PKGS=(--torch-backend=auto -r requirements-gpu.txt)
+fi
 if [ ! -x /tmp/vllm-env/bin/python ]; then
   $UV venv -q /tmp/vllm-env --python 3.12
-  $UV pip install -q --python /tmp/vllm-env/bin/python --torch-backend=auto \
-    -r requirements-gpu.txt -r requirements.txt wrapt
+  $UV pip install -q --python /tmp/vllm-env/bin/python "${VLLM_PKGS[@]}" -r requirements.txt wrapt
 fi
 if [ ! -x /tmp/train-env/bin/python ]; then
   $UV venv -q /tmp/train-env --python 3.12
