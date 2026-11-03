@@ -38,7 +38,7 @@ MAX_LOGP_DIFF = 0.1        # mean absolute per-token log-prob gap, vLLM against 
 SMALL_BASE = "Qwen/Qwen3-0.6B"
 CHECK_LR = 5e-5            # 5x step 3's, so the weights move enough for a stale copy to show
 MODES = ("off", "colocate", "server")
-SERVER_GPU_SHARE = 0.75    # of the second GPU, for `trl vllm-serve`
+SERVER_GPU_SHARE = 0.70    # of the second GPU, for `trl vllm-serve`
 
 
 def check_cfg(mode: str, steps: int, port: int = 8000) -> dict:
@@ -152,8 +152,9 @@ def serve(python: str, base: str, port: int, gpu: str, log: Path, timeout: int =
     """`trl vllm-serve` on one GPU, once it answers its health check."""
     import urllib.request
     trl_cli = str(Path(python).parent / "trl")
-    # 0.75, not 0.90: receiving the trainer's weights, vLLM allocates packed buffers of about
-    # 1.1 GB, which ran out of memory on a T4 at 0.90 on 2026-11-03 and left the trainer waiting
+    # Receiving the trainer's weights, vLLM allocates packed buffers of about 1.1 GB. At 0.90 of
+    # a T4 that ran out of memory on 2026-11-03 and left the trainer waiting; at 0.75 it logged
+    # failed allocations and recovered on retry. 0.70 leaves a margin
     cmd = [trl_cli, "vllm-serve", "--model", base, "--tensor-parallel-size", "1",
            "--dtype", "float16", "--max-model-len", "5120", "--gpu-memory-utilization",
            str(SERVER_GPU_SHARE), "--port", str(port)]
@@ -268,12 +269,16 @@ def report_md(report: dict) -> str:
          ", ".join(f"{k} {v[k]}" for k in v) + ".", "",
          f"Each check ran {report['steps']} GRPO steps of 4 samples on the same "
          f"{len(report['windows'])} step 3 windows, picked for median answer length.", "",
+         "Speed against the baseline compares answer tokens per second, and only for the same "
+         "model: steps differ in answer length, and a step's time grows with its longest answer.",
+         "",
          "| check | mode | model | passed | seconds per step | answer tokens | answer tokens per "
          "second | speed against baseline | log-prob gap, worst | reward | peak GPU MiB |",
          "|---|---|---|---|---|---|---|---|---|---|---|"]
     for c in report["checks"]:
-        speed = (f"{base['seconds_per_step'] / c['seconds_per_step']:.1f}x"
-                 if base and c.get("seconds_per_step") else "-")
+        same = base and c.get("answer_tokens_per_second") and c.get("base") == base["base"]
+        speed = (f"{c['answer_tokens_per_second'] / base['answer_tokens_per_second']:.1f}x"
+                 if same else "-")
         L.append(f"| {c['name']} | {c['mode']} | {c['base']} | {'yes' if c['passed'] else 'NO'} | "
                  f"{c.get('seconds_per_step', '-')} | {c.get('answer_tokens', '-')} | "
                  f"{c.get('answer_tokens_per_second', '-')} | {speed} | "

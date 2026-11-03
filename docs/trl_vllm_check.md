@@ -85,6 +85,37 @@ Kaggle T4 x2, notebook Version 2, about 56 minutes. Measured:
 Not shown yet: that server mode works, whether fp16 Model A trains in a T4's memory, and how much
 faster vLLM samples than transformers on the same model. The second run is for those.
 
+## Second run, 2026-11-03: all three pass
+
+Kaggle T4 x2, notebook Version 3 at commit `ff25971`, about 29 minutes. Measured, from
+`checks/trl_vllm/` on the Hub:
+
+| check | model | seconds per step | answer tokens | log-prob gap, worst | reward | peak GPU MiB |
+|---|---|---|---|---|---|---|
+| baseline | Model A, 4-bit, step 2 adapter | 144.8 | 328 | - | 0.656 | 13,402 |
+| colocate | Qwen3-0.6B, fresh adapter | 41.1 | 778 | 0.0023 | 0 | 8,314 |
+| server | Model A, fp16, step 2 adapter | 61.1 | 236 | 0.0030 | 0.602 | 12,264 |
+
+- **Both vLLM modes work with this stack.** The trained weights reach vLLM at every step: the
+  worst gap is 0.003, against 0.1 allowed.
+- **fp16 Model A trains on a T4** for server mode, with a peak of 12.3 GB on the training GPU.
+- **On a T4, server mode is about 1.5 to 1.7 times as fast as the baseline.** The report's 2.4x
+  compared seconds per step, but the baseline's step 3 sampled long answers (667 tokens on
+  average, 239 seconds) where the server's sampled 288. In the three steps with similar longest
+  answers, the speedup was 1.75x, 1.5x and 1.7x, and answer tokens per second were 15.4 against
+  9.1. The report now compares answer tokens per second, and only for the same model.
+- **Why only 1.5 to 1.7 times on a T4:** with sampling fast, the rest of the step is training,
+  and a T4 trains slowly. Steps with about 214-token answers still took about 55 seconds. On the
+  H100, step 3's short test spent most of each 58-second step sampling, so vLLM should save more
+  there. That is an inference from these numbers, not measured.
+- **The server's memory is still tight at 75%.** Receiving weights, it logged failed 1.1 GB
+  allocations with about 1.06 GB free and recovered on retry. It now takes 70%.
+- Rewards are close (0.60 against 0.66), but 4 steps of random samples say nothing about
+  quality.
+
+Still not shown: colocate with Model A, which needs a GPU with room for two copies, such as an
+H100. The paid run's short test covers it in its first 4 steps.
+
 ## After it passes
 
 1. Set `rlvr.use_vllm: true` in `configs/real_rlvr.yaml`, with `vllm_mode: colocate` on an H100

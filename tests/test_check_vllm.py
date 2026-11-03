@@ -77,7 +77,12 @@ def test_report_compares_each_check_with_the_baseline():
     md = check_vllm.report_md({"versions": {"vllm": "0.32.0", "trl": "1.17.1"},
                                "gpus": ["Tesla T4", "Tesla T4"], "steps": 4,
                                "windows": ["a", "b", "c", "d"], "checks": checks})
-    assert "| colocate | colocate | small | yes | 10.0 |" in md and "| 4.0x |" in md
+    assert "| colocate | colocate | small | yes | 10.0 |" in md
+    assert "| 4.0x |" not in md, "a different model is not compared with the baseline"
+    same = check_vllm.summarize("server", "server", "A", stats(), 4)
+    md_same = check_vllm.report_md({"versions": {}, "gpus": [], "steps": 4, "windows": [],
+                                    "checks": [checks[0], same]})
+    assert "| 4.0x |" in md_same              # 100 against 25 answer tokens per second
     assert "| server | server | A | NO |" in md and "- server: vllm-serve exited with 1" in md
 
 
