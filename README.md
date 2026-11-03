@@ -25,6 +25,7 @@ so `src/` is an independent implementation and does not import it. See
 | Teacher pre-labeling, step 1c of the parked plan | **ran 2026-11-02, approved by the user at about $7.70 at peak price**: [reports/prelabel_full.md](reports/prelabel_full.md). All 4,430 chunks of the 150 agreements were labeled for $7.56 at peak price, about half that off-peak. 2,415 quotes were kept, and 9 chunks are left out of training. Records are on the Hub under `prelabel_full/`. Nobody has reviewed the labels yet |
 | SFT on the pre-labels, step 2 of the parked plan | **ran once on Kaggle T4 x2 on 2026-11-02**: [reports/real_sft.md](reports/real_sft.md). 146 steps on 1,447 examples from the 120 train agreements (about 81% of one epoch) in 6.0 hours, then scoring in about an hour. On the 5 M1 agreements, against Model A on the same chunks, Found F1 went from 0.756 to 0.951 and Strict F1 from 0.542 to 0.776, with paired intervals above zero, a direction only on 5 agreements. The teacher is still ahead on Strict F1 (0.829) and right quotes (80% against 55%). Run in [notebooks/05_real_sft.ipynb](notebooks/05_real_sft.ipynb), [configs/real_sft.yaml](configs/real_sft.yaml). No Nebius. Scoring on the 30 test agreements waits for your review of them |
 | RLVR on the pre-labels, step 3 | **code written, CPU tests pass, nothing has run on a GPU yet**: [src/real_rlvr.py](src/real_rlvr.py), [configs/real_rlvr.yaml](configs/real_rlvr.yaml), [scripts/nebius_rlvr.sh](scripts/nebius_rlvr.sh). The user approved one run on a Nebius H100 on 2026-11-02, estimated at about $9-11 with a cap of $18. A local dry run of the data step gives 13,592 windows of 8,000 characters from the train agreements, 1,458 with a teacher quote, and prompts of at most 3,412 tokens |
+| TRL + vLLM check, before vLLM sampling in GRPO | **code written, CPU tests pass on both version sets, nothing has run on a GPU yet**: [docs/trl_vllm_check.md](docs/trl_vllm_check.md), [notebooks/07_check_trl_vllm.ipynb](notebooks/07_check_trl_vllm.ipynb) on free Kaggle T4 x2. vLLM 0.32.0 needs transformers below 5.20, so the one venv TRL's vLLM mode needs pins 5.19.0 ([requirements-rl-vllm.txt](requirements-rl-vllm.txt)); all 157 CPU tests pass with it |
 
 ## Layout
 
@@ -43,6 +44,7 @@ src/discover.py    data scale-up: EDGAR full-text search, filters, archetypes, i
 src/real_loop.py   step 2: SFT on the teacher's pre-labels, scored on the 5 M1 agreements
 src/real_rlvr.py   step 3: RLVR on windows of the train agreements, against the teacher's labels
 src/sample.py      vLLM sampling, n answers per excerpt, resumable (step 3 screening)
+src/check_vllm.py  checks GRPO with vLLM sampling (colocate, server) against transformers' generate
 src/chunking.py    char windows with overlap
 src/parsing.py     JSON parsing, loop detection, key canonicalization
 src/merge.py       per-document union of chunk outputs (deduplicated)

@@ -1,0 +1,14 @@
+# One venv for GRPO that samples with vLLM (docs/trl_vllm_check.md). TRL's vLLM mode needs vLLM
+# in the same Python as training, unlike requirements-train.txt and requirements-gpu.txt, which
+# go into separate venvs. Install together with requirements.txt and requirements-gpu.txt (or
+# vLLM's CUDA 12.9 build on drivers older than CUDA 13, as scripts/nebius_rlvr.sh does).
+#
+# vLLM 0.32.0 requires transformers >=5.16.1,<5.20, so this pins 5.19.0 where
+# requirements-train.txt has 5.22.1. TRL 1.17.1 supports vLLM 0.22.0 to 0.32.x; its [vllm]
+# extra adds the server client.
+transformers==5.19.0
+peft==0.21.2
+trl[vllm]==1.17.1
+accelerate==1.15.0
+datasets==5.1.0
+bitsandbytes==0.50.2

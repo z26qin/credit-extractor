@@ -89,12 +89,45 @@ def time_limit(hours: float | None):
     return TimeLimit()
 
 
-def load_policy(base: str, adapter: Path):
+def load_policy(base: str, adapter: Path, quantize: bool | None = None):
     from peft import PeftModel
     from .train import load_base
-    model = load_base(base)
+    model = load_base(base, quantize)
     model.config.use_cache = False
     return PeftModel.from_pretrained(model, str(adapter), is_trainable=True)
+
+
+def grpo_args(cfg: dict, out_dir: Path, n_rows: int, max_steps: int | None = None) -> dict:
+    """GRPOConfig settings. Each optimizer step takes `num_generations` samples of one prompt,
+    one at a time.
+
+    With `rlvr.use_vllm`, TRL samples with vLLM instead of transformers' generate, which was
+    about 20 tokens a second per answer on an H100: in this process on the same GPU
+    (`vllm_mode: colocate`), or from `trl vllm-serve` on a second GPU (`server`). Either way TRL
+    merges the adapter and sends the weights to vLLM before each step's sampling
+    (docs/trl_vllm_check.md).
+    """
+    from .train import precision_args
+    rl = cfg["rlvr"]
+    args = dict(
+        output_dir=str(out_dir), max_steps=max_steps or n_rows, seed=cfg["seed"],
+        per_device_train_batch_size=1, gradient_accumulation_steps=rl["num_generations"],
+        num_generations=rl["num_generations"], max_completion_length=rl["max_completion_length"],
+        mask_truncated_completions=rl.get("mask_truncated_completions", False),
+        temperature=rl.get("temperature", 1.0), beta=0.0, learning_rate=rl["learning_rate"],
+        generation_kwargs={"use_cache": True},
+        gradient_checkpointing=True, gradient_checkpointing_kwargs={"use_reentrant": False},
+        save_strategy="steps", save_steps=rl["save_steps"], save_total_limit=1,
+        logging_steps=rl.get("logging_steps", 5), disable_tqdm=True, report_to="none",
+        **precision_args())
+    if rl.get("use_vllm"):
+        del args["generation_kwargs"]          # transformers' generate only; vLLM would reject it
+        args.update(use_vllm=True, vllm_mode=rl.get("vllm_mode", "colocate"),
+                    vllm_gpu_memory_utilization=rl.get("vllm_gpu_memory_utilization", 0.3),
+                    vllm_max_model_length=rl.get("vllm_max_model_length"),
+                    vllm_server_port=rl.get("vllm_server_port", 8000),
+                    vllm_server_timeout=rl.get("vllm_server_timeout", 600))
+    return args
 
 
 def run(cfg: dict, data: Path, adapter: Path, out_dir: Path, base: str | None = None,
@@ -105,7 +138,7 @@ def run(cfg: dict, data: Path, adapter: Path, out_dir: Path, base: str | None = 
     from trl import GRPOConfig, GRPOTrainer
 
     from .synth import load_set
-    from .train import finish, precision_args, prompt_text, resume_point, trainer_callbacks
+    from .train import finish, prompt_text, resume_point, trainer_callbacks
 
     base = base or cfg["base_model"]
     rl = cfg["rlvr"]
@@ -115,19 +148,8 @@ def run(cfg: dict, data: Path, adapter: Path, out_dir: Path, base: str | None = 
     rows = [{"prompt": prompt_text(tok, x["excerpt"]), "excerpt": x["excerpt"],
              "gold": json.dumps(x["gold"], ensure_ascii=False)}
             for x in load_set(data)[:prompts or rl.get("prompts")]]
-    model = load_policy(base, adapter)
-
-    # Each optimizer step takes `num_generations` samples of one prompt, one at a time.
-    args = GRPOConfig(
-        output_dir=str(out_dir), max_steps=max_steps or len(rows), seed=cfg["seed"],
-        per_device_train_batch_size=1, gradient_accumulation_steps=rl["num_generations"],
-        num_generations=rl["num_generations"], max_completion_length=rl["max_completion_length"],
-        mask_truncated_completions=rl.get("mask_truncated_completions", False),
-        temperature=rl.get("temperature", 1.0), beta=0.0, learning_rate=rl["learning_rate"],
-        generation_kwargs={"use_cache": True},
-        gradient_checkpointing=True, gradient_checkpointing_kwargs={"use_reentrant": False},
-        save_strategy="steps", save_steps=rl["save_steps"], save_total_limit=1,
-        logging_steps=5, disable_tqdm=True, report_to="none", **precision_args())
+    model = load_policy(base, adapter, rl.get("quantize"))
+    args = GRPOConfig(**grpo_args(cfg, out_dir, len(rows), max_steps))
     clock, hub = trainer_callbacks(hub_repo, hub_prefix)
     reward = make_reward(rl.get("exact_by_token_f1", False))
     trainer = GRPOTrainer(model=model, reward_funcs=reward, args=args,

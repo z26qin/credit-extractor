@@ -113,18 +113,22 @@ def big_gpu() -> bool:
             and torch.cuda.get_device_properties(0).total_memory >= BIG_GPU_GIB * 2**30)
 
 
-def load_base(model_id: str):
+def load_base(model_id: str, quantize: bool | None = None):
     """Model A in 4-bit on a small GPU, in bf16 on a big one, or as it is on CPU, where only the
     tests run. Steps 1 and 2 trained on T4s in 4-bit. An adapter moves between the two, since
-    LoRA only adds to the base's weights."""
+    LoRA only adds to the base's weights.
+
+    `quantize=False` keeps the full base on a small GPU too, in fp16 on a T4: vLLM generation in
+    GRPO needs the merged weights in full precision (docs/trl_vllm_check.md)."""
     import torch
     from peft import prepare_model_for_kbit_training
     from transformers import AutoModelForCausalLM, BitsAndBytesConfig
     if not torch.cuda.is_available():
         return AutoModelForCausalLM.from_pretrained(model_id)
-    if big_gpu():
-        model = AutoModelForCausalLM.from_pretrained(model_id, device_map={"": 0},
-                                                     dtype=torch.bfloat16)
+    if quantize is False or (quantize is None and big_gpu()):
+        bf16 = torch.cuda.get_device_capability(0)[0] >= 8
+        model = AutoModelForCausalLM.from_pretrained(
+            model_id, device_map={"": 0}, dtype=torch.bfloat16 if bf16 else torch.float16)
         model.enable_input_require_grads()
         return model
     quant = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4",

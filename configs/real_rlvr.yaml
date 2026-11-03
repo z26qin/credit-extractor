@@ -37,6 +37,11 @@ rlvr:
   learning_rate: 1.0e-5
   save_steps: 10
   exact_by_token_f1: true   # a quote counts as right for the exactness factor only by token F1
+  # vLLM sampling inside GRPO (src/rlvr.py grpo_args): off until notebooks/07 passes, and it
+  # needs the one venv of requirements-rl-vllm.txt (docs/trl_vllm_check.md)
+  use_vllm: false
+  vllm_mode: colocate       # colocate: same GPU, for an H100; server: trl vllm-serve on GPU 1
+  vllm_gpu_memory_utilization: 0.3
 
 short_test:
   steps: 4              # on the selected windows with the longest sampled answers
