@@ -252,3 +252,7 @@ Measured on CPU, with `tests/test_small_loop.py`:
 
 Checked on the T4 run of 2026-11-02 (measured): 4-bit loading, fp16 training, memory, speed, and
 vLLM loading a merged model all worked.
+
+## Step 1d: test set review
+
+Done 2026-11-03 by Claude at the user's request, as a search-based pass rather than the user's full review the parked plan asked for (`reports/test_review.md`). The test gold set is `reports/gold_test.json`, 394 passages over 30 agreements, not reviewed by the user. Scoring Model A, SFT and RLVR on it needs a GPU run and its own estimate. The M1 gold set is open for the user's review on a private page whose verdicts Claude can read back.
