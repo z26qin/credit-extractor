@@ -20,9 +20,13 @@ git fetch -q origin "$BRANCH" && git checkout -q "$BRANCH" && git pull -q --ff-o
 git log -1 --oneline
 
 # uv builds both venvs, as the notebooks do: vLLM's torch pin stays out of training's venv
-if [ ! -x /tmp/uv-env/bin/uv ]; then
+# python3.12-dev: Triton compiles vLLM's kernels against Python.h, which the image lacks
+if [ ! -f /usr/include/python3.12/Python.h ]; then
   sudo apt-get update -qq
-  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq python3-venv > /dev/null
+  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq python3-venv python3.12-dev \
+    build-essential > /dev/null
+fi
+if [ ! -x /tmp/uv-env/bin/uv ]; then
   python3 -m venv /tmp/uv-env && /tmp/uv-env/bin/pip install -q uv
 fi
 UV=/tmp/uv-env/bin/uv
