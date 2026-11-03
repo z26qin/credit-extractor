@@ -55,6 +55,8 @@ def test_a_check_passes_only_with_its_steps_reward_and_close_log_probs():
     assert "stopped after 2 of 4 steps" in short["problems"]
     zero = check_vllm.summarize("c", "colocate", "m", stats(reward=0.0), 4)
     assert "no answer earned any reward" in zero["problems"]
+    fresh = check_vllm.summarize("c", "colocate", "m", stats(reward=0.0), 4, trained=False)
+    assert fresh["passed"], "a fresh adapter on a small base is not expected to earn reward"
     base = check_vllm.summarize("baseline", "off", "m", stats(with_gap=False), 4)
     assert base["passed"], "the baseline samples with transformers, so it has no gap"
 
@@ -88,6 +90,15 @@ def test_fp16_copy_rewrites_the_dtype(tmp_path, monkeypatch):
     out = check_vllm.fp16_copy("org/model", tmp_path / "copy")
     config = json.loads((out / "config.json").read_text())
     assert config == {"torch_dtype": "float16", "hidden_size": 8}
+
+
+def test_a_check_that_ran_but_failed_keeps_its_result(tmp_path):
+    out = tmp_path / "o"
+    out.mkdir()
+    (out / "result.json").write_text(json.dumps({"name": "x", "passed": False}))
+    got = check_vllm.launch_check(sys.executable, ["-c", "raise SystemExit(1)", "--out", out],
+                                  "0", tmp_path / "x.log", timeout=120)
+    assert got == {"name": "x", "passed": False}
 
 
 def test_a_failed_check_is_reported_not_raised(tmp_path, capsys):

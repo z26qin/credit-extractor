@@ -38,6 +38,7 @@ MAX_LOGP_DIFF = 0.1        # mean absolute per-token log-prob gap, vLLM against 
 SMALL_BASE = "Qwen/Qwen3-0.6B"
 CHECK_LR = 5e-5            # 5x step 3's, so the weights move enough for a stale copy to show
 MODES = ("off", "colocate", "server")
+SERVER_GPU_SHARE = 0.75    # of the second GPU, for `trl vllm-serve`
 
 
 def check_cfg(mode: str, steps: int, port: int = 8000) -> dict:
@@ -80,8 +81,12 @@ def fp16_copy(model_id: str, out: Path) -> Path:
 
 
 def summarize(name: str, mode: str, base: str, stats: dict, steps: int,
-              generations: int = 4) -> dict:
-    """The check's numbers from train_stats.json, and whether it passed."""
+              generations: int = 4, trained: bool = True) -> dict:
+    """The check's numbers from train_stats.json, and whether it passed.
+
+    Reward is required only of a trained adapter: a small base with a fresh adapter cannot do
+    the task (on Kaggle on 2026-11-03 Qwen3-0.6B earned none), and that check is for the code
+    path and the weight sync."""
     logs = [r for r in stats["log"] if "reward" in r]
 
     def mean(key: str) -> float | None:
@@ -100,7 +105,7 @@ def summarize(name: str, mode: str, base: str, stats: dict, steps: int,
     problems = []
     if stats["steps"] < steps:
         problems.append(f"stopped after {stats['steps']} of {steps} steps")
-    if not out["reward"]:
+    if trained and not out["reward"]:
         problems.append("no answer earned any reward")
     if mode != "off":
         if not gaps:
@@ -108,7 +113,7 @@ def summarize(name: str, mode: str, base: str, stats: dict, steps: int,
         elif max(gaps) > MAX_LOGP_DIFF:
             problems.append(f"vLLM's log probs are {max(gaps):.3f} from the trainer's, over "
                             f"{MAX_LOGP_DIFF}: the weights may not have reached vLLM")
-    out.update(passed=not problems, problems=problems)
+    out.update(passed=not problems, problems=problems, trained_adapter=trained)
     return out
 
 
@@ -118,6 +123,7 @@ def run_check(name: str, mode: str, base: str, data: Path, out: Path, steps: int
     import torch
     from . import rlvr
     out.mkdir(parents=True, exist_ok=True)
+    trained = adapter is not None
     if adapter is None:
         adapter = fresh_adapter(base, out / "fresh_adapter")
     model = base
@@ -127,7 +133,7 @@ def run_check(name: str, mode: str, base: str, data: Path, out: Path, steps: int
     stats_path = rlvr.run(cfg, data, adapter, out / "train", base=model,
                           max_steps=steps) / "train_stats.json"
     result = summarize(name, mode, base, json.loads(stats_path.read_text("utf-8")), steps,
-                       cfg["rlvr"]["num_generations"])
+                       cfg["rlvr"]["num_generations"], trained)
     (out / "result.json").write_text(json.dumps(result, indent=1), encoding="utf-8")
     print(json.dumps(result), flush=True)
     return result
@@ -146,9 +152,11 @@ def serve(python: str, base: str, port: int, gpu: str, log: Path, timeout: int =
     """`trl vllm-serve` on one GPU, once it answers its health check."""
     import urllib.request
     trl_cli = str(Path(python).parent / "trl")
+    # 0.75, not 0.90: receiving the trainer's weights, vLLM allocates packed buffers of about
+    # 1.1 GB, which ran out of memory on a T4 at 0.90 on 2026-11-03 and left the trainer waiting
     cmd = [trl_cli, "vllm-serve", "--model", base, "--tensor-parallel-size", "1",
-           "--dtype", "float16", "--max-model-len", "5120", "--gpu-memory-utilization", "0.90",
-           "--port", str(port)]
+           "--dtype", "float16", "--max-model-len", "5120", "--gpu-memory-utilization",
+           str(SERVER_GPU_SHARE), "--port", str(port)]
     env = dict(os.environ, CUDA_VISIBLE_DEVICES=gpu, VLLM_USE_FLASHINFER_SAMPLER="0")
     proc = subprocess.Popen(cmd, cwd=REPO_ROOT, env=env, stdout=open(log, "w"),
                             stderr=subprocess.STDOUT)
@@ -179,7 +187,8 @@ def launch_check(python: str, args: list, gpu: str, log: Path, timeout: int) -> 
                                   timeout=timeout).returncode
     except subprocess.TimeoutExpired:
         code = f"timeout after {timeout} s"
-    if code == 0 and (out / "result.json").exists():
+    # a check that ran but did not pass exits 1 and still wrote its result, which is the finding
+    if (out / "result.json").exists():
         return json.loads((out / "result.json").read_text("utf-8"))
     print(f"check failed ({code}); last lines of {log}:", flush=True)
     print("\n".join(log.read_text("utf-8", errors="replace").splitlines()[-25:]), flush=True)

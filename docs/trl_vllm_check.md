@@ -64,6 +64,27 @@ Hub under `checks/trl_vllm/`. Estimated at 30 to 45 minutes of Kaggle time, not 
 It does not test colocate memory with Model A, which needs a GPU bigger than a T4, nor runs longer
 than 4 steps, nor whether vLLM sampling changes what GRPO learns.
 
+## First run, 2026-11-03
+
+Kaggle T4 x2, notebook Version 2, about 56 minutes. Measured:
+
+- **The combined venv installs.** vLLM 0.32.0, TRL 1.17.1, transformers 5.19.0, peft 0.21.2
+  and torch 2.13.0+cu132 went into one venv in about 6 minutes.
+- **baseline passed:** 149.5 seconds per step, 328 answer tokens on average, reward 0.656,
+  peak 13.4 GB.
+- **colocate ran all 4 steps, and the weights reach vLLM.** The log-prob gap was 0.0018 to
+  0.0023 at each step, against 0.1 allowed. Steps took 42.5 seconds, with 778 answer tokens on
+  average (in steps 2 and 3, 25% and 75% of answers hit the 1,024 limit), and no reward: a fresh
+  adapter on a 0.6B base does not do the task. The report marks it failed because of two bugs
+  in the check, both fixed since: it required reward of an untrained adapter, and it dropped the
+  result of a check whose process exited 1.
+- **server did not run.** Receiving the trainer's first weights, the vLLM server ran out of
+  memory: it held 90% of its T4, and the transfer allocates packed buffers of about 1.1 GB. The
+  trainer then waited for the 30-minute timeout. The server now takes 75%.
+
+Not shown yet: that server mode works, whether fp16 Model A trains in a T4's memory, and how much
+faster vLLM samples than transformers on the same model. The second run is for those.
+
 ## After it passes
 
 1. Set `rlvr.use_vllm: true` in `configs/real_rlvr.yaml`, with `vllm_mode: colocate` on an H100
