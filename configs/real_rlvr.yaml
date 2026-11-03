@@ -1,0 +1,63 @@
+# RLVR on real agreements: GRPO from the step 2 adapter, rewarded against the teacher's labels
+# (src/real_rlvr.py, notebooks/06_real_rlvr.ipynb).
+seed: 42
+base_model: Qwen/Qwen3-4B-Instruct-2507
+hub_prefix: real_rlvr
+sft_prefix: real_sft                    # step 2: its adapter, and its M1 decodes for comparison
+sft_stage: sft_real
+
+data:
+  collect_prefix: collect_full
+  prelabel_prefix: prelabel_full
+  manifest: reports/collect_full_manifest.csv
+  split: reports/collect_full_split.json
+
+windows:                # prompts are pieces of the teacher's 24,000-character train chunks
+  chars: 8000           # about 2,300 prompt tokens, so 4 samples and their backward pass fit a T4
+  overlap: 2000
+  check_agreements: 12  # train agreements held back for the reward check, never screened
+  pool_quotes: 600      # windows with a teacher quote, screened
+  pool_empty: 200       # windows with no teacher quote but a search term, screened
+  check_quotes: 75
+  check_empty: 25
+  hard_negative_terms: [Incremental, Maturity Date, Available Amount, Applicable Margin,
+                        Applicable Rate, Restricted Payment, Permitted Lien, other Indebtedness,
+                        Leverage Ratio, Unrestricted Subsidiar, Most Favored, Effective Yield]
+
+screen:                 # SFT samples each pool window as GRPO would, and keeps those that differ
+  min_spread: 0.05      # population std of the 4 rewards
+  min_prompts: 50       # fewer than this and the run stops before training
+  max_prompts: 400
+
+rlvr:
+  num_generations: 4
+  max_completion_length: 1024
+  mask_truncated_completions: true
+  temperature: 1.0
+  learning_rate: 1.0e-5
+  save_steps: 10
+  exact_by_token_f1: true   # a quote counts as right for the exactness factor only by token F1
+
+short_test:
+  steps: 4              # on the selected windows with the longest sampled answers
+  max_rlvr_hours: 4.5   # fewer prompts if the projection is longer, so scoring fits the session
+
+# vLLM sampling for screening and the check set
+sample:
+  tp: 2
+  max_model_len: 5120    # longest window prompt is 3,412 tokens, plus the 1,024 answer limit
+  batch: 100
+
+# Scoring on the 5 M1 agreements, exactly as in step 2 (configs/real_sft.yaml)
+chunk_chars: 24000
+overlap: 4000
+max_tokens: 4096
+ladder: [1.05, 1.15, 1.25]
+batch_size: 16
+max_model_len_cap: 65536
+vllm_kwargs:
+  gpu_memory_utilization: 0.90
+  enforce_eager: false
+m1_prefix: m1_collect
+manifest: reports/m1_manifest.csv
+sync_every_minutes: 3

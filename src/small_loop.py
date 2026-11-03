@@ -39,10 +39,15 @@ def train_python(venv: Path = TRAIN_VENV) -> str:
 
 def launch(module: str, args: list, log: Path) -> None:
     """Run a training module on one GPU, streaming its output to the notebook and a log file."""
-    log.parent.mkdir(parents=True, exist_ok=True)
     env = dict(os.environ, CUDA_VISIBLE_DEVICES="0", TOKENIZERS_PARALLELISM="false",
                PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True")
-    cmd = [train_python(), "-m", module, *map(str, args)]
+    stream([train_python(), "-m", module, *map(str, args)], env, log)
+
+
+def stream(cmd: list[str], env: dict, log: Path) -> None:
+    """Run a subprocess from the repo root, copying its output to the notebook and `log`."""
+    log.parent.mkdir(parents=True, exist_ok=True)
+    module = cmd[2] if len(cmd) > 2 and cmd[1] == "-m" else cmd[0]
     with open(log, "w", encoding="utf-8") as lf:
         proc = subprocess.Popen(cmd, cwd=REPO_ROOT, env=env, stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT, text=True, bufsize=1)

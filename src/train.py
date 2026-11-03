@@ -103,13 +103,30 @@ def answer_trainer():
     return AnswerLossTrainer
 
 
+BIG_GPU_GIB = 40           # from this much memory, the base trains in bf16 instead of 4-bit
+
+
+def big_gpu() -> bool:
+    """A GPU with bf16 and room for the full base, such as an H100, unlike a T4."""
+    import torch
+    return (torch.cuda.is_available() and torch.cuda.get_device_capability(0)[0] >= 8
+            and torch.cuda.get_device_properties(0).total_memory >= BIG_GPU_GIB * 2**30)
+
+
 def load_base(model_id: str):
-    """Model A in 4-bit on a GPU, or as it is on CPU, where only the tests run."""
+    """Model A in 4-bit on a small GPU, in bf16 on a big one, or as it is on CPU, where only the
+    tests run. Steps 1 and 2 trained on T4s in 4-bit. An adapter moves between the two, since
+    LoRA only adds to the base's weights."""
     import torch
     from peft import prepare_model_for_kbit_training
     from transformers import AutoModelForCausalLM, BitsAndBytesConfig
     if not torch.cuda.is_available():
         return AutoModelForCausalLM.from_pretrained(model_id)
+    if big_gpu():
+        model = AutoModelForCausalLM.from_pretrained(model_id, device_map={"": 0},
+                                                     dtype=torch.bfloat16)
+        model.enable_input_require_grads()
+        return model
     quant = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4",
                                bnb_4bit_use_double_quant=True,
                                bnb_4bit_compute_dtype=torch.float16)
@@ -121,10 +138,12 @@ def load_base(model_id: str):
 
 
 def precision_args() -> dict:
-    """fp16 on a T4, which has no bf16; plain CPU otherwise, also on a Mac with MPS."""
+    """fp16 on a T4, which has no bf16; bf16 on newer GPUs; plain CPU otherwise, also on a Mac
+    with MPS. The check is the compute capability, since torch reports emulated bf16 on a T4."""
     import torch
     gpu = torch.cuda.is_available()
-    return {"fp16": gpu, "bf16": False, "use_cpu": not gpu}
+    bf16 = gpu and torch.cuda.get_device_capability(0)[0] >= 8
+    return {"fp16": gpu and not bf16, "bf16": bf16, "use_cpu": not gpu}
 
 
 def trainer_callbacks(hub_repo: str | None, hub_prefix: str | None):

@@ -24,6 +24,7 @@ so `src/` is an independent implementation and does not import it. See
 | Data scale-up, step 1a of the parked plan | **collected 2026-11-02**: 150 credit agreements from 150 issuers, found by EDGAR full-text search with 2,460 SEC requests, not counting a first run stopped to add the fund filter: 30 investment grade, 60 secured mid-cap and 60 leveraged, split by CIK hash into 120 train and 30 test. Text on the Hub under `collect_full/`. Manifest in [reports/collect_full_manifest.csv](reports/collect_full_manifest.csv), and the mix and archetypes, which you have not reviewed yet, in [reports/collect_full_mix.md](reports/collect_full_mix.md) |
 | Teacher pre-labeling, step 1c of the parked plan | **ran 2026-11-02, approved by the user at about $7.70 at peak price**: [reports/prelabel_full.md](reports/prelabel_full.md). All 4,430 chunks of the 150 agreements were labeled for $7.56 at peak price, about half that off-peak. 2,415 quotes were kept, and 9 chunks are left out of training. Records are on the Hub under `prelabel_full/`. Nobody has reviewed the labels yet |
 | SFT on the pre-labels, step 2 of the parked plan | **ran once on Kaggle T4 x2 on 2026-11-02**: [reports/real_sft.md](reports/real_sft.md). 146 steps on 1,447 examples from the 120 train agreements (about 81% of one epoch) in 6.0 hours, then scoring in about an hour. On the 5 M1 agreements, against Model A on the same chunks, Found F1 went from 0.756 to 0.951 and Strict F1 from 0.542 to 0.776, with paired intervals above zero, a direction only on 5 agreements. The teacher is still ahead on Strict F1 (0.829) and right quotes (80% against 55%). Run in [notebooks/05_real_sft.ipynb](notebooks/05_real_sft.ipynb), [configs/real_sft.yaml](configs/real_sft.yaml). No Nebius. Scoring on the 30 test agreements waits for your review of them |
+| RLVR on the pre-labels, step 3 | **code written, CPU tests pass, nothing has run on a GPU yet**: [src/real_rlvr.py](src/real_rlvr.py), [configs/real_rlvr.yaml](configs/real_rlvr.yaml), [scripts/nebius_rlvr.sh](scripts/nebius_rlvr.sh). The user approved one run on a Nebius H100 on 2026-11-02, estimated at about $9-11 with a cap of $18. A local dry run of the data step gives 13,592 windows of 8,000 characters from the train agreements, 1,458 with a teacher quote, and prompts of at most 3,412 tokens |
 
 ## Layout
 
@@ -40,6 +41,8 @@ src/small_loop.py  M4 orchestration: data, training, gate, scoring, report
 src/teacher.py     teacher pre-labeling trial: DeepSeek labels, checked quotes, spend cap
 src/discover.py    data scale-up: EDGAR full-text search, filters, archetypes, issuer split
 src/real_loop.py   step 2: SFT on the teacher's pre-labels, scored on the 5 M1 agreements
+src/real_rlvr.py   step 3: RLVR on windows of the train agreements, against the teacher's labels
+src/sample.py      vLLM sampling, n answers per excerpt, resumable (step 3 screening)
 src/chunking.py    char windows with overlap
 src/parsing.py     JSON parsing, loop detection, key canonicalization
 src/merge.py       per-document union of chunk outputs (deduplicated)
@@ -53,6 +56,7 @@ src/edgar.py       M1: rate-limited EDGAR client, HTML -> text, manifest
 configs/           run configs (reproduce.yaml, collect.yaml, credit_schema.yaml, baselines.yaml)
 docs/              upstream notes, next steps, labeling guide
 notebooks/         thin notebooks: clone repo, pip install, call src/
+scripts/           nebius_rlvr.sh: step 3 on one Nebius GPU VM
 tests/             CPU unit tests:  python -m pytest -q
 ```
 
@@ -173,6 +177,20 @@ tests/             CPU unit tests:  python -m pytest -q
   fits the same 12-hour session. Empty chunks are capped at 30% of the examples, and 434 of 2,495
   were sampled. Scoring uses the 5 M1 agreements, the only gold set, on the same chunks, and
   Model A runs again on them so both rows compare.
+- **RLVR on the pre-labels (step 3, 2026-11-02).** GRPO from the step 2 adapter, with the
+  teacher's kept quotes as the answers, since the train agreements have no human labels. It can
+  remove the student's own mistakes (in M1, 28 of its 52 wrong quotes did not overlap a teacher
+  quote) but not the teacher's. Prompts are 8,000-character windows of the teacher's 24,000-
+  character train chunks; a window that cuts a kept quote is dropped, so its answer is clear.
+  The pool is 600 windows with quotes and 200 without, and the empty ones must hold a search
+  term, so they test restraint where it is hard. A check set of 100 windows comes from 12 other
+  train agreements. Screening samples each pool window 4 times with SFT and keeps up to 400
+  windows whose rewards differ, because M4 showed that groups with no spread teach nothing. The
+  reward is M4's, with one change: for its exactness factor, a quote counts as right only by
+  token F1 of at least 0.5, so a whole section that holds the right passage counts as too long.
+  On a GPU with at least 40 GB and bf16 the base trains in bf16, not 4-bit; the adapter moves
+  between the two, since LoRA only adds to the base. Scoring reuses step 2's Model A and SFT
+  decodes on M1 and decodes RLVR the same way.
 - **Latency:** vLLM rows report batch wall time divided by batch size, which is amortized
   rather than true single-request latency. transformers rows report true per-request
   time. `latency.csv` has one row per decode attempt.

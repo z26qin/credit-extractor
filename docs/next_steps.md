@@ -222,6 +222,22 @@ F1 but not its Strict F1 (0.829) or its share of right quotes (80% against 55%).
 wrong quotes are whole incremental sections quoted sentence by sentence, mention-only Maturity
 Date sentences, and builder-basket items quoted again on their own.
 
+## Step 3: RLVR on the pre-labels
+
+Written 2026-11-02, before any GPU run. The design is in the README (Decisions). On Kaggle it
+would take about 7 hours with training capped at 4.5 (estimate). The user approved one run on a
+Nebius H100 instead:
+
+| part | hours (estimate) |
+|---|---|
+| VM start, two venvs, model download | about 0.5 |
+| screening 800 windows x 4 samples, and SFT on the check set | about 0.25 |
+| short test, then GRPO on up to 400 windows, capped at 2 hours | about 1-1.5 |
+| RLVR merge, M1 decode, check set | about 0.25 |
+
+At $4.50 an hour on demand that is about $9-11. The VM is stopped from outside at 4 hours, so
+it cannot pass $18, and it is deleted with its disk once the adapter and report are on the Hub.
+
 ## Checked so far
 
 Measured on CPU, with `tests/test_small_loop.py`:

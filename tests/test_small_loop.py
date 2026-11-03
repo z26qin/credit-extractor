@@ -383,7 +383,8 @@ def test_rlvr_changes_the_adapter_when_rewards_differ(tiny, tiny_cfg, tmp_path, 
     adapter = train.run(tiny_cfg, tmp_path / "data" / "train.jsonl", tmp_path / "sft", base=tiny)
     before = load_file(adapter / "adapter_model.safetensors")
     rng = random.Random(0)
-    monkeypatch.setattr(rlvr, "reward_func", lambda completions, **_: [rng.random() for _ in completions])
+    monkeypatch.setattr(rlvr, "make_reward", lambda *a: lambda completions, **_: [
+        rng.random() for _ in completions])
     cfg = dict(tiny_cfg, rlvr=dict(tiny_cfg["rlvr"], learning_rate=1e-2))
     final = rlvr.run(cfg, tmp_path / "data" / "rlvr.jsonl", adapter, tmp_path / "rlvr", base=tiny)
     after = load_file(final / "adapter_model.safetensors")
