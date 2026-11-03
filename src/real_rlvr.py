@@ -202,7 +202,9 @@ def run_sampler(model: Path, data: Path, out: Path, cfg: dict, n: int, temperatu
     cmd = [py, "-m", "src.sample", "--model", model, "--data", data, "--out", out, "--n", n,
            "--temperature", temperature, "--max-tokens", cfg["rlvr"]["max_completion_length"],
            "--tp", s["tp"], "--max-model-len", s["max_model_len"], "--batch", s["batch"]]
-    stream([str(c) for c in cmd], dict(os.environ, TOKENIZERS_PARALLELISM="false"), log)
+    # FlashInfer's sampler compiles on first use, which needs ninja and nvcc; torch's is enough
+    stream([str(c) for c in cmd], dict(os.environ, TOKENIZERS_PARALLELISM="false",
+                                       VLLM_USE_FLASHINFER_SAMPLER="0"), log)
 
 
 def score_samples(samples: list[dict], windows: dict[str, dict], exact_by_f1: bool) -> list[dict]:
