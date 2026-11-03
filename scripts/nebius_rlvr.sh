@@ -54,5 +54,8 @@ torch.__version__, 'gpu', torch.cuda.is_available())"
 /tmp/train-env/bin/python -c "import torch, transformers, peft, trl; print('train: torch',
 torch.__version__, 'gpu', torch.cuda.is_available(), '| trl', trl.__version__)"
 
+# FlashInfer's sampler compiles on first use and the image has neither ninja nor nvcc. Every vLLM
+# start needs this, not only src.sample's: on 2026-11-02 the M1 decode missed it and fell back to HF
+export VLLM_USE_FLASHINFER_SAMPLER=0
 # the training venv runs the stages too: it has everything they import
 exec /tmp/train-env/bin/python -m src.real_rlvr --max-rlvr-hours "${MAX_RLVR_HOURS:-2}"

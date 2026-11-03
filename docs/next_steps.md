@@ -238,6 +238,8 @@ Nebius H100 instead:
 At $4.50 an hour on demand that is about $9-11. The VM is stopped from outside at 4 hours, so
 it cannot pass $18, and it is deleted with its disk once the adapter and report are on the Hub.
 
+Measured on the run (2026-11-03): 2.81 hours from VM start to delete, about $12.64. Three failed starts and one restart took the first 29 minutes; the run that finished took 137 minutes, of which training was the 2-hour limit (373 of 394 windows, 19.3 seconds each). Results and caveats are in `reports/real_rlvr.md`.
+
 ## Checked so far
 
 Measured on CPU, with `tests/test_small_loop.py`:
