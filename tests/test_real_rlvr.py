@@ -268,6 +268,23 @@ def test_screening_stops_when_too_few_windows_differ(stage_env, tmp_path):
         real_rlvr.screen(env, cfg, data, sft)
 
 
+def test_time_limit_stops_training_after_its_hours():
+    pytest.importorskip("transformers")
+    from transformers import TrainerControl
+    limit, control = rlvr.time_limit(0.5), TrainerControl()
+    limit.on_train_begin(None, None, control)
+    limit.on_step_end(None, None, control)
+    assert not control.should_training_stop and not limit.stopped
+    limit.start -= 0.5 * 3600 + 1
+    limit.on_step_end(None, None, control)
+    assert control.should_training_stop and limit.stopped
+    none, control = rlvr.time_limit(None), TrainerControl()
+    none.on_train_begin(None, None, control)
+    none.start -= 10 ** 6
+    none.on_step_end(None, None, control)
+    assert not control.should_training_stop
+
+
 def test_grpo_runs_with_the_step_3_settings(tiny, tiny_cfg, tmp_path):
     small_sets(tmp_path / "data")
     adapter = train.run(tiny_cfg, tmp_path / "data" / "train.jsonl", tmp_path / "sft", base=tiny)
@@ -275,8 +292,8 @@ def test_grpo_runs_with_the_step_3_settings(tiny, tiny_cfg, tmp_path):
     cfg["rlvr"].update(num_generations=2, max_completion_length=8, save_steps=2)
     assert cfg["rlvr"]["exact_by_token_f1"] and cfg["rlvr"]["mask_truncated_completions"]
     final = rlvr.run(cfg, tmp_path / "data" / "rlvr.jsonl", adapter, tmp_path / "rlvr", base=tiny,
-                     prompts=2)
+                     prompts=2, max_hours=1.0)
     stats = json.loads((final / "train_stats.json").read_text(encoding="utf-8"))
-    assert stats["steps"] == 2 and stats["prompts"] == 2
+    assert stats["steps"] == 2 and stats["prompts"] == 2 and stats["stopped_by_time"] is False
     summary = real_rlvr._train_summary(stats)
     assert summary["reward_first"] is not None and summary["zero_spread_share"] is not None

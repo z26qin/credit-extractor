@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import time
 from pathlib import Path
 
 from .gold import clean_source
@@ -71,6 +72,23 @@ def make_reward(exact_by_f1: bool = False):
 reward_func = make_reward()
 
 
+def time_limit(hours: float | None):
+    """Ends training once `hours` have passed, so the adapter is still saved as usual."""
+    from transformers import TrainerCallback
+
+    class TimeLimit(TrainerCallback):
+        start, stopped = None, False
+
+        def on_train_begin(self, args, state, control, **kwargs):
+            self.start = time.time()
+
+        def on_step_end(self, args, state, control, **kwargs):
+            if hours and time.time() - self.start > hours * 3600:
+                control.should_training_stop = self.stopped = True
+
+    return TimeLimit()
+
+
 def load_policy(base: str, adapter: Path):
     from peft import PeftModel
     from .train import load_base
@@ -81,7 +99,7 @@ def load_policy(base: str, adapter: Path):
 
 def run(cfg: dict, data: Path, adapter: Path, out_dir: Path, base: str | None = None,
         prompts: int | None = None, max_steps: int | None = None, hub_repo: str | None = None,
-        hub_prefix: str | None = None) -> Path:
+        hub_prefix: str | None = None, max_hours: float | None = None) -> Path:
     from datasets import Dataset
     from transformers import AutoTokenizer
     from trl import GRPOConfig, GRPOTrainer
@@ -114,15 +132,16 @@ def run(cfg: dict, data: Path, adapter: Path, out_dir: Path, base: str | None = 
     reward = make_reward(rl.get("exact_by_token_f1", False))
     trainer = GRPOTrainer(model=model, reward_funcs=reward, args=args,
                           train_dataset=Dataset.from_list(rows), processing_class=tok,
-                          callbacks=[clock, hub])
+                          callbacks=[clock, hub, limit := time_limit(max_hours)])
     # TRL turns QLoRA adapter weights into bf16, which a T4 cannot compute with. The recipe keeps
     # them in fp32 under fp16 autocast, as SFT does, and no optimizer exists yet at this point.
     for p in trainer.model.parameters():
         if p.requires_grad:
             p.data = p.data.float()
     trainer.train(resume_from_checkpoint=resume_point(out_dir))
-    return finish(model, trainer, clock, out_dir, {"stage": "rlvr", "prompts": len(rows)},
-                  hub_repo, hub_prefix)
+    return finish(model, trainer, clock, out_dir,
+                  {"stage": "rlvr", "prompts": len(rows), "max_hours": max_hours,
+                   "stopped_by_time": limit.stopped}, hub_repo, hub_prefix)
 
 
 def main(argv=None) -> int:
@@ -133,12 +152,13 @@ def main(argv=None) -> int:
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--prompts", type=int)
     ap.add_argument("--max-steps", type=int)
+    ap.add_argument("--max-hours", type=float, help="stop training after this many hours")
     ap.add_argument("--hub-repo")
     ap.add_argument("--hub-prefix")
     ap.add_argument("--config", type=Path, help="default configs/small_loop.yaml")
     a = ap.parse_args(argv)
     run(load_cfg(a.config), a.data, a.adapter, a.out, prompts=a.prompts, max_steps=a.max_steps,
-        hub_repo=a.hub_repo, hub_prefix=a.hub_prefix)
+        hub_repo=a.hub_repo, hub_prefix=a.hub_prefix, max_hours=a.max_hours)
     return 0
 
 

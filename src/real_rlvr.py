@@ -342,11 +342,13 @@ def short_test(env: Env, cfg: dict, sft: Path) -> dict:
     return result
 
 
-def train(env: Env, cfg: dict, sft: Path, prompts: int) -> Path:
+def train(env: Env, cfg: dict, sft: Path, prompts: int, max_hours: float | None = None) -> Path:
+    """GRPO on the first `prompts` selected windows, stopped early at `max_hours` if given."""
     out, prefix = _trained(env, cfg, "rlvr_real")
     if not (out / "final" / "adapter_config.json").exists():
+        limit = ["--max-hours", max_hours] if max_hours else []
         launch("src.rlvr", ["--config", CONFIG, "--data", screen_dir(env, cfg) / "rlvr.jsonl",
-                            "--adapter", sft, "--out", out, "--prompts", prompts,
+                            "--adapter", sft, "--out", out, "--prompts", prompts, *limit,
                             *_hub_args(env, prefix)], SCRATCH / "logs" / "rlvr_real.log")
     return out / "final"
 
@@ -440,8 +442,10 @@ def write_report(env: Env, cfg: dict, info: dict, screened: dict, short: dict, r
          "## Training, measured", "",
          f"Short test on the {cfg['short_test']['steps']} selected windows with the longest "
          f"answers: {short['seconds_per_step_longest']} seconds per prompt, peak "
-         f"{short['peak_gpu_mib']} MiB, projected {short['projected_hours']} hours for all "
-         f"{short['selected']}, so {short['prompts']} prompts.", "",
+         f"{short['peak_gpu_mib']} MiB, so {short['projected_hours']} hours for all "
+         f"{short['selected']}, an upper bound since those answers are the longest. Training "
+         f"took the selected windows in random order, with a limit of {s.get('max_hours')} hours"
+         + (", which stopped it." if s.get("stopped_by_time") else "; it finished first."), "",
          "| prompts | seconds per prompt | peak GPU MiB | reward, first 3 logs | last 3 logs | "
          "groups with no spread | answer tokens |", "|---|---|---|---|---|---|---|",
          f"| {s['steps']} | {s['seconds_per_step']} | {s['peak_gpu_mib']} | {t['reward_first']} | "
@@ -488,7 +492,9 @@ def main(argv=None) -> int:
     sft = sft_adapter(env, cfg)
     screened = screen(env, cfg, data, sft)
     short = short_test(env, cfg, sft)
-    adapter = train(env, cfg, sft, short["prompts"])
+    # all selected windows, with a time limit: the short test's projection uses the longest
+    # answers, so it errs long (on the H100 it cut 394 windows to 124)
+    adapter = train(env, cfg, sft, short["selected"], cfg["short_test"]["max_rlvr_hours"])
     results = evaluate(env, cfg, data, adapter)
     write_report(env, cfg, info, screened, short, adapter, results)
     print(f"session wall time: {env.session_minutes():.1f} min", flush=True)
